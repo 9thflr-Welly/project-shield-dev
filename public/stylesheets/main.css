@@ -230,7 +230,7 @@ input {
   color: grey;
   font-style: italic;
 }
-.error, #cal-error-msg {
+.error, #cal-error-msg, #tim-error-msg {
   color: red;
 }
 
