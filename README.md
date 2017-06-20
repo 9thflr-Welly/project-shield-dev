@@ -1,4 +1,3 @@
 # project-shield
 
-1. 自己開一個branch編輯
-2. 要deploy前先讓Ted知道
+2017/06/20 first commit, 完成行事曆功能
