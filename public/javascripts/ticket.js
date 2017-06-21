@@ -53,6 +53,8 @@ function loadTable(){
               '<button type="button" id="editBtn" data-toggle="modal" data-target="#editModal">Edit</button>' +
               ' ' +
               '<button type="button" id="viewBtn" data-toggle="modal" data-target="#viewModal">View</button>' +
+              ' ' +
+              '<button type="button" id="deleBtn">Delete</button>' +
             '</td>' +
           '<tr>'
         );
