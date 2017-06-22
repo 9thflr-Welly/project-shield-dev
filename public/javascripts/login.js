@@ -2,13 +2,9 @@ var google_provider = new firebase.auth.GoogleAuthProvider();
 var facebook_provider = new firebase.auth.FacebookAuthProvider();
 
 $(document).ready(function() {
-
   $(document).on('click', '#login-btn', login); //登入
-
   $(document).on('click', '#google-log', googleLog); //Google登入
-
   $(document).on('click', '#facebook-log', facebookLog); //Facebook登入
-
   $(document).on('click', '#line-log', lineLog); // Line登入
 });
 
@@ -33,12 +29,12 @@ function googleLog() {
     var user = result.user;
     // console.log(user);
 
-    database.ref('users/' + user.uid).push({
-      name: user.displayName,
-      email: user.email
-    });
+    // database.ref('users/' + user.uid).push({
+    //   name: user.displayName,
+    //   email: user.email
+    // });
 
-    window.location.assign("/");
+    // window.location.assign("/");
   }).catch(function(error) {
     // Handle Errors here.
     var errorCode = error.code;
@@ -81,10 +77,8 @@ function facebookLog() {
 function lineLog() {
   var URL = 'https://access.line.me/dialog/oauth/weblogin?';
   URL += 'response_type=code';
-  // URL += '&client_id=1520029431';
-  URL += '&client_id=1520803908';
-  // URL += '&redirect_uri=https://desolate-tor-67580.herokuapp.com/';
-  URL += '&redirect_uri=https://localhost:3000/';
+  URL += '&client_id=1520029431';
+  URL += '&redirect_uri=https://desolate-tor-67580.herokuapp.com/';
   URL += '&state=abcde';
 
   window.location.href = URL;
