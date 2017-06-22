@@ -2,8 +2,6 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><%= title %></title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
@@ -16,6 +14,8 @@
 
   </head>
   <body>
+
+
     <div id="wrapper">
       <!-- Navigation -->
       <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
@@ -30,31 +30,74 @@
           </div>
           <!-- /.navbar-header -->
 
+
           <ul class="nav navbar-top-links navbar-right">
-              <!-- <input type="text" id="search-input" placeholder="搜尋圖表"/>
-              <button type="button" id="search-btn">搜尋</button> -->
-              <form class="search">
-                  <input type="text" id="search-input" placeholder="搜尋圖表" />
-
-                  <ul class="results" id="a">
-                      <li id="get_h"><a href="#">總覽</a>
-                      </li>
-                      <li id="get_a"><a href="#">瀏覽人數</a>
-                      </li>
-                      <li id="get_b"><a href="#">收入分析</a>
-                      </li>
-                      <li id="get_c"><a href="#">回饋</a>
-                      </li>
-                      <li id="get_d"><a href="#">通知</a>
-                      </li>
-                      <li id="get_e"><a href="#">收入比例</a>
-                      </li>
-                      <li id="get_g"><a href="#">聊天室</a>
-                      </li>
-
-                  </ul>
-              </form>
+            <li class="dropdown">
+          	 <form class="search" >
+          	   <input type="text" id="search-input" placeholder="搜尋圖表"/>
+          		 <ul class="results" id="a" >
+          			<li id="get_h"><a href="#">總覽</a></li>
+          			<li id="get_a"><a href="#" >瀏覽人數</a></li>
+          			<li id="get_b"><a href="#">收入分析</a></li>
+          	 		<li id="get_c"><a href="#">回饋</a></li>
+                <li id="get_d"><a href="#">通知</a></li>
+                <li id="get_e"><a href="#">收入比例</a></li>
+                <li id="get_g"><a href="#">聊天室</a></li>
+          		 </ul>
+          	 </form>
+           </li>
               <!-- <button type="button" id="search-btn">搜尋</button> -->
+
+              <!-- <li class="dropdown">
+                  <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                      <i class="fa fa-envelope fa-fw"></i> <i class="fa fa-caret-down"></i>
+                  </a>
+                  <ul class="dropdown-menu dropdown-messages">
+                      <li>
+                          <a href="#">
+                              <div>
+                                  <strong>John Smith</strong>
+                                  <span class="pull-right text-muted">
+                                      <em>Yesterday</em>
+                                  </span>
+                              </div>
+                              <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
+                          </a>
+                      </li>
+                      <li class="divider"></li>
+                      <li>
+                          <a href="#">
+                              <div>
+                                  <strong>John Smith</strong>
+                                  <span class="pull-right text-muted">
+                                      <em>Yesterday</em>
+                                  </span>
+                              </div>
+                              <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
+                          </a>
+                      </li>
+                      <li class="divider"></li>
+                      <li>
+                          <a href="#">
+                              <div>
+                                  <strong>John Smith</strong>
+                                  <span class="pull-right text-muted">
+                                      <em>Yesterday</em>
+                                  </span>
+                              </div>
+                              <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
+                          </a>
+                      </li>
+                      <li class="divider"></li>
+                      <li>
+                          <a class="text-center" href="#">
+                              <strong>Read All Messages</strong>
+                              <i class="fa fa-angle-right"></i>
+                          </a>
+                      </li>
+                  </ul>
+
+              </li> -->
 
               <!-- /.dropdown -->
               <li class="dropdown">
@@ -62,12 +105,13 @@
                       <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
                   </a>
                   <ul class="dropdown-menu dropdown-user">
-                      <li><a href="/profile"><i class="fa fa-user fa-fw"></i> User Profile</a>
+                      <li><a href="#"><i class="fa fa-user fa-fw"></i> User Profile</a>
                       </li>
-                      <!-- <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
-                      </li> -->
+                      <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
+                      </li>
                       <li class="divider"></li>
-                      <li><a href="#" id="signout-btn"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
+                      <li><a href="/login" id="signout-btn"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                      </li>
                   </ul>
                   <!-- /.dropdown-user -->
               </li>
@@ -98,7 +142,6 @@
           <!-- /.navbar-static-side -->
       </nav>
     </div>
-
 
     <div id="home">
       <!-- <button id="signout-btn">Sign Out</button> -->
@@ -549,10 +592,9 @@
     <script src='javascripts/jquery.min.js'></script>
     <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/3.9.0/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.1.2/firebase.js"></script>
     <script src="javascripts/firebaseConfig.js"></script>
     <script src="javascripts/index.js"></script>
-
     <!-- Morris Charts JavaScript -->
     <script src="vendor/raphael/raphael.min.js"></script>
     <script src="vendor/morrisjs/morris.min.js"></script>
