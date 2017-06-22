@@ -23,7 +23,6 @@ $(document).ready(function() {
   $(document).on('click', '#tform-submit', formSubmit); //一般新增
   $(document).on('click', '#tform-goback', goback); //回上一頁
 
-
   //=========[SEARCH by TEXT]=========
   $("#exampleInputAmount").keyup(function() {
     var $rows = $('#open-ticket-list tr');
@@ -33,25 +32,6 @@ $(document).ready(function() {
       var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
       return !~text.indexOf(val);
     }).hide();
-  });
-
-  //==========[FOR CATEGORY]==========
-  //搜尋篩選要檢視的rows
-  $("#exampleInputAmount").keyup(function() {
-    var $rows = $('#open-ticket-list tr');
-    var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
-    $rows.show().filter(function() {
-      var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
-      return !~text.indexOf(val);
-    }).hide();
-  });
-
-  //Click on Category
-  $('#cate').change(function() {
-    var cate = $("#cate option:selected").text();
-    //alert(cate);
-    $("#"+cate).show();
-    $("#exampleInputAmount").val(cate);
   });
 });
 
@@ -87,7 +67,7 @@ function loadTable(){
               ' ' +
               '<button type="button" id="deleBtn">Delete</button>' +
             '</td>' +
-          '<tr>'
+          '</tr>'
         );
       } else {
         $('#open-ticket-list').append(
@@ -105,7 +85,7 @@ function loadTable(){
               ' ' +
               '<button type="button" id="deleBtn">Delete</button>' +
             '</td>' +
-          '<tr>'
+          '</tr>'
         );
       }
 
@@ -414,43 +394,6 @@ function addSub() {
 function deleteSub() {
   $(this).parent().remove();
 }
-
-function myFunction() {
-  var input, filter, table, tr, td, i;
-  input = document.getElementById("#exampleInputAmount");
-  filter = input.value.toUpperCase();
-  //For Open-Ticket-List
-  table = document.getElementById("#open-ticket-list");
-  tr = table.getElementsByTagName("tr");
-  for (i = 0; i < tr.length; i++) {
-    td = tr[i].getElementsByTagName("td")[0];
-    if (td) {
-      if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
-        tr[i].style.display = "";
-      } else {
-        tr[i].style.display = "none";
-      }
-    }
-  }
-  //For Closed-Ticket-List
-  table = document.getElementById("#closed-ticket-list");
-  tr = table.getElementsByTagName("tr");
-  for (i = 0; i < tr.length; i++) {
-    td = tr[i].getElementsByTagName("td")[0];
-    if (td) {
-      if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
-        tr[i].style.display = "";
-      } else {
-        tr[i].style.display = "none";
-      }
-    }
-  }
-
-}
-
-
-
-
 
 //=========[SORT ALL]=========
 function sortTable(n) {
