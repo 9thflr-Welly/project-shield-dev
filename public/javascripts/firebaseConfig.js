@@ -24,6 +24,7 @@ if(window.location.pathname === '/login' || window.location.pathname === '/signu
 } else {
   auth.onAuthStateChanged(user => {
     if(user){
+      // console.log(user.email);
       console.log('firebase signed in');
     } else {
       // console.log('need to sign in');

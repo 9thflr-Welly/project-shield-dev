@@ -1,5 +1,6 @@
 var google_provider = new firebase.auth.GoogleAuthProvider();
 var facebook_provider = new firebase.auth.FacebookAuthProvider();
+var line_code;
 
 $(document).ready(function() {
   $(document).on('click', '#login-btn', login); //登入
@@ -27,12 +28,11 @@ function googleLog() {
     var token = result.credential.accessToken;
     // The signed-in user info.
     var user = result.user;
-    // console.log(user);
 
-    // database.ref('users/' + user.uid).push({
-    //   name: user.displayName,
-    //   email: user.email
-    // });
+    database.ref('users/' + user.uid).push({
+      name: user.displayName,
+      email: user.email
+    });
 
     // window.location.assign("/");
   }).catch(function(error) {
@@ -43,11 +43,12 @@ function googleLog() {
     var email = error.email;
     // The firebase.auth.AuthCredential type that was used.
     var credential = error.credential;
-    // ...
   });
 }
 
 function facebookLog() {
+
+
   auth.signInWithPopup(facebook_provider).then(function(result) {
     // This gives you a Facebook Access Token. You can use it to access the Facebook API.
     var token = result.credential.accessToken;
@@ -75,13 +76,18 @@ function facebookLog() {
 }
 
 function lineLog() {
-  var URL = 'https://access.line.me/dialog/oauth/weblogin?';
-  URL += 'response_type=code';
-  URL += '&client_id=1520029431';
-  URL += '&redirect_uri=https://desolate-tor-67580.herokuapp.com/';
-  URL += '&state=abcde';
+  if(location.pathname === '/') {
+    var URL = 'https://access.line.me/dialog/oauth/weblogin?';
+    URL += 'response_type=code';
+    URL += '&client_id=1520029431';
+    URL += '&redirect_uri=https://desolate-tor-67580.herokuapp.com/login';
+    URL += '&state=abcde';
 
-  window.location.href = URL;
+    window.location.href = URL;
+  } else {
+    line_code = window.location.href;
+    console.log(line_code);
+  }
 }
 
 
