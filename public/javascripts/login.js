@@ -3,6 +3,7 @@ var facebook_provider = new firebase.auth.FacebookAuthProvider();
 var line_code;
 
 $(document).ready(function() {
+  console.log(line_code);
   $(document).on('click', '#login-btn', login); //登入
   $(document).on('click', '#google-log', googleLog); //Google登入
   $(document).on('click', '#facebook-log', facebookLog); //Facebook登入
@@ -76,12 +77,15 @@ function facebookLog() {
 }
 
 function lineLog() {
-  if(location.pathname === '/') {
+
+  if(location.pathname === '/login' && line_code === undefined) {
     var URL = 'https://access.line.me/dialog/oauth/weblogin?';
     URL += 'response_type=code';
-    URL += '&client_id=1520029431';
-    URL += '&redirect_uri=https://desolate-tor-67580.herokuapp.com/login';
-    URL += '&state=abcde';
+    // URL += '&client_id=1520029431';
+    URL += '&client_id=1520803908';
+    // URL += '&redirect_uri=https://desolate-tor-67580.herokuapp.com/';
+    URL += '&redirect_uri=https://localhost:3000/login';
+    URL += '&state=login';
 
     window.location.href = URL;
   } else {
