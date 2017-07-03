@@ -225,6 +225,7 @@ input {
 #chatWrap {
   float: left;
   border: 1px #000, solid;
+  width: 60%;
 }
 .whisper {
   color: grey;
