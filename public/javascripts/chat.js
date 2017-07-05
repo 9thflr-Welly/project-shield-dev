@@ -44,6 +44,11 @@ $(document).ready(function() {
     // messageContent.append('<b>' + data.name + ': </b>' + data.msg + "<br/>");
   });
 
+  socket.emit('image', (image, buffer) => {
+    console.log(image, buffer);
+    console.log('images passes');
+  });
+
   socket.on('whisper', (data) => {
     messageContent.append('<span class="whisper"><b>' + data.name + ': </b>' + data.msg + "</span><br/>");
   });

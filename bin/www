@@ -8,6 +8,7 @@ var debug = require('debug')('project-shield:server');
 var http  = require('http');
 var firebase = require('firebase');
 var linebot = require('linebot');
+const line = require('@line/bot-sdk');
 
 var config = {
   apiKey: "AIzaSyAqzIra9YkeE0HZZBSwXrjh4GemO7yVdmI",
@@ -53,6 +54,9 @@ var bot = linebot({
   channelAccessToken: 'yeeDeC5dExJDeVEPPf2dMTlAoZE4izrqX6bBaldhddpG7esOFEpxm5m5dMIIB7pz0zIS49QZxJBFgAkxQZWmfy9toaiTR+B/q1pz7F5xkf+dljkSJV1krOOtrT93BSSYydIZLnt0zxX8JCqWF4uE4wdB04t89/1O/w1cDnyilFU='
 });
 const linebotParser = bot.parser();
+const client = new line.Client({
+  channelAccessToken: 'yeeDeC5dExJDeVEPPf2dMTlAoZE4izrqX6bBaldhddpG7esOFEpxm5m5dMIIB7pz0zIS49QZxJBFgAkxQZWmfy9toaiTR+B/q1pz7F5xkf+dljkSJV1krOOtrT93BSSYydIZLnt0zxX8JCqWF4uE4wdB04t89/1O/w1cDnyilFU='
+});
 
 
 /**
@@ -69,6 +73,7 @@ bot.on('message', event => {
   console.log(event);
   let d = Date.now();
   let date = new Date(d);
+  let imgBuf;
   message_lineTochat = event.message.text;
   receiverId = event.source.userId;
 
@@ -80,8 +85,31 @@ bot.on('message', event => {
   //     console.log('error');
   //   });
 
+
   if(event.message.type === 'sticker') {
+    console.log(event);
+    console.log(event.message.content);
     io.sockets.emit('new message', {msg: 'Sticker Sent. Please check your phone.', name: 'Visitor'});
+  } else if(event.message.type === 'image'){
+    console.log(event);
+    const stream = client.getMessageContent(event.message.id);
+    stream.on('data', (chunk) => {
+      console.log(chunk);
+      imgBuf = chunk;
+    });
+    stream.on('error', (err) => {
+      console.log(err);
+    });
+    io.sockets.emit( 'image', "data:image/png;base64,"+ imgBuf );
+    console.log('image goes through');
+  } else if(event.message.type === 'video'){
+    console.log(event);
+  } else if(event.message.type === 'audio'){
+    console.log(event);
+  } else if(event.message.type === 'file'){
+    console.log(event);
+  } else if(event.message.type === 'location'){
+    console.log(event);
   } else if(event.message.type === 'text' && (event.message.text.indexOf('.com') !== -1 || event.message.text.indexOf('.edu') !== -1 || event.message.text.indexOf('.net') !== -1 || event.message.text.indexOf('.io') !== -1)) {
     io.sockets.emit('new message', {msg: '<a href="https://' + message_lineTochat + '/" target="_blank">' + message_lineTochat + '</a>', name: 'Visitor'});
     usersRef.push({
@@ -128,19 +156,36 @@ io.sockets.on('connection', (socket) => {
   // 後台傳送訊息
   socket.on('send message', (data, callback) => {
     var msg = data.trim();
+    var message;
+
+    if(msg.includes('/sticker')){
+      message = {
+        type: "sticker",
+        packageId: "1",
+        stickerId: "10"
+      };
+    } else {
+      message = {
+        type: "text",
+        text: msg
+      };
+    }
+
     let d = Date.now();
     let date = new Date(d);
 
     // 訊息傳到後台介面上
     if(msg.indexOf('.com') !== -1 || msg.indexOf('.edu') !== -1 || msg.indexOf('.net') !== -1 || msg.indexOf('.io') !== -1){
-      io.sockets.emit('new message', {msg: '<a href="https://' + msg + '/" target="_blank">' + msg + '</a>', name: socket.nickname});
+      io.sockets.emit('new message', {msg: '<a href="https://' + message + '/" target="_blank">' + message + '</a>', name: socket.nickname});
+    } else if(msg.includes('/sticker')) {
+      io.sockets.emit('new message', {msg: 'Send sticker to user', name: socket.nickname});
     } else {
-      io.sockets.emit('new message', {msg: msg, name: socket.nickname});
+      io.sockets.emit('new message', {msg: message, name: socket.nickname});
     }
 
     // 訊息傳到LINE
     if(receiverId !== undefined) {
-      bot.push(receiverId, msg);
+      bot.push(receiverId, message);
     }
 
     // 訊息儲存到firebase資料庫
