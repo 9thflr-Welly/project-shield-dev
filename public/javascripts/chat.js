@@ -44,9 +44,11 @@ $(document).ready(function() {
     // messageContent.append('<b>' + data.name + ': </b>' + data.msg + "<br/>");
   });
 
-  socket.emit('image', (image, buffer) => {
-    console.log(image, buffer);
-    console.log('images passes');
+  socket.emit('img-chunk', chunk => {
+    let imgChunk = [];
+    let img = $('#img-stream');
+    imgChunk.push(chunk);
+    img.setAttribute('src', 'data:image/jpeg;base64,' + window.btoa(imgChunk));
   });
 
   socket.on('whisper', (data) => {

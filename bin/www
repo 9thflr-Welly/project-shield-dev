@@ -9,6 +9,7 @@ var http  = require('http');
 var firebase = require('firebase');
 var linebot = require('linebot');
 const line = require('@line/bot-sdk');
+var apiai = require('apiai');
 
 var config = {
   apiKey: "AIzaSyAqzIra9YkeE0HZZBSwXrjh4GemO7yVdmI",
@@ -58,6 +59,8 @@ const client = new line.Client({
   channelAccessToken: 'yeeDeC5dExJDeVEPPf2dMTlAoZE4izrqX6bBaldhddpG7esOFEpxm5m5dMIIB7pz0zIS49QZxJBFgAkxQZWmfy9toaiTR+B/q1pz7F5xkf+dljkSJV1krOOtrT93BSSYydIZLnt0zxX8JCqWF4uE4wdB04t89/1O/w1cDnyilFU='
 });
 
+// api ai setting
+var appApiai = apiai("6fd13e1dd00b4d93881e1e75cdf02bd4");
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -77,15 +80,6 @@ bot.on('message', event => {
   message_lineTochat = event.message.text;
   receiverId = event.source.userId;
 
-  // event.reply(message_lineTochat).then(function(data) {
-  //     // success
-  //     console.log(message_lineTochat);
-  //   }).catch(function(error) {
-  //     // error
-  //     console.log('error');
-  //   });
-
-
   if(event.message.type === 'sticker') {
     console.log(event);
     console.log(event.message.content);
@@ -95,12 +89,12 @@ bot.on('message', event => {
     const stream = client.getMessageContent(event.message.id);
     stream.on('data', (chunk) => {
       console.log(chunk);
-      imgBuf = chunk;
+      io.sockets.emit('img-chunk', chunk);
     });
     stream.on('error', (err) => {
       console.log(err);
     });
-    io.sockets.emit( 'image', "data:image/png;base64,"+ imgBuf );
+
     console.log('image goes through');
   } else if(event.message.type === 'video'){
     console.log(event);
@@ -125,6 +119,22 @@ bot.on('message', event => {
       messageTime: date.toString()
     });
   }
+
+  var request = appApiai.textRequest(message_lineTochat, {
+    sessionId: '46110120-6a78-4a0e-a5f0-a8596b53d37e'
+  });
+  request.on('response', function(response) {
+    console.log(response);
+    let res_msg = response.result.fulfillment.speech
+    if(response.result.action !== 'input.unknown') {
+      io.sockets.emit('new message', {msg: res_msg, name: 'BOT'});
+      event.reply({ type: 'text', text: 'BOT：' + res_msg });
+    }
+  });
+  request.on('error', function(error) {
+    console.log(error);
+  });
+  request.end();
 
 });
 app.post('/webhook/', linebotParser);
@@ -180,7 +190,7 @@ io.sockets.on('connection', (socket) => {
     } else if(msg.includes('/sticker')) {
       io.sockets.emit('new message', {msg: 'Send sticker to user', name: socket.nickname});
     } else {
-      io.sockets.emit('new message', {msg: message, name: socket.nickname});
+      io.sockets.emit('new message', {msg: msg, name: socket.nickname});
     }
 
     // 訊息傳到LINE
