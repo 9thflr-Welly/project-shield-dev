@@ -181,8 +181,12 @@ input {
 .alignCenter{
   text-align: center;
 }
-
-#home, #calendar-wrap, #profile-wrap, #ticket-wrap {
+#home {
+  position: relative;
+  left: 300px;
+  width: 73%;
+}
+#calendar-wrap, #profile-wrap, #ticket-wrap {
   position: relative;
   left: 250px;
   width: 78%;
