@@ -1,0 +1,67 @@
+/*Chat*/
+#chat {
+  height: 500px;
+  background-color: #ffedd6;
+}
+#contentWrap {
+  display: none;
+}
+#chatWrap {
+  float: left;
+  border: 1px #000, solid;
+  width: 45%;
+}
+
+.whisper {
+  color: grey;
+  font-style: italic;
+}
+.error, #cal-error-msg, #tim-error-msg {
+  color: red;
+}
+
+/*聊天室多開 開始*/
+div.tab {
+    float: left;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+    width: 30%;
+    height: 300px;
+    text-align: center;
+    padding:10px 0;
+}
+/* Style the buttons inside the tab */
+div.tab button {
+    display: block;
+    background-color: inherit;
+    color: black;
+    padding: 10px 0px 10px 0px;
+    width: 100%;
+    border: none;
+    outline: none;
+    text-align: left;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 14px;
+    text-align: center;
+    font-weight: bold;
+}
+/* Change background color of buttons on hover */
+div.tab button:hover {
+    background-color: #ddd;
+}
+/* Create an active/current "tab button" class */
+div.tab button.active {
+    background-color: #ccc;
+}
+/* Style the tab content */
+.tabcontent {
+    float: left;
+    padding: 0px 12px;
+    border: 1px solid #ccc;
+    width: 70%;
+    border-left: none;
+    height: 300px;
+    display:none;
+}
+/*聊天室多開 結束*/
