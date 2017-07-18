@@ -5,7 +5,7 @@ var facebook_provider = new firebase.auth.FacebookAuthProvider();
 $(document).ready(function() {
   line_code = window.location.href;
   console.log(line_code);
-  if(line_code !== 'https://desolate-tor-67580.herokuapp.com/login'){
+  if(line_code !== 'https://localhost:3000/login'){
     let new_code = line_code.substr(52, 20);
     console.log(new_code);
 
@@ -13,10 +13,10 @@ $(document).ready(function() {
         method: 'POST',
         data: {
       		grant_type: 'authorization code',
-          client_id: '1522575994',
-          client_secret: '1d346fc6782a03916e7c74e15fb4f442',
+          client_id: '1520803908',
+          client_secret: '2fb17a933caf2db8fa4c1d8fb67e7b6a',
           code: new_code,
-          redirect_uri: 'https://desolate-tor-67580.herokuapp.com/login'
+          redirect_uri: 'https://localhost:3000/login'
       	}
     }).then(response => {
       console.log(response);
@@ -97,8 +97,8 @@ function facebookLog() {
 function lineLog() {
   var URL = 'https://access.line.me/dialog/oauth/weblogin?';
   URL += 'response_type=code';
-  URL += '&client_id=1522575994';
-  URL += '&redirect_uri=https://desolate-tor-67580.herokuapp.com/login';
+  URL += '&client_id=1520803908';
+  URL += '&redirect_uri=https://localhost:3000/login';
   URL += '&state=login';
   window.location.href = URL;
 }

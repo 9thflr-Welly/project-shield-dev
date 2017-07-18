@@ -8,6 +8,7 @@ var debug = require('debug')('project-shield:server');
 var http = require('http');
 var firebase = require('firebase');
 var linebot = require('linebot');
+const line = require('@line/bot-sdk');
 var apiai = require('apiai');
 
 var config = {
@@ -47,7 +48,7 @@ var users = {};
 var type_sticker = 0;
 //webhook event
 var message_lineTochat;
-var receiverId;
+var receiverId = 'Ue369116591fbd2d13a7eb5f0ff12547b';
 // LINE bot設定
 var bot = linebot({
     channelId: '1516667468',
@@ -55,6 +56,9 @@ var bot = linebot({
     channelAccessToken: 'yeeDeC5dExJDeVEPPf2dMTlAoZE4izrqX6bBaldhddpG7esOFEpxm5m5dMIIB7pz0zIS49QZxJBFgAkxQZWmfy9toaiTR+B/q1pz7F5xkf+dljkSJV1krOOtrT93BSSYydIZLnt0zxX8JCqWF4uE4wdB04t89/1O/w1cDnyilFU='
 });
 const linebotParser = bot.parser();
+const client = new line.Client({
+    channelAccessToken: 'yeeDeC5dExJDeVEPPf2dMTlAoZE4izrqX6bBaldhddpG7esOFEpxm5m5dMIIB7pz0zIS49QZxJBFgAkxQZWmfy9toaiTR+B/q1pz7F5xkf+dljkSJV1krOOtrT93BSSYydIZLnt0zxX8JCqWF4uE4wdB04t89/1O/w1cDnyilFU='
+});
 
 // api ai setting
 var appApiai = apiai("6fd13e1dd00b4d93881e1e75cdf02bd4");
@@ -79,6 +83,7 @@ bot.on('message', event => {
     let longitude = event.message.longitude;
     message_lineTochat = event.message.text;
     receiverId = event.source.userId;
+    console.log(receiverId);
 
     // from wenyen
     //  ===================  KINDS ====================
@@ -210,9 +215,9 @@ bot.on('message', event => {
             user: receiverId,
             messageTime: date.toString()
         });
-    } else if (event.message.type === 'text' && message_lineTochat.trim() === '菜單') {
+    } else if (event.message.type === 'text' && message_lineTochat.trim() === '購買方案') {
         io.sockets.emit('new message', {
-            msg: '已發送菜單',
+            msg: '已發送購買方案'+"4小時方案  "+"8小時方案  "+"16小時方案  ",
             name: 'notice'
         });
         event.reply({
@@ -221,52 +226,22 @@ bot.on('message', event => {
             "template": {
                 "type": "buttons",
                 "thumbnailImageUrl": "https://example.com/bot/images/image.jpg",
-                "title": "Menu",
-                "text": "Please select",
-                "actions": [{
-                        "type": "postback",
-                        "label": "Buy",
-                        "data": "action=buy&itemid=123"
-                    },
-                    {
-                        "type": "postback",
-                        "label": "Add to cart",
-                        "data": "action=add&itemid=123"
-                    },
-                    {
-                        "type": "uri",
-                        "label": "View detail",
-                        "uri": "http://example.com/page/123"
-                    }
-                ]
-            }
-        })
-        usersRef.push({
-            message: message_lineTochat,
-            user: receiverId,
-            messageTime: date.toString()
-        });
-
-    } else if (event.message.type === 'text' && message_lineTochat.trim() === '選項') {
-        io.sockets.emit('new message', {
-            msg: '已發送選項',
-            name: 'notice'
-        });
-        event.reply({
-            "type": "template",
-            "altText": "this is a confirm template",
-            "template": {
-                "type": "confirm",
-                "text": "Are you sure?",
+                "title": "購買方案說明",
+                "text": "請選擇一個方案",
                 "actions": [{
                         "type": "message",
-                        "label": "Yes",
-                        "text": "yes"
+                        "label": "4小時方案",
+                        "text": "4小時方案"
                     },
                     {
                         "type": "message",
-                        "label": "No",
-                        "text": "no"
+                        "label": "8小時方案",
+                        "text": "8小時方案"
+                    },
+                    {
+                        "type": "message",
+                        "label": "16小時方案",
+                        "text": "16小時方案"
                     }
                 ]
             }
@@ -277,71 +252,52 @@ bot.on('message', event => {
             messageTime: date.toString()
         });
 
-    } else if (event.message.type === 'text' && message_lineTochat.trim() === '旋轉盤') {
+    } else if (event.message.type === 'text' && message_lineTochat.trim() === '服務時段') {
+        let service_time = '「0700~1100」 \n 「1100~1500」 \n 「1500~1900」 \n 「1900~2300」 \n 兩個時段必須是「連續的」 \n 「0700~1100」及「1100~1500」 \n 「1100~1500」及「1500~1900」 \n 「1500~1900」及「1900~2300」。';
         io.sockets.emit('new message', {
-            msg: '已發送旋轉盤',
+            msg: '已發送服務時段'+"0700~1100」"+"「1100~1500」"+"「1500~1900」"+"「1900~2300」",
             name: 'notice'
         });
         event.reply({
-            "type": "template",
-            "altText": "this is a carousel template",
-            "template": {
-                "type": "carousel",
-                "columns": [{
-                        "thumbnailImageUrl": "https://example.com/bot/images/item1.jpg",
-                        "title": "this is menu",
-                        "text": "description",
-                        "actions": [{
-                                "type": "postback",
-                                "label": "Buy",
-                                "data": "action=buy&itemid=111"
-                            },
-                            {
-                                "type": "postback",
-                                "label": "Add to cart",
-                                "data": "action=add&itemid=111"
-                            },
-                            {
-                                "type": "uri",
-                                "label": "View detail",
-                                "uri": "http://example.com/page/111"
-                            }
-                        ]
-                    },
-                    {
-                        "thumbnailImageUrl": "https://example.com/bot/images/item2.jpg",
-                        "title": "this is menu",
-                        "text": "description",
-                        "actions": [{
-                                "type": "postback",
-                                "label": "Buy",
-                                "data": "action=buy&itemid=222"
-                            },
-                            {
-                                "type": "postback",
-                                "label": "Add to cart",
-                                "data": "action=add&itemid=222"
-                            },
-                            {
-                                "type": "uri",
-                                "label": "View detail",
-                                "uri": "http://example.com/page/222"
-                            }
-                        ]
-                    }
-                ]
-            }
-        })
+            type: 'text',
+            text: 'BOT：\n' + service_time
+        });
         usersRef.push({
-            message: message_lineTochat,
+            message: '已發送服務時段'+"0700~1100」"+"「1100~1500」"+"「1500~1900」"+"「1900~2300」",
             user: receiverId,
             messageTime: date.toString()
         });
 
-
-        /*  ===============  TEXTS  ===============  */
-
-
+    } else if (event.message.type === 'text' && message_lineTochat.trim() === '4小時方案') {
+      let four = '4小時方案 \n 15,888 元 \n 4小時方案/每天 \n $15,888每月';
+      io.sockets.emit('new message', {
+          msg: four,
+          name: 'BOT'
+      });
+      event.reply({
+          type: 'text',
+          text: 'BOT：' + four
+      });
+    } else if (event.message.type === 'text' && message_lineTochat.trim() === '8小時方案') {
+      let eight = '8小時方案 \n 21,888 元 \n 8小時方案/每天 \n $21,888每月';
+      io.sockets.emit('new message', {
+          msg: eight,
+          name: 'BOT'
+      });
+      event.reply({
+          type: 'text',
+          text: 'BOT：' + eight
+      });
+    } else if (event.message.type === 'text' && message_lineTochat.trim() === '16小時方案') {
+      let sixteen = '16小時方案 \n 39,888 元 \n 16小時方案/每天 \n $39,888每月';
+      io.sockets.emit('new message', {
+          msg: sixteen,
+          name: 'BOT'
+      });
+      event.reply({
+          type: 'text',
+          text: 'BOT：' + sixteen
+      });
     } else {
         io.sockets.emit('new message', {
             msg: message_lineTochat,
@@ -355,31 +311,32 @@ bot.on('message', event => {
     }
     // 訊息是xxxxxx, template message
     // AI 機器人 設定
-    var request = appApiai.textRequest(message_lineTochat, {
-        sessionId: '46110120-6a78-4a0e-a5f0-a8596b53d37e'
-    });
-    request.on('response', function(response) {
-        console.log(response);
-        let res_msg = response.result.fulfillment.speech
-        if (response.result.action !== 'input.unknown') {
-            io.sockets.emit('new message', {
-                msg: res_msg,
-                name: 'BOT'
-            });
-            event.reply({
-                type: 'text',
-                text: 'BOT：' + res_msg
-            });
-        }
-    });
-    request.on('error', function(error) {
-        console.log(error);
-    });
-    request.end();
+    // var request = appApiai.textRequest(message_lineTochat, {
+    //     sessionId: '46110120-6a78-4a0e-a5f0-a8596b53d37e'
+    // });
+    // request.on('response', function(response) {
+    //     console.log(response);
+    //     let res_msg = response.result.fulfillment.speech
+    //     if (response.result.action !== 'input.unknown') {
+    //         io.sockets.emit('new message', {
+    //             msg: res_msg,
+    //             name: 'BOT'
+    //         });
+    //         event.reply({
+    //             type: 'text',
+    //             text: 'BOT：' + res_msg
+    //         });
+    //     }
+    // });
+    // request.on('error', function(error) {
+    //     console.log(error);
+    // });
+    // request.end();
     // AI  機器人 end
 
 });
 app.post('/webhook/', linebotParser);
+
 
 /**
  * Socket.io
@@ -429,14 +386,14 @@ io.sockets.on('connection', (socket) => {
 
         // 訊息傳到後台介面上
         if (msg.indexOf('.com') !== -1 || msg.indexOf('.edu') !== -1 || msg.indexOf('.net') !== -1 || msg.indexOf('.io') !== -1 || msg.indexOf('.org') !== -1) {
-            if (msg.indexOf('https') !== -1 || msg.indexOf('http') !== -1) {
+            if (message_lineTochat.indexOf('https') !== -1 || message_lineTochat.indexOf('http') !== -1) {
                 io.sockets.emit('new message', {
-                    msg: '<a href=' + msg + '>' + msg + '</a>',
+                    msg: '<a href=' + message_lineTochat + '>' + message_lineTochat + '</a>',
                     name: socket.nickname
                 });
             } else {
                 io.sockets.emit('new message', {
-                    msg: '<a href="https://' + msg + '/" target="_blank">' + msg + '</a>',
+                    msg: '<a href="https://' + message_lineTochat + '/" target="_blank">' + message_lineTochat + '</a>',
                     name: socket.nickname
                 });
             }
