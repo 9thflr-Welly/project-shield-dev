@@ -217,8 +217,8 @@ bot.on('message', event => {
         });
     } else if (event.message.type === 'text' && message_lineTochat.trim() === '購買方案') {
         io.sockets.emit('new message', {
-            msg: '已發送購買方案'+"4小時方案  "+"8小時方案  "+"16小時方案  ",
-            name: 'notice'
+            msg: '已接收購買方案'+"4小時方案  "+"8小時方案  "+"16小時方案  ",
+            name: receiverId,
         });
         event.reply({
             "type": "template",
@@ -256,7 +256,7 @@ bot.on('message', event => {
         let service_time = '「0700~1100」 \n 「1100~1500」 \n 「1500~1900」 \n 「1900~2300」 \n 兩個時段必須是「連續的」 \n 「0700~1100」及「1100~1500」 \n 「1100~1500」及「1500~1900」 \n 「1500~1900」及「1900~2300」。';
         io.sockets.emit('new message', {
             msg: '已發送服務時段'+"0700~1100」"+"「1100~1500」"+"「1500~1900」"+"「1900~2300」",
-            name: 'notice'
+            name: receiverId
         });
         event.reply({
             type: 'text',
@@ -272,7 +272,7 @@ bot.on('message', event => {
       let four = '4小時方案 \n 15,888 元 \n 4小時方案/每天 \n $15,888每月';
       io.sockets.emit('new message', {
           msg: four,
-          name: 'BOT'
+          name: receiverId
       });
       event.reply({
           type: 'text',
@@ -282,7 +282,7 @@ bot.on('message', event => {
       let eight = '8小時方案 \n 21,888 元 \n 8小時方案/每天 \n $21,888每月';
       io.sockets.emit('new message', {
           msg: eight,
-          name: 'BOT'
+          name: receiverId
       });
       event.reply({
           type: 'text',
@@ -292,7 +292,7 @@ bot.on('message', event => {
       let sixteen = '16小時方案 \n 39,888 元 \n 16小時方案/每天 \n $39,888每月';
       io.sockets.emit('new message', {
           msg: sixteen,
-          name: 'BOT'
+          name: receiverId
       });
       event.reply({
           type: 'text',
@@ -302,7 +302,7 @@ bot.on('message', event => {
         io.sockets.emit('new message', {
             msg: message_lineTochat,
             name: receiverId
-        });
+                    });
         usersRef.push({
             message: message_lineTochat,
             user: receiverId,

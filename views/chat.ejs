@@ -50,11 +50,12 @@
                         <a href="/"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                      </li>
                      <li>
-                        <a href="/calendar"><i class="fa fa-table fa-fw"></i> Calendar</a>
-                     </li>
-                     <li>
                         <a href="/chat" class="active"><i class="fa fa-commenting fa-fw"></i> Chat</a>
                      </li>
+                     <li>
+                        <a href="/calendar"><i class="fa fa-table fa-fw"></i> Calendar</a>
+                     </li>
+
                      <li>
                         <a href="/ticket"><i class="fa fa-ticket fa-fw"></i> Support</a>
                      </li>
@@ -104,7 +105,7 @@
             /* Style the tab content */
             .tabcontent {
             float: left;
-            padding: 0px 12px;
+            padding: 12px 12px;
             border: 1px solid #ccc;
             width: 70%;
             border-left: none;
@@ -113,13 +114,26 @@
             background-color: lightblue;
             overflow: scroll;
             display: none;
+
             }
+            .topright{
+               float:right;
+            }
+            p {
+               padding-left: 2px;
+            }
+            .reply{
+               float:top;
+               }
          </style>
          </head>
+    <section>
          <div class="tab">
             <h4 class="tablinks">Users Online</h4>
             <ol class="list-group" id="clients"></ol>
          </div>
+
+
          <section id="canvas">
 
          </section>
@@ -163,6 +177,10 @@
             <section class="tabcontent" id="canvas2"></section>
             <section class="tabcontent" id="canvas3"></section>
          </div>
+
+    </section>
+      <div class="reply"><form action="" id="send-message"><input size="35" id="message" /><input type="submit"/></form></div>
+
       </div>
       </div>
       <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js'></script>

@@ -41,6 +41,7 @@ $(document).ready(function() {
             let dataArray = [];
             let testVal = snap.val();
             let myIds = Object.keys(testVal);
+            // console.log(testVal);
 
 
             for (var i = 0; i < myIds.length; i++) {
@@ -107,13 +108,13 @@ $(document).ready(function() {
 
             // user1
             let arr1 = dataArray.filter(user1 => {
-                return user1.user == 'U8322eb28b5b3c1f5b2d101620daa71ed';
+                return user1.user == 'U52b2014e2905721d4072e65407653235';
             });
             // console.log(arr1.length);
             for (let j = 0; j < arr1.length; j++) {
                 user1.prepend(
                     '<tr>' +
-                    '<td>U8322eb28b5b3c1f5b2d101620daa71ed: ' + arr1[j].message + '</td>' +
+                    '<td>U52b2014e2905721d4072e65407653235: ' + arr1[j].message + '</td>' +
                     // '<td>' + arr1[j].messageTime + '</td>' +
                     '</tr>'
                 );
@@ -181,13 +182,13 @@ $(document).ready(function() {
             }
 
             let arr6 = dataArray.filter(user6 => {
-                return user6.user == 'U52b2014e2905721d4072e65407653235';
+                return user6.user == 'U0cbbba0d281fc5b095caaacac73fd1b5';
             });
             // console.log(arr1.length);
             for (let j = 0; j < arr6.length; j++) {
                 user6.prepend(
                     '<tr>' +
-                    '<td>U52b2014e2905721d4072e65407653235: ' + arr6[j].message + '</td>' +
+                    '<td>U0cbbba0d281fc5b095caaacac73fd1b5: ' + arr6[j].message + '</td>' +
                     // '<td>' + arr1[j].messageTime + '</td>' +
                     '</tr>'
                 );
@@ -199,10 +200,8 @@ $(document).ready(function() {
             });
             // console.log(arr1.length);
             for (let j = 0; j < arr7.length; j++) {
-                user7.prepend(
-                    '<tr>' +
-                    '<td>Ue369116591fbd2d13a7eb5f0ff12547b: ' + arr7[j].message + '</td>' +
-                    '</tr>'
+                canvas2.append(
+                    "<p>" + arr7[j].message + "<br/></p>"
                 );
 
             }
@@ -268,7 +267,7 @@ $(document).ready(function() {
         var person = prompt("Please enter your name");
         if (person != null) {
             printAgent.append("Welcome <b>" + person + "</b>! You're now on board.");
-        } //'name already taken'功能未做
+        } //'name already taken'功能未做、push agent name 未做
     }
 
 
@@ -306,19 +305,6 @@ $(document).ready(function() {
     // });
 
 
-    function displayClient(data) {
-        var i = data.name;
-        var namefound = (name_list.indexOf(i) > -1);
-
-        if (namefound) {
-            console.log('user existed');
-        } else {
-            clients.append("<b><button id=\"" + data.name + "\" class=\"tablinks\"> " + data.name + "</button></b>");
-            name_list.push(data.name);
-            console.log(name_list);
-        }
-
-    }
 
     function displayMessage(data) {
         let chat_number = 1;
@@ -334,37 +320,104 @@ $(document).ready(function() {
         if (namefound) {
             //append new msg in existed window
 
-            if (name_list.indexOf(i) == 1) {
+            console.log('namefound');
+
+            if ( i == 'U0cbbba0d281fc5b095caaacac73fd1b5') {
                 console.log('found1');
 
-                canvas1.append("<p><strong>" + data.name + ": </strong>" + data.msg + "<br/></p>");
+                canvas1.append("<p>" + data.msg + "<br/></p>");
 
-            } else if (name_list.indexOf(i) == 2) {
+
+            } else if (i == 'Ue369116591fbd2d13a7eb5f0ff12547b') {
+
                 console.log('found2');
-                canvas2.append("<p><strong>" + data.name + ": </strong>" + data.msg + "<br/></p>");
+                canvas2.append("<p>" + data.msg + "<br/></p>");
 
-            } else if (name_list.indexOf(i) == 3) {
+
+            } else if (i =='U636956e3c62bdeecab26ea39be27cccc') {
+
                 console.log('found3');
-                canvas3.append("<p><strong>" + data.name + ": </strong>" + data.msg + "<br/></p>");
-            }
+                canvas3.append("<p>" + data.msg + "<br/></p>");
 
-        } else if (i === "Ue369116591fbd2d13a7eb5f0ff12547b") {
+
+} else if (i === "Ue369116591fbd2d13a7eb5f0ff12547b") {
+
+
             $('#user7').show();
             user7.prepend('<tr>' +
                 '<td>Ue369116591fbd2d13a7eb5f0ff12547b: ' + data.msg + '</td>' + '</tr>');
-        } else {
+
+
+         }//else if
+
+     }//close if
+     else{
+
+            console.log('new msg received');
+
+            if (i == 'U0cbbba0d281fc5b095caaacac73fd1b5'){
+                console.log('append msg to canvas1');
+                canvas1.append(
+                "<span onclick=\"this.parentElement.style.display=\'none\'\" class=\"topright\">x</span>" +
+                "<div id=\"" + data.name + "\">" +
+                "<h7>" +
+                "<strong>" + data.name + ":</strong></h7><br/><p>" + data.msg + "<br/></p></div>"
+
+
+                    );
+            }else if (i == 'U636956e3c62bdeecab26ea39be27cccc'){
+                canvas3.append(
+                "<span onclick=\"this.parentElement.style.display=\'none\'\" class=\"topright\">x</span>" +
+                "<div id=\"" + data.name + "\">" +
+                "<p>" +
+                "<strong>" + data.name + ": </strong><br/>" + data.msg + "<br/></p></div>"
+);
+
+
+            }else if (i == 'Ue369116591fbd2d13a7eb5f0ff12547b'){
+                console.log('append msg to canvas2');
+
+                canvas2.append(
+                "<span onclick=\"this.parentElement.style.display=\'none\'\" class=\"topright\">x</span>" +
+                "<div id=\"" + data.name + "\">" +
+                "<p>" +
+                "<strong>" + data.name + ": </strong><br/>" + data.msg + "<br/></p></div>"
+);
+
+        }else{
             canvas.append(
                 "<div id='chat" + chat_number + "' class=\"tabcontent\">" +
                 "<span onclick=\"this.parentElement.style.display=\'none\'\" class=\"topright\">x</span>" +
                 "<div id=\"" + data.name + "\">" +
                 "<p>" +
-                "<strong>" + data.name + ": </strong>" + data.msg + "<br/></p></div>");
+                "<strong>" + data.name + ": </strong><br/>" + data.msg + "<br/></p></div>");
 
             chat_number++;
 
         }
 
-        $(document).on('click', "#U0cbbba0d281fc5b095caaacac73fd1b5", function() {
+
+    }//else
+
+}//function
+
+    function displayClient(data) {
+        var i = data.name;
+        var namefound = (name_list.indexOf(i) > -1);
+
+        if (namefound) {
+            console.log('user existed');
+
+        }else if (i == 'notice'){
+            console.log('notice sent');
+
+        }else {
+            clients.append("<b><button id=\"" + data.name + "\" class=\"tablinks\"> " + data.name + "</button></b>");
+            name_list.push(data.name);
+            console.log(name_list);
+        }
+
+            $(document).on('click', "#U0cbbba0d281fc5b095caaacac73fd1b5", function() {
             canvas1.show();
             canvas2.hide();
             canvas3.hide();
@@ -374,7 +427,7 @@ $(document).ready(function() {
             user4.hide();
             user5.hide()
         });
-        $(document).on('click', "#U52b2014e2905721d4072e65407653235", function() {
+        $(document).on('click', "#Ue369116591fbd2d13a7eb5f0ff12547b", function() {
             canvas2.show();
             canvas1.hide();
             canvas3.hide();
@@ -394,5 +447,7 @@ $(document).ready(function() {
             user4.hide();
             user5.hide()
         });
+
     }
+
 }); //document ready close tag
