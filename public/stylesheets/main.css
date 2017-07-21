@@ -184,8 +184,8 @@ input {
 
 #home, #calendar-wrap, #profile-wrap, #ticket-wrap {
   position: relative;
-  left: 20%;
-  right:3%;
+  left: 25%;
+  right: 3%;
   width: 70%;
 }
 

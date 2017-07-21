@@ -50,12 +50,11 @@
                         <a href="/"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                      </li>
                      <li>
-                        <a href="/chat" class="active"><i class="fa fa-commenting fa-fw"></i> Chat</a>
-                     </li>
-                     <li>
                         <a href="/calendar"><i class="fa fa-table fa-fw"></i> Calendar</a>
                      </li>
-
+                     <li>
+                        <a href="/chat" class="active"><i class="fa fa-commenting fa-fw"></i> Chat</a>
+                     </li>
                      <li>
                         <a href="/ticket"><i class="fa fa-ticket fa-fw"></i> Support</a>
                      </li>
@@ -125,9 +124,12 @@
             .reply{
                float:top;
                }
+            .tablinks{
+               padding-left: 10px
+            }
          </style>
          </head>
-    <section>
+
          <div class="tab">
             <h4 class="tablinks">Users Online</h4>
             <ol class="list-group" id="clients"></ol>
@@ -137,49 +139,43 @@
          <section id="canvas">
 
          </section>
-         <div>
+<!--          <div>
             <section class="tabcontent" id="user1">
                <h5>User1</h5>
-               <div id="user1_inn"></div>
-               <form action="" id="send-message"><input size="35" id="message" /><input type="submit"/></form>
+               <div id="user1"></div>
             </section>
             <section class="tabcontent" id="user2">
                <h5>User2</h5>
-               <div id="user2_inn"></div>
-               <form action="" id="send-message"><input size="35" id="message" /><input type="submit"/></form>
+               <div id="user2"></div>
             </section>
             <section class="tabcontent" id="user3">
                <h5>User3</h5>
-               <div id="user3_inn"></div>
-               <form action="" id="send-message"><input size="35" id="message" /><input type="submit"/></form>
+               <div id="user3"></div>
             </section>
             <section class="tabcontent" id="user4">
                <h5>User4</h5>
-               <div id="user4_inn"></div>
-               <form action="" id="send-message"><input size="35" id="message" /><input type="submit"/></form>
+               <div id="user4"></div>
             </section>
             <section class="tabcontent" id="user5">
                <h5>User5</h5>
-               <div id="user5_inn"></div>
-               <form action="" id="send-message"><input size="35" id="message" /><input type="submit"/></form>
+               <div id="user5"></div>
             </section>
             <section class="tabcontent" id="user6">
                <h5>User6</h5>
                <div id="user6_inn"></div>
-               <form action="" id="send-message"><input size="35" id="message" /><input type="submit"/></form>
             </section>
             <section class="tabcontent" id="user7">
                <h5>User7</h5>
                <div id="user7_inn"></div>
-               <form action="" id="send-message"><input size="35" id="message" /><input type="submit"/></form>
             </section>
-            <section class="tabcontent" id="canvas1"></section>
-            <section class="tabcontent" id="canvas2"></section>
-            <section class="tabcontent" id="canvas3"></section>
-         </div>
+         </div> -->
 
-    </section>
-      <div class="reply"><form action="" id="send-message"><input size="35" id="message" /><input type="submit"/></form></div>
+
+          <form action="" id="send-message">
+            <input size="35" id="message" />
+            <input type="submit"/>
+          </form>
+
 
       </div>
       </div>

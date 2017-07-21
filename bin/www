@@ -48,7 +48,7 @@ var users = {};
 var type_sticker = 0;
 //webhook event
 var message_lineTochat;
-var receiverId = 'Ue369116591fbd2d13a7eb5f0ff12547b';
+var receiverId = '';
 // LINE bot設定
 var bot = linebot({
     channelId: '1516667468',
@@ -96,30 +96,6 @@ bot.on('message', event => {
 
         type_sticker += 1;
 
-
-        event.reply({
-
-            "type": "template",
-            "altText": "this is a confirm template",
-
-            "template": {
-                "type": "confirm",
-                "text": "Are you sure?",
-                "actions": [{
-                        "type": "message",
-                        "label": "Yes",
-                        "text": "yes"
-                    },
-
-                    {
-                        "type": "message",
-                        "label": "No",
-                        "text": "no"
-                    }
-                ]
-            }
-
-        });
 
     } else if (message_type === 'location') {
         io.sockets.emit('new message', {
@@ -225,7 +201,6 @@ bot.on('message', event => {
             "altText": "this is a buttons template",
             "template": {
                 "type": "buttons",
-                "thumbnailImageUrl": "https://example.com/bot/images/image.jpg",
                 "title": "購買方案說明",
                 "text": "請選擇一個方案",
                 "actions": [{
@@ -252,10 +227,45 @@ bot.on('message', event => {
             messageTime: date.toString()
         });
 
-    } else if (event.message.type === 'text' && message_lineTochat.trim() === '服務時段') {
+    } else if (event.message.type === 'text' && message_lineTochat.trim() === 'Hi') {
+        io.sockets.emit('new message', {
+            msg: '已接收選項'+"購買方案, "+"服務時段",
+            name: receiverId,
+        });
+        event.reply({
+            "type": "template",
+            "altText": "this is a buttons template",
+            "template": {
+                "type": "buttons",
+                "title": "問題選項",
+                "text": "請選擇一個詢問主題",
+                "actions": [{
+                        "type": "message",
+                        "label": "購買方案",
+                        "text": "購買方案"
+                    },
+                    {
+                        "type": "message",
+                        "label": "服務時段",
+                        "text": "服務時段"
+                    },
+
+                ]
+
+                            }
+        })
+        usersRef.push({
+            message: message_lineTochat,
+            user: receiverId,
+            messageTime: date.toString()
+        });
+
+
+
+            }else if (event.message.type === 'text' && message_lineTochat.trim() === '服務時段') {
         let service_time = '「0700~1100」 \n 「1100~1500」 \n 「1500~1900」 \n 「1900~2300」 \n 兩個時段必須是「連續的」 \n 「0700~1100」及「1100~1500」 \n 「1100~1500」及「1500~1900」 \n 「1500~1900」及「1900~2300」。';
         io.sockets.emit('new message', {
-            msg: '已發送服務時段'+"0700~1100」"+"「1100~1500」"+"「1500~1900」"+"「1900~2300」",
+            msg: '已發送服務時段'+"「0700~1100」"+"「1100~1500」"+"「1500~1900」"+"「1900~2300」",
             name: receiverId
         });
         event.reply({
@@ -338,6 +348,7 @@ bot.on('message', event => {
 app.post('/webhook/', linebotParser);
 
 
+
 /**
  * Socket.io
  */
@@ -357,6 +368,8 @@ io.sockets.on('connection', (socket) => {
             updateNicknames();
         }
     });
+
+
 
     function updateNicknames() {
         io.sockets.emit('usernames', Object.keys(users));
@@ -389,30 +402,54 @@ io.sockets.on('connection', (socket) => {
             if (message_lineTochat.indexOf('https') !== -1 || message_lineTochat.indexOf('http') !== -1) {
                 io.sockets.emit('new message', {
                     msg: '<a href=' + message_lineTochat + '>' + message_lineTochat + '</a>',
-                    name: socket.nickname
+                    name: socket.nickname,
+                    id: receiverId
                 });
             } else {
                 io.sockets.emit('new message', {
                     msg: '<a href="https://' + message_lineTochat + '/" target="_blank">' + message_lineTochat + '</a>',
-                    name: socket.nickname
+                    name: socket.nickname,
+                    id: receiverId
+
                 });
             }
         } else if (msg.includes('/sticker')) {
             io.sockets.emit('new message', {
                 msg: 'Send sticker to user',
-                name: socket.nickname
+                name: socket.nickname,
+                    id: receiverId
+
             });
         } else {
             io.sockets.emit('new message', {
                 msg: msg,
-                name: socket.nickname
+                name: socket.nickname,
+                    id: receiverId
+
             });
         }
 
+
+ /*  =======  Define Receiver  ========  */
+    var defReceiver;
+    socket.on('receiver', (data, callback) => {
+        callback(true);
+        socket.defReceiver = data;
+        console.log('Just arived in www, tell me whats socket.defReceiver');
+        console.log(socket.defReceiver);
+
+    });
+
+
+/*  ==================================  */
+
+        console.log('before bot push, tell me what is socket.defReceiver');
+        console.log(socket.defReceiver);
         // 訊息傳到LINE
         if (receiverId !== undefined) {
-            bot.push(receiverId, message);
+            bot.push(socket.defReceiver, message);
         }
+
 
         // 訊息儲存到firebase資料庫
         agentsRef.push({
@@ -420,7 +457,7 @@ io.sockets.on('connection', (socket) => {
             agent: socket.nickname,
             messageTime: date.toString()
         });
-    });
+    });//sent message
 
     socket.on('disconnect', (data) => {
         if (!socket.nickname) return;

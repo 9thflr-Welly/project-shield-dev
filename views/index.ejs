@@ -32,9 +32,6 @@
                         <li id="get_a"><a href="#">瀏覽人數</a></li>
                         <li id="get_b"><a href="#">國家來源</a></li>
                         <li id="get_c"><a href="#">瀏覽器</a></li>
-                        <li id="get_d"><a href="#">通知</a></li>
-                        <li id="get_e"><a href="#">收入比例</a></li>
-                        <li id="get_g"><a href="#">聊天室</a></li>
                      </ul>
                   </form>
                </li>
@@ -44,10 +41,10 @@
                   <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
                   </a>
                   <ul class="dropdown-menu dropdown-user">
-                     <li><a href="#"><i class="fa fa-user fa-fw"></i> User Profile</a>
+                     <li><a href="/profile"><i class="fa fa-user fa-fw"></i> User Profile</a>
                      </li>
-                     <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
-                     </li>
+                     <!-- <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
+                     </li> -->
                      <li class="divider"></li>
                      <li><a href="/login" id="signout-btn"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
                      </li>
@@ -69,9 +66,11 @@
                      <li>
                         <a href="/calendar"><i class="fa fa-table fa-fw"></i> Calendar</a>
                      </li>
-
                      <li>
                         <a href="/ticket"><i class="fa fa-ticket fa-fw"></i> Support</a>
+                     </li>
+                     <li>
+                        <a href="https://admin-e610d.firebaseapp.com"><i class="fa fa-cogs fa-fw"></i> Admin</a>
                      </li>
                   </ul>
                </div>
@@ -93,7 +92,7 @@
             <div class="panel-body">
                <div id="embed-api-auth-container"></div>
                <div id="chart-container"></div>
-               <!--        <div id="view-selector-container"></div> -->
+               <div style="display:none" id="view-selector-container"></div>
             </div>
          </div>
          <!-- MULTIPLE VIEWS -->
@@ -104,7 +103,7 @@
             <div class="panel-body">
                <div id="embed-api-auth-container"></div>
                <div id="chart-1-container"></div>
-               <!--        <div id="chart-2-container"></div>  -->
+               <div id="chart-2-container"></div>
                <div style="display:none" id="view-selector-1-container"></div>
                <div style="display:none" id="view-selector-2-container"></div>
             </div>
@@ -152,7 +151,7 @@
             */
            gapi.analytics.auth.authorize({
              container: 'embed-api-auth-container',
-             clientid: '764991058027-dqs48k62291hd8qii817q9t2vn480v7c.apps.googleusercontent.com'
+             clientid: '893891576690-e7sjrhcipgj0ekpulers7l2itsagdcrl.apps.googleusercontent.com'
            });
          /*=====================DASHBOARD======================*/
            /**
