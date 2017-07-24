@@ -8,17 +8,12 @@ $(document).ready(function() {
     var messageInput = $('#message');
     var messageContent = $('#chat');
     var clients = $('#clients');
-    var name_list = ['test'];
+
     var newUsers = $('#newUsers');
     var printAgent = $('#printAgent');
     var canvas = $("#canvas");
-    var user1 = $("#user1");
-    var user2 = $("#user2");
-    var user3 = $("#user3");
-    var user4 = $("#user4");
-    var user5 = $("#user5");
-    var user6 = $("#user6_inn");
-    var user7 = $("#user7_inn");
+
+    var name_list = ['test'];
     var user_list = [];
     var person = prompt("Please enter your name");
     var count = 0;
@@ -30,7 +25,7 @@ $(document).ready(function() {
     function clickMsg() {
         var target = $(this).attr('rel');
         $("#" + target).show().siblings().hide();
-        console.log('clickMsg executed')
+        // console.log('clickMsg executed')
     }
 
     $(document).on('click', '.tablinks', clickMsg);
@@ -42,7 +37,7 @@ $(document).ready(function() {
     } // set agent name
 
     function agentName() {
-        // person;
+        person;
         if (person != null) {
             socket.emit('new user', person, (data) => {
                 if (data) {
@@ -84,6 +79,7 @@ $(document).ready(function() {
     messageForm.submit((e) => {
         e.preventDefault();
         socket.emit('send message', messageInput.val(), (data) => {
+
             messageContent.append('<span class="error">' + data + "</span><br/>");
         });
         messageInput.val('');
@@ -99,7 +95,12 @@ $(document).ready(function() {
 
     /*  =========== to assign the right receiverId  =========  */
 
-    socket.on('send message', messageInput.val(), (data) => {})
+    socket.on('send message', messageInput.val(), (data) => {
+
+    })
+
+    /*  =================================  */
+
     socket.on('new message', (data) => {
         displayMessage(data);
         displayClient(data);
@@ -107,44 +108,46 @@ $(document).ready(function() {
         // messageContent.append('<b>' + data.name + ': </b>' + data.msg + "<br/>");
     });
 
+    socket.on('whisper', (data) => {
+        messageContent.append('<span class="whisper"><b>' + data.name + ': </b>' + data.msg + "</span><br/>");
+    });
+
     function displayMessage(data) {
         var i = data.name;
         var namefound = (name_list.indexOf(i) > -1); //if client exists
 
-        if (namefound) {
+        if (namefound == true) {
             //append new msg in existed window
             console.log('im: ' + i);
-
             console.log('namefound');
-            // 要處理agents訊息沒出來的問題
-            if (i === person && data.id === undefined) {
+            if (i == person && data.to_id !== undefined) {
                 console.log('yes existed agent msg identified');
                 var n;
                 for (n = 0; n < t_value + 1; n++) {
-                    console.log('yes it gets to the for loop');
-                    console.log('n is currently looping to')
-                    console.log(n);
-                    console.log('Is n already == t_value?')
-                    console.log(n == t_value);
+                    // console.log('yes it gets to the for loop');
+                    // console.log('n is currently looping to')
+                    // console.log(n);
+                    // console.log('Is n already == t_value?')
+                    // console.log(n == t_value);
 
                     var k = t[n].key;
                     console.log(k);
-                    console.log('the below is t[n].key');
-                    console.log(t[n].key);
+                    // console.log('the below is t[n].key');
+                    // console.log(t[n].key);
 
-                    if ($("#" + k).is(':visible')) {
-                        console.log('yes it knows what is visible');
+                    if ($("#" + to_id + "-content").is(':visible')) {
+                        // console.log('yes it knows what is visible');
                         var gotIt;
                         gotIt = k;
-                        console.log('the following is gotIt');
-                        console.log(gotIt);
+                        // console.log('the following is gotIt');
+                        // console.log(gotIt);
                         receiver = gotIt;
-                        console.log('tell me whats receiver');
+                        // console.log('tell me whats receiver');
                         console.log(receiver);
                         defReceiver();
 
                         $("#" + gotIt + "-content").append("<p><strong>" + data.name + ": </strong>" + data.msg + "<br/></p>");
-                        console.log('agent reply appended to according canvas');
+                        // console.log('agent reply appended to according canvas');
 
                     } //if if
                     else {
@@ -154,15 +157,16 @@ $(document).ready(function() {
                 } //for
 
             } //if agent
-            else {
-                $("#" + data.id + "-content").append("<p><strong>" + data.name + ": </strong>" + data.msg + "<br/></p>");
+            else if (i) {
+
+                $("#" + i + "-content").append("<p><strong>" + data.name + ": </strong>" + data.msg + "<br/></p>");
                 console.log('appended to according canvas');
             } //if
-
-
         } //close if
         else {
+
             console.log('new msg append to canvas');
+
             canvas.append(
                 "<div id=\"" + data.id + "\" class=\"tabcontent\">" +
                 "<span onclick=\"this.parentElement.style.display=\'none\'\" class=\"topright\">x</span>" +
@@ -172,6 +176,7 @@ $(document).ready(function() {
                 "</p>" +
                 "</div>" +
                 "</div>"); // close append
+
         } //else
 
 
@@ -181,7 +186,6 @@ $(document).ready(function() {
         var i = data.name;
         var namefound = (name_list.indexOf(i) > -1);
 
-
         if (namefound) {
             console.log('user existed');
 
@@ -189,7 +193,7 @@ $(document).ready(function() {
             console.log('notice sent');
 
         } else {
-            if (i === person && data.id === undefined) {
+            if (i == person) {
                 console.log('agent username loaded');
                 name_list.push(data.name);
                 t.push({
@@ -238,11 +242,7 @@ $(document).ready(function() {
 
                 } //if agent
 
-
-
             } else {
-
-
 
                 clients.append("<b><button  rel=\"" + data.id + "\" class=\"tablinks\"> " + data.name + "</button></b>");
                 name_list.push(data.name);
@@ -255,12 +255,9 @@ $(document).ready(function() {
                 t_key = t[count].key;
                 count++;
 
-
-
-
-                //            console.log(name_list);
             } //close else
         } //close else
+
 
     } //close client function
 
