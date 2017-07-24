@@ -12,6 +12,7 @@
       <!-- Morris Charts CSS -->
       <link rel="stylesheet" href="vendor/morrisjs/morris.css" >
       <link rel="stylesheet" href="stylesheets/main.css" />
+      <link rel="stylesheet" href="stylesheets/chat.css" />
    </head>
    <body>
       <div id="wrapper">
@@ -67,118 +68,20 @@
       </div>
       <div id="home">
          <h4 style="text-align: center" id="printAgent"></h4>
-         <style>
-            div.tab {
-            float: left;
-            border: 1px solid #ccc;
-            background-color: #f1f1f1;
-            width: 30%;
-            height: 300px;
-            text-align: center;
-            padding:10px 0;
-            }
-            /* Style the buttons inside the tab */
-            div.tab button {
-            display: block;
-            background-color: inherit;
-            color: black;
-            padding: 10px 0px 10px 0px;
-            width: 100%;
-            border: none;
-            outline: none;
-            text-align: left;
-            cursor: pointer;
-            transition: 0.3s;
-            font-size: 14px;
-            text-align: center;
-            font-weight: bold;
-            }
-            /* Change background color of buttons on hover */
-            div.tab button:hover {
-            background-color: #ddd;
-            }
-            /* Create an active/current "tab button" class */
-            div.tab button.active {
-            background-color: #ccc;
-            }
-            /* Style the tab content */
-            .tabcontent {
-            float: left;
-            padding: 12px 12px;
-            border: 1px solid #ccc;
-            width: 70%;
-            border-left: none;
-            height: 300px;
-            display:block;
-            background-color: lightblue;
-            overflow: scroll;
-            display: none;
-
-            }
-            .topright{
-               float:right;
-            }
-            p {
-               padding-left: 2px;
-            }
-            .reply{
-               float:top;
-               }
-            .tablinks{
-               padding-left: 10px
-            }
-         </style>
-         </head>
 
          <div class="tab">
             <h4 class="tablinks">Users Online</h4>
             <ol class="list-group" id="clients"></ol>
          </div>
 
+         <section id="canvas"></section>
 
-         <section id="canvas">
-
-         </section>
-<!--          <div>
-            <section class="tabcontent" id="user1">
-               <h5>User1</h5>
-               <div id="user1"></div>
-            </section>
-            <section class="tabcontent" id="user2">
-               <h5>User2</h5>
-               <div id="user2"></div>
-            </section>
-            <section class="tabcontent" id="user3">
-               <h5>User3</h5>
-               <div id="user3"></div>
-            </section>
-            <section class="tabcontent" id="user4">
-               <h5>User4</h5>
-               <div id="user4"></div>
-            </section>
-            <section class="tabcontent" id="user5">
-               <h5>User5</h5>
-               <div id="user5"></div>
-            </section>
-            <section class="tabcontent" id="user6">
-               <h5>User6</h5>
-               <div id="user6_inn"></div>
-            </section>
-            <section class="tabcontent" id="user7">
-               <h5>User7</h5>
-               <div id="user7_inn"></div>
-            </section>
-         </div> -->
-
-
-          <form action="" id="send-message">
+         <form action="" id="send-message">
             <input size="35" id="message" />
             <input type="submit"/>
           </form>
-
-
       </div>
-      </div>
+
       <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js'></script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
       <script src="https://www.gstatic.com/firebasejs/3.9.0/firebase.js"></script>
