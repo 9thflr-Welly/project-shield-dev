@@ -21,11 +21,11 @@ $(document).ready(function() {
     var t_value;
     var t_key;
     var receiver;
+    var designated_user_id;
 
     function clickMsg() {
         var target = $(this).attr('rel');
         $("#" + target).show().siblings().hide();
-        // console.log('clickMsg executed')
     }
 
     $(document).on('click', '.tablinks', clickMsg);
@@ -37,7 +37,7 @@ $(document).ready(function() {
     } // set agent name
 
     function agentName() {
-        person;
+        // person;
         if (person != null) {
             socket.emit('new user', person, (data) => {
                 if (data) {
@@ -50,36 +50,18 @@ $(document).ready(function() {
             printAgent.append("Welcome <b>" + person + "</b>! You're now on board.");
         } //'name already taken'功能未做、push agent name 未做
 
-
     }
 
     /*  =======  To indentify the right receiver  =====  */
     function defReceiver() {
-        socket.emit('receiver', receiver, (data) => {
-
-        });
+        socket.emit('receiver', receiver, (data) => {});
         console.log('receiver sent to www');
     }
 
     /*  =======  CODES FROM GITHUB: NICKNAME  ======  */
-
-    nicknameForm.submit((e) => {
-        e.preventDefault();
-        socket.emit('new user', nicknameInput.val(), (data) => {
-            if (data) {
-                $('#nickWrap').hide();
-                $('#contentWrap').show();
-            } else {
-                nicknameError.html('username is already taken');
-            }
-        });
-        nicknameInput.val('');
-    });
-
     messageForm.submit((e) => {
         e.preventDefault();
         socket.emit('send message', messageInput.val(), (data) => {
-
             messageContent.append('<span class="error">' + data + "</span><br/>");
         });
         messageInput.val('');
@@ -108,64 +90,47 @@ $(document).ready(function() {
         // messageContent.append('<b>' + data.name + ': </b>' + data.msg + "<br/>");
     });
 
-    socket.on('whisper', (data) => {
-        messageContent.append('<span class="whisper"><b>' + data.name + ': </b>' + data.msg + "</span><br/>");
-    });
-
     function displayMessage(data) {
         var i = data.name;
         var namefound = (name_list.indexOf(i) > -1); //if client exists
+        console.log(namefound);
 
-        if (namefound == true) {
+        if (namefound) {
             //append new msg in existed window
             console.log('im: ' + i);
             console.log('namefound');
             if (i == person && data.to_id !== undefined) {
                 console.log('yes existed agent msg identified');
-                var n;
-                for (n = 0; n < t_value + 1; n++) {
-                    // console.log('yes it gets to the for loop');
-                    // console.log('n is currently looping to')
-                    // console.log(n);
-                    // console.log('Is n already == t_value?')
-                    // console.log(n == t_value);
-
-                    var k = t[n].key;
-                    console.log(k);
-                    // console.log('the below is t[n].key');
-                    // console.log(t[n].key);
-
-                    if ($("#" + to_id + "-content").is(':visible')) {
-                        // console.log('yes it knows what is visible');
-                        var gotIt;
-                        gotIt = k;
-                        // console.log('the following is gotIt');
-                        // console.log(gotIt);
-                        receiver = gotIt;
-                        // console.log('tell me whats receiver');
-                        console.log(receiver);
-                        defReceiver();
-
-                        $("#" + gotIt + "-content").append("<p><strong>" + data.name + ": </strong>" + data.msg + "<br/></p>");
-                        // console.log('agent reply appended to according canvas');
-
-                    } //if if
-                    else {
-                        console.log('no the n is not visible, do it again')
-
-                    }
-                } //for
-
+                // if ($("#" + data.to_id).is(':visible')) {
+                if($("#" + data.to_id + "-option").is(':selected')){
+                    // console.log('appended agent message');
+                    $("#" + data.to_id + "-content").append("<p><strong>" + data.name + ": </strong>" + data.msg + "<br/></p>");
+                }
+                else {
+                    console.log('no the n is not visible, do it again')
+                }
             } //if agent
-            else if (i) {
-
-                $("#" + i + "-content").append("<p><strong>" + data.name + ": </strong>" + data.msg + "<br/></p>");
+            else {
+                $("#" + data.id + "-content").append("<p><strong>" + data.name + ": </strong>" + data.msg + "<br/></p>");
                 console.log('appended to according canvas');
             } //if
         } //close if
         else {
-
-            console.log('new msg append to canvas');
+          if (i == person && data.to_id !== undefined) {
+              console.log('yes existed agent msg identified');
+              for (let n = 0; n < t_value + 1; n++) {
+                  if ($("#" + data.to_id).is(':visible')) {
+                      console.log('appended agent message');
+                      $("#" + data.to_id + "-content").append("<p><strong>" + data.name + ": </strong>" + data.msg + "<br/></p>");
+                  } //if if
+                  else {
+                      console.log('no the n is not visible, do it again')
+                  }
+              } //for
+          } else {
+            // console.log('new msg append to canvas');
+            name_list.push(data.id);
+            $('#user-rooms').append('<option id="' + data.id + '-option">' + data.name + '</option>');
 
             canvas.append(
                 "<div id=\"" + data.id + "\" class=\"tabcontent\">" +
@@ -176,6 +141,8 @@ $(document).ready(function() {
                 "</p>" +
                 "</div>" +
                 "</div>"); // close append
+          }
+
 
         } //else
 

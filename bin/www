@@ -84,6 +84,7 @@ bot.on('message', event => {
     // console.log(receiverId);
 
     event.source.profile().then(function(profile) {
+      // console.log(profile);
         // event.reply('Hello ' + profile.displayName);
         receiver_name = profile.displayName
 
@@ -375,12 +376,6 @@ io.sockets.on('connection', (socket) => {
         }
     });
 
-
-
-    // function updateNicknames() {
-    //     io.sockets.emit('usernames', Object.keys(users));
-    // }
-
     // 從SHIELD chat傳送訊息
     socket.on('send message', (data, callback) => {
         // console.log(data, receiverId);
@@ -388,22 +383,28 @@ io.sockets.on('connection', (socket) => {
         var message;
 
         if(msg.includes('/image')){
+          let link = msg.substr(7);
+          // console.log(link);
           message = {
             type: "image",
-            originalContentUrl: "https://www.movienewsguide.com/wp-content/uploads/2016/03/Phoenix-Suns.jpg",
-            previewImageUrl: "https://www.movienewsguide.com/wp-content/uploads/2016/03/Phoenix-Suns.jpg"
+            originalContentUrl: link,
+            previewImageUrl: link
           };
         } else if(msg.includes('/audio')){
+          let link = msg.substr(7);
+          // console.log(link);
           message = {
             type: "audio",
-            originalContentUrl: "https://example.com/original.m4a",
-            duration: 240000
+            originalContentUrl: link,
+            duration: 6000
           };
         } else if(msg.includes('/video')){
+          let link = msg.substr(7);
+          // console.log(link);
           message = {
             type: "video",
-            originalContentUrl: "https://example.com/original.mp4",
-            previewImageUrl: "https://example.com/preview.jpg"
+            originalContentUrl: link,
+            previewImageUrl: "https://www.movienewsguide.com/wp-content/uploads/2016/03/Phoenix-Suns.jpg"
           };
         } else {
           message = {
@@ -416,21 +417,7 @@ io.sockets.on('connection', (socket) => {
         let date = new Date(d);
 
         // 訊息傳到後台介面上
-        if (msg.indexOf('.com') !== -1 || msg.indexOf('.edu') !== -1 || msg.indexOf('.net') !== -1 || msg.indexOf('.io') !== -1 || msg.indexOf('.org') !== -1) {
-            if (message_lineTochat.indexOf('https') !== -1 || message_lineTochat.indexOf('http') !== -1) {
-                io.sockets.emit('new message', {
-                    msg: '<a href=' + message_lineTochat + '>' + message_lineTochat + '</a>',
-                    name: socket.nickname,
-                    to_id: receiverId
-                });
-            } else {
-                io.sockets.emit('new message', {
-                    msg: '<a href="https://' + message_lineTochat + '/" target="_blank">' + message_lineTochat + '</a>',
-                    name: socket.nickname,
-                    to_id: receiverId
-                });
-            }
-        } else if (msg.includes('/image')) {
+        if (msg.includes('/image')) {
             io.sockets.emit('new message', {
                 msg: 'Send image to user',
                 name: socket.nickname,
@@ -448,36 +435,32 @@ io.sockets.on('connection', (socket) => {
                 name: socket.nickname,
                 to_id: receiverId
             });
-        } else {
+        } else if (msg.indexOf('.com') !== -1 || msg.indexOf('.edu') !== -1 || msg.indexOf('.net') !== -1 || msg.indexOf('.io') !== -1 || msg.indexOf('.org') !== -1) {
+            if (message_lineTochat.indexOf('https') !== -1 || message_lineTochat.indexOf('http') !== -1) {
+                io.sockets.emit('new message', {
+                    msg: '<a href=' + message_lineTochat + '>' + message_lineTochat + '</a>',
+                    name: socket.nickname,
+                    to_id: receiverId
+                });
+            } else {
+                io.sockets.emit('new message', {
+                    msg: '<a href="https://' + message_lineTochat + '/" target="_blank">' + message_lineTochat + '</a>',
+                    name: socket.nickname,
+                    to_id: receiverId
+                });
+            }
+        }  else {
             io.sockets.emit('new message', {
                 msg: msg,
                 name: socket.nickname,
                 to_id: receiverId
             });
         }
-
-
-        /*  =======  Define Receiver  ========  */
-        // var defReceiver;
-        // socket.on('receiver', (data, callback) => {
-        //     callback(true);
-        //     socket.defReceiver = data;
-        //     console.log('Just arived in www, tell me whats socket.defReceiver');
-        //     console.log(socket.defReceiver);
-        //
-        // });
-
-
-        /*  ==================================  */
-
-        // console.log('before bot push, tell me what is socket.defReceiver');
-        // console.log(socket.defReceiver);
         // 訊息傳到LINE
         if (receiverId !== undefined) {
-          console.log(receiverId, message);
+          // console.log(receiverId, message);
           bot.push(receiverId, message);
         }
-
 
         // 訊息儲存到firebase資料庫
         agentsRef.push({
