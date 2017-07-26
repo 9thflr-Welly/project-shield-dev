@@ -48,6 +48,7 @@ var type_sticker = 0;
 //webhook event
 var message_lineTochat;
 var receiverId = '';
+var agent_sendTo_receiver;
 // LINE bot設定
 var bot = linebot({
     channelId: '1516667468',
@@ -58,7 +59,7 @@ const linebotParser = bot.parser();
 
 
 // api ai setting
-var appApiai = apiai("6fd13e1dd00b4d93881e1e75cdf02bd4");
+// var appApiai = apiai("6fd13e1dd00b4d93881e1e75cdf02bd4");
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -378,8 +379,10 @@ io.sockets.on('connection', (socket) => {
 
     // 從SHIELD chat傳送訊息
     socket.on('send message', (data, callback) => {
-        // console.log(data, receiverId);
-        var msg = data.trim();
+        console.log(data);
+        var msg = data.msg.trim();
+        agent_sendTo_receiver = data.id.trim();
+        console.log(agent_sendTo_receiver);
         var message;
 
         if(msg.includes('/image')){
@@ -421,45 +424,45 @@ io.sockets.on('connection', (socket) => {
             io.sockets.emit('new message', {
                 msg: 'Send image to user',
                 name: socket.nickname,
-                to_id: receiverId
+                to_id: agent_sendTo_receiver
             });
         } else if (msg.includes('/audio')) {
             io.sockets.emit('new message', {
                 msg: 'Send audio to user',
                 name: socket.nickname,
-                to_id: receiverId
+                to_id: agent_sendTo_receiver
             });
         } else if (msg.includes('/video')) {
             io.sockets.emit('new message', {
                 msg: 'Send video to user',
                 name: socket.nickname,
-                to_id: receiverId
+                to_id: agent_sendTo_receiver
             });
         } else if (msg.indexOf('.com') !== -1 || msg.indexOf('.edu') !== -1 || msg.indexOf('.net') !== -1 || msg.indexOf('.io') !== -1 || msg.indexOf('.org') !== -1) {
             if (message_lineTochat.indexOf('https') !== -1 || message_lineTochat.indexOf('http') !== -1) {
                 io.sockets.emit('new message', {
                     msg: '<a href=' + message_lineTochat + '>' + message_lineTochat + '</a>',
                     name: socket.nickname,
-                    to_id: receiverId
+                    to_id: agent_sendTo_receiver
                 });
             } else {
                 io.sockets.emit('new message', {
                     msg: '<a href="https://' + message_lineTochat + '/" target="_blank">' + message_lineTochat + '</a>',
                     name: socket.nickname,
-                    to_id: receiverId
+                    to_id: agent_sendTo_receiver
                 });
             }
         }  else {
             io.sockets.emit('new message', {
                 msg: msg,
                 name: socket.nickname,
-                to_id: receiverId
+                to_id: agent_sendTo_receiver
             });
         }
         // 訊息傳到LINE
         if (receiverId !== undefined) {
           // console.log(receiverId, message);
-          bot.push(receiverId, message);
+          bot.push(agent_sendTo_receiver, message);
         }
 
         // 訊息儲存到firebase資料庫

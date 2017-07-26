@@ -1,20 +1,14 @@
 $(document).ready(function() {
     var socket = io.connect();
     var users = $('#users');
-    var nicknameForm = $('#setNick');
-    var nicknameError = $('#nickError');
-    var nicknameInput = $('#nickname');
     var messageForm = $('#send-message');
     var messageInput = $('#message');
     var messageContent = $('#chat');
     var clients = $('#clients');
-
-    var newUsers = $('#newUsers');
     var printAgent = $('#printAgent');
     var canvas = $("#canvas");
 
-    var name_list = ['test'];
-    var user_list = [];
+    var name_list = [];
     var person = prompt("Please enter your name");
     var count = 0;
     var t = [];
@@ -43,7 +37,7 @@ $(document).ready(function() {
                 if (data) {
 
                 } else {
-                    nicknameError.html('username is already taken');
+                    alert('username is already taken');
                 }
             });
 
@@ -53,17 +47,21 @@ $(document).ready(function() {
     }
 
     /*  =======  To indentify the right receiver  =====  */
-    function defReceiver() {
-        socket.emit('receiver', receiver, (data) => {});
-        console.log('receiver sent to www');
-    }
+    // function defReceiver() {
+    //     socket.emit('receiver', receiver, (data) => {});
+    //     console.log('receiver sent to www');
+    // }
 
     /*  =======  CODES FROM GITHUB: NICKNAME  ======  */
     messageForm.submit((e) => {
         e.preventDefault();
-        socket.emit('send message', messageInput.val(), (data) => {
+        designated_user_id = $( "#user-rooms option:selected" ).val();
+        socket.emit('send message', {id: designated_user_id , msg: messageInput.val()}, (data) => {
             messageContent.append('<span class="error">' + data + "</span><br/>");
         });
+        // socket.emit('send message', messageInput.val(), (data) => {
+        //     messageContent.append('<span class="error">' + data + "</span><br/>");
+        // });
         messageInput.val('');
     });
 
@@ -75,11 +73,6 @@ $(document).ready(function() {
         users.html(html);
     });
 
-    /*  =========== to assign the right receiverId  =========  */
-
-    socket.on('send message', messageInput.val(), (data) => {
-
-    })
 
     /*  =================================  */
 
@@ -101,14 +94,15 @@ $(document).ready(function() {
             console.log('namefound');
             if (i == person && data.to_id !== undefined) {
                 console.log('yes existed agent msg identified');
+                $("#" + data.to_id + "-content").append("<p><strong>" + data.name + ": </strong>" + data.msg + "<br/></p>");
                 // if ($("#" + data.to_id).is(':visible')) {
-                if($("#" + data.to_id + "-option").is(':selected')){
-                    // console.log('appended agent message');
-                    $("#" + data.to_id + "-content").append("<p><strong>" + data.name + ": </strong>" + data.msg + "<br/></p>");
-                }
-                else {
-                    console.log('no the n is not visible, do it again')
-                }
+                // if($("#" + data.to_id + "-option").is(':selected')){
+                //     // console.log('appended agent message');
+                //     $("#" + data.to_id + "-content").append("<p><strong>" + data.name + ": </strong>" + data.msg + "<br/></p>");
+                // }
+                // else {
+                //     console.log('no the n is not visible, do it again')
+                // }
             } //if agent
             else {
                 $("#" + data.id + "-content").append("<p><strong>" + data.name + ": </strong>" + data.msg + "<br/></p>");
@@ -118,7 +112,7 @@ $(document).ready(function() {
         else {
           if (i == person && data.to_id !== undefined) {
               console.log('yes existed agent msg identified');
-              for (let n = 0; n < t_value + 1; n++) {
+              // for (let n = 0; n < t_value + 1; n++) {
                   if ($("#" + data.to_id).is(':visible')) {
                       console.log('appended agent message');
                       $("#" + data.to_id + "-content").append("<p><strong>" + data.name + ": </strong>" + data.msg + "<br/></p>");
@@ -126,11 +120,11 @@ $(document).ready(function() {
                   else {
                       console.log('no the n is not visible, do it again')
                   }
-              } //for
+              // } //for
           } else {
             // console.log('new msg append to canvas');
             name_list.push(data.id);
-            $('#user-rooms').append('<option id="' + data.id + '-option">' + data.name + '</option>');
+            $('#user-rooms').append('<option value="' + data.id + '">' + data.name + '</option>');
 
             canvas.append(
                 "<div id=\"" + data.id + "\" class=\"tabcontent\">" +
@@ -196,10 +190,10 @@ $(document).ready(function() {
                             receiver = gotIt;
                             console.log('Tell me whats receiver');
                             console.log(receiver);
-                            defReceiver();
+                            // defReceiver();
 
 
-                            $("#" + gotIt).append("<p><strong>" + data.name + ": </strong>" + data.msg + "<br/></p>");
+                            // $("#" + gotIt).append("<p><strong>" + data.name + ": </strong>" + data.msg + "<br/></p>");
                             console.log('agent reply appended to according canvas');
 
 
