@@ -23,6 +23,7 @@ firebase.initializeApp(config);
 const usersRef = firebase.database().ref().child('chats/users');
 const agentsRef = firebase.database().ref().child('chats/agents');
 
+
 const auth = firebase.auth();
 // console.log(auth.app);
 
@@ -282,8 +283,6 @@ bot.on('message', event => {
                 messageTime: date.toString()
             });
 
-
-
         } else if (event.message.type === 'text' && message_lineTochat.trim() === '服務時段') {
             let service_time = '「0700~1100」 \n 「1100~1500」 \n 「1500~1900」 \n 「1900~2300」 \n 兩個時段必須是「連續的」 \n 「0700~1100」及「1100~1500」 \n 「1100~1500」及「1500~1900」 \n 「1500~1900」及「1900~2300」。';
             io.sockets.emit('new message', {
@@ -293,7 +292,7 @@ bot.on('message', event => {
             });
             event.reply({
                 type: 'text',
-                text: 'BOT：\n' + service_time
+                text: service_time
             });
             usersRef.push({
                 message: '已發送服務時段' + "0700~1100」" + "「1100~1500」" + "「1500~1900」" + "「1900~2300」",
@@ -310,7 +309,7 @@ bot.on('message', event => {
             });
             event.reply({
                 type: 'text',
-                text: 'BOT：' + four
+                text: four
             });
         } else if (event.message.type === 'text' && message_lineTochat.trim() === '8小時方案') {
             let eight = '8小時方案 \n 21,888 元 \n 8小時方案/每天 \n $21,888每月';
@@ -321,7 +320,7 @@ bot.on('message', event => {
             });
             event.reply({
                 type: 'text',
-                text: 'BOT：' + eight
+                text: eight
             });
         } else if (event.message.type === 'text' && message_lineTochat.trim() === '16小時方案') {
             let sixteen = '16小時方案 \n 39,888 元 \n 16小時方案/每天 \n $39,888每月';
@@ -332,7 +331,7 @@ bot.on('message', event => {
             });
             event.reply({
                 type: 'text',
-                text: 'BOT：' + sixteen
+                text: sixteen
             });
         } else {
             io.sockets.emit('new message', {
@@ -471,6 +470,7 @@ io.sockets.on('connection', (socket) => {
             agent: socket.nickname,
             messageTime: date.toString()
         });
+
     }); //sent message
 
     socket.on('disconnect', (data) => {
