@@ -79,7 +79,7 @@ bot.on('message', event => {
     let receiver_name;
 
     event.source.profile().then(function(profile) {
-      // console.log(profile);
+        // console.log(profile);
         // event.reply('Hello ' + profile.displayName);
         receiver_name = profile.displayName;
 
@@ -219,7 +219,130 @@ bot.on('message', event => {
           });
 
         }
-        else if (event.message.type === 'text' && message_lineTochat.trim() === 'Hi') {
+        else if (event.message.type === 'text' && message_lineTochat.trim() === '問券調查') {
+          setTimeout(() => {
+            msgObj.message = '詢問客戶資料（性別）';
+            emitIO_and_pushDB(msgObj);
+          }, 1000)
+
+          event.reply({
+            "type": "template",
+            "altText": "問券調查part1",
+            "template": {
+              "type": "buttons",
+              "title": "問券調查：性別",
+              "text": "請選擇您的性別",
+              "actions": [{
+                "type": "message",
+                "label": "性別：男",
+                "text": "性別：男"
+              },{
+                "type": "message",
+                "label": "性別：女",
+                "text": "性別：女"
+              }]
+            }
+          });
+          msgObj.message = message_lineTochat.trim();
+          emitIO_and_pushDB(msgObj);
+
+        }
+        else if (event.message.type === 'text' && (message_lineTochat.trim() === '性別：女' || message_lineTochat.trim() === '性別：男')) {
+          setTimeout(() => {
+            msgObj.message = '詢問客戶資料（居住地）';
+            emitIO_and_pushDB(msgObj);
+          })
+
+          event.reply({
+            "type": "template",
+            "altText": "問券調查",
+            "template": {
+              "type": "buttons",
+              "title": "問券調查：性別",
+              "text": "請選擇您的性別",
+              "actions": [{
+                "type": "message",
+                "label": "地區：北部",
+                "text": "地區：北部"
+              },{
+                "type": "message",
+                "label": "地區：中部",
+                "text": "地區：中部"
+              },{
+                "type": "message",
+                "label": "地區：南部",
+                "text": "地區：南部"
+              },{
+                "type": "message",
+                "label": "地區：東部",
+                "text": "地區：東部"
+              }]
+            }
+          });
+          msgObj.message = message_lineTochat.trim();
+          emitIO_and_pushDB(msgObj);
+
+        }
+        else if (event.message.type === 'text' && (message_lineTochat.trim() === '地區：北部' || message_lineTochat.trim() === '地區：中部' || message_lineTochat.trim() === '地區：南部' || message_lineTochat.trim() === '地區：東部')) {
+          setTimeout(() => {
+            msgObj.message = '詢問客戶資料（年齡層）';
+            emitIO_and_pushDB(msgObj);
+          })
+
+          event.reply({
+            "type": "template",
+            "altText": "問券調查part2",
+            "template": {
+              "type": "carousel",
+              "columns": [
+                  {
+                    "text": "您的年齡層。請左右滑動並選擇您的年齡層",
+                    "actions": [
+                        {
+                            "type": "message",
+                            "label": "20以下",
+                            "text": "20以下"
+                        },
+                        {
+                            "type": "message",
+                            "label": "21-30",
+                            "text": "21-30"
+                        },
+                        {
+                            "type": "message",
+                            "label": "31-40",
+                            "text": "31-40"
+                        }
+                    ]
+                  },
+                  {
+                    "text": "您的年齡層。請左右滑動並選擇您的年齡層",
+                    "actions": [
+                        {
+                          "type": "message",
+                          "label": "41-50",
+                          "text": "41-50"
+                        },
+                        {
+                          "type": "message",
+                          "label": "51-60",
+                          "text": "51-60"
+                        },
+                        {
+                          "type": "message",
+                          "label": "65以上",
+                          "text": "65以上"
+                        }
+                    ]
+                  }
+              ]
+            }
+          });
+          msgObj.message = message_lineTochat.trim();
+          emitIO_and_pushDB(msgObj);
+
+        }
+        else if (event.message.type === 'text' && message_lineTochat.trim() === '你好') {
           msgObj.message = '已接收選項'+"購買方案, "+"服務時段";
           emitIO_and_pushDB(msgObj);
 
