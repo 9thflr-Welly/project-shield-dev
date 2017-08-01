@@ -248,8 +248,11 @@ bot.on('message', event => {
         else if (event.message.type === 'text' && (message_lineTochat.trim() === '20以下' || message_lineTochat.trim() === '21-30' || message_lineTochat.trim() === '31-40' || message_lineTochat.trim() === '41-50' || message_lineTochat.trim() === '51-64' || message_lineTochat.trim() === '65以上')) {
           msgObj.message = message_lineTochat.trim();
           emitIO_and_pushDB(msgObj);
-          msgObj.message = '感謝您填寫問卷！';
-          emitIO_and_pushDB(msgObj);
+          setTimeout(() => {
+            msgObj.message = '感謝您填寫問卷！';
+            emitIO_and_pushDB(msgObj);
+          }, 1000);
+
 
           event.reply({
             type: 'text',
