@@ -247,6 +247,12 @@ bot.on('message', event => {
           emitIO_and_pushDB(msgObj);
 
         }
+        else if (event.message.type === 'text' && (message_lineTochat.trim() === '20以下' || message_lineTochat.trim() === '21-30' || message_lineTochat.trim() === '31-40' || message_lineTochat.trim() === '41-50' || message_lineTochat.trim() === '51-64' || message_lineTochat.trim() === '65以上')) {
+          event.reply({
+            type: 'text',
+            text: '感謝您填寫問卷！'
+          });
+        }
         else if (event.message.type === 'text' && (message_lineTochat.trim() === '性別：女' || message_lineTochat.trim() === '性別：男')) {
           setTimeout(() => {
             msgObj.message = '詢問客戶資料（居住地）';
@@ -325,8 +331,8 @@ bot.on('message', event => {
                         },
                         {
                           "type": "message",
-                          "label": "51-60",
-                          "text": "51-60"
+                          "label": "51-64",
+                          "text": "51-64"
                         },
                         {
                           "type": "message",
