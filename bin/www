@@ -243,21 +243,28 @@ bot.on('message', event => {
               }]
             }
           });
-          msgObj.message = message_lineTochat.trim();
-          emitIO_and_pushDB(msgObj);
 
         }
         else if (event.message.type === 'text' && (message_lineTochat.trim() === '20以下' || message_lineTochat.trim() === '21-30' || message_lineTochat.trim() === '31-40' || message_lineTochat.trim() === '41-50' || message_lineTochat.trim() === '51-64' || message_lineTochat.trim() === '65以上')) {
+          msgObj.message = message_lineTochat.trim();
+          emitIO_and_pushDB(msgObj);
+          msgObj.message = '感謝您填寫問卷！';
+          emitIO_and_pushDB(msgObj);
+
           event.reply({
             type: 'text',
             text: '感謝您填寫問卷！'
           });
+
         }
         else if (event.message.type === 'text' && (message_lineTochat.trim() === '性別：女' || message_lineTochat.trim() === '性別：男')) {
+          msgObj.message = message_lineTochat.trim();
+          emitIO_and_pushDB(msgObj);
+
           setTimeout(() => {
             msgObj.message = '詢問客戶資料（居住地）';
             emitIO_and_pushDB(msgObj);
-          })
+          }, 1000)
 
           event.reply({
             "type": "template",
@@ -285,15 +292,17 @@ bot.on('message', event => {
               }]
             }
           });
-          msgObj.message = message_lineTochat.trim();
-          emitIO_and_pushDB(msgObj);
+
 
         }
         else if (event.message.type === 'text' && (message_lineTochat.trim() === '地區：北部' || message_lineTochat.trim() === '地區：中部' || message_lineTochat.trim() === '地區：南部' || message_lineTochat.trim() === '地區：東部')) {
+          msgObj.message = message_lineTochat.trim();
+          emitIO_and_pushDB(msgObj);
+
           setTimeout(() => {
             msgObj.message = '詢問客戶資料（年齡層）';
             emitIO_and_pushDB(msgObj);
-          })
+          }, 1000)
 
           event.reply({
             "type": "template",
@@ -344,8 +353,6 @@ bot.on('message', event => {
               ]
             }
           });
-          msgObj.message = message_lineTochat.trim();
-          emitIO_and_pushDB(msgObj);
 
         }
         else if (event.message.type === 'text' && message_lineTochat.trim() === '你好') {
