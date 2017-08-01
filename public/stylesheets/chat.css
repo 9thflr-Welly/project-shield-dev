@@ -63,6 +63,6 @@ p {
 .tablinks{
   padding-left: 10px
 }
-#clients {
+#clients, #idle-roomes {
   list-style: none;
 }
