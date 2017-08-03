@@ -23,9 +23,6 @@ firebase.initializeApp(config);
 const usersRef = firebase.database().ref().child('chats/users2');
 const agentsRef = firebase.database().ref().child('chats/agents2');
 
-const auth = firebase.auth();
-// console.log(auth.app);
-
 /**
  * Get port from environment and store in Express.
  */
