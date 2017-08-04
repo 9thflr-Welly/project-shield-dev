@@ -10,7 +10,7 @@ $(document).ready(function() {
   var searchBox = $('.searchBox');
   var name_list = [];
   var userProfiles = [];
-  var person = prompt("Please enter your name");
+  var person = '';
   var historyMsg_users = [];
   var historyMsg_agents = [];
   var user_list = []; // user list for checking on idle chat rooms
@@ -101,7 +101,7 @@ $(document).ready(function() {
   $(document).on('click', '.edit-button', changeProfile);
   $(document).on('click','#userInfo-submit',submitProfile)
 
-  if (window.location.pathname === '/chatAll') {
+  if (window.location.pathname === '/chat') {
     console.log("Start loading history message...");
     setTimeout(function() {
       socket.emit('get json from back');
@@ -111,20 +111,18 @@ $(document).ready(function() {
       socket.emit("get tags from chat")
     }, 100);
   }
-
   function loadMsg() {
     console.log("Start loading msg...");
     socket.emit('get json from back');    //emit a request to www, request for history msg
   } //end loadMsg func
-
   socket.on('push json to front', (data) => {   //www emit data of history msg
     console.log("push json to front");
+    console.log(data);
     for( i in data ) pushMsg(data[i]);    //one user do function one time
     sortUsers("recentTime", sortRecentBool, function(a,b){ return a<b; } );
     // closeIdleRoom();
     $('.tablinks_head').text('Loading complete'); //origin text is "network loading"
   });
-
   function pushMsg(data){     //one user do function one time; data structure see file's end
     let historyMsg = data.Messages;
     let profile = data.Profile;
@@ -221,13 +219,12 @@ $(document).ready(function() {
       + lastMsgStr
       + "</button></b>"
     );    //new a tablinks
-
   }
-
   function agentName() {    //enter agent name
     while( person=="" ) {
       person = prompt("Please enter your name");
     }
+    console.log(person);
     if (person != null) {
       socket.emit('new user', person, (data) => {
         if(data){
@@ -269,7 +266,6 @@ $(document).ready(function() {
       );
     }
   });
-
   messageForm.submit((e) => {
     e.preventDefault();
     selectAll();
@@ -302,7 +298,6 @@ $(document).ready(function() {
       select = 'false';
     }
   }
-
   socket.on('usernames', (data) => {    //maybe no use now
     var html = '';
     for (i = 0; i < data.length; i++) {
@@ -310,12 +305,8 @@ $(document).ready(function() {
     }
     users.html(html);
   });
-
-
   /*  =================================  */
-
   socket.on('new message2', (data) => {   //if www push "new message2"
-
     console.log("Message get! identity = " + data.owner + ", name = " + data.name);
     //owner = "user", "agent" ; name = "Colman", "Ted", others...
     displayMessage( data ); //update canvas
@@ -329,7 +320,6 @@ $(document).ready(function() {
 
     // messageContent.append('<b>' + data.name + ': </b>' + data.msg + "<br/>");
   });
-
   function displayMessage( data ) {     //update canvas
 
     if (name_list.indexOf(data.id) !== -1) {    //if its chated user
@@ -367,7 +357,6 @@ $(document).ready(function() {
       //new a option in select bar
     }
   }//function
-
   function displayClient( data ) {    //update tablinks
     let font_weight = data.owner=="user" ? "bold" : "normal";   //if msg is by user, mark it unread
 
@@ -387,7 +376,6 @@ $(document).ready(function() {
 
     $(".tablinks").eq(0).before($(".tablinks[rel='"+data.id+"']"));
   } //close client function
-
   //extend jquery, let searching case insensitive
   $.extend($.expr[':'], {
     'containsi': function(elem, i, match, array) {
@@ -395,7 +383,6 @@ $(document).ready(function() {
       .indexOf((match[3] || "").toLowerCase()) >= 0;
     }
   });
-
   searchBox.change(function () {    //not clean code ><,  just some search function
     var searchStr = searchBox.val();
 
@@ -406,10 +393,8 @@ $(document).ready(function() {
       $('.tablinks').each( function() {
         //find his content parent
         let id = $(this).attr('rel');
-
         //hide no search_str msg
         $("div #"+id+"-content"+" .message").css("display", "none");
-
         //display searched msg & push #link when onclick
         $("div #"+id+"-content"+" .message:containsi("+searchStr+")")
           .css("display", "").on( "click", when_click_msg );
@@ -420,10 +405,9 @@ $(document).ready(function() {
           $(this).attr("id", "ref");    //msg immediately add link
           searchBox.val("");    //then cancel searching mode,
           displayAll();         //display all msg
-          window.location.replace("/chatAll#ref"); //then jump to the #link added
+          window.location.replace("/chat#ref"); //then jump to the #link added
           $(this).attr("id", "");   //last remove link
         };
-
         //if this customer already no msg...
         let color = "";
         $("div #"+id+"-content"+" .message").each(function() {
@@ -445,7 +429,6 @@ $(document).ready(function() {
       $(this).css("color","");
     });
   }
-
   $('.datepicker').datepicker({
     dateFormat: 'yy-mm-dd'
   });
@@ -480,14 +463,12 @@ $(document).ready(function() {
     else if( val==3) { a=30; b=60; }
     else if( val==4) { a=60; b=9999999; }
     else alert(val);
-
     $('.tablinks').each(function() {
       let val = $(this).attr('data-'+filterWay);
       if( val>a && val<b ) $(this).show();
       else $(this).hide();
     });
   });
-
   function sortUsers(ref, up_or_down, operate) {
     let arr = $('#clients b');
     for( let i=0; i<arr.length-1; i++ ) {
@@ -502,7 +483,6 @@ $(document).ready(function() {
     $('#clients').append(arr);
 
   } //end sort func
-
   function sortAvgChatTime() {
     sortUsers("avgTime", sortAvgBool, function(a,b){ return a<b; } );
     var tmp = !sortAvgBool;
@@ -527,8 +507,7 @@ $(document).ready(function() {
     sortAvgBool = sortTotalBool = sortFirstBool = sortRecentBool = true;
     sortRecentBool = tmp;
   }
-
-
+  // buffer for showProfile
   var buffer;
   function showProfile() {
     var targetId = $('#selected').attr('rel'); //get useridd of current selected user
@@ -550,7 +529,6 @@ $(document).ready(function() {
       let data = buffer[ $(this).attr('id') ];
       let type = $(this).attr('type');
       let inner = $(this).find('#td-inner');
-
       if( data!=undefined && data!=null && data!="" ) {
         console.log("defined!");
         if( type=='text' ) inner.text(data);
@@ -568,29 +546,7 @@ $(document).ready(function() {
         else if( type=='time' ) inner.val("");
       }
     });
-
   }
-
-  // function showProfile() {
-  //   var target = $('#selected').attr('rel'); //get useridd of current selected user
-  //   console.log("show profile");
-  //   socket.emit('get profile',{id: target}) ;
-  // }
-  // socket.on('show profile',(data) => {
-  //   var Th = $('.userInfo-th');
-  //   var Td = $('.userInfo-td');
-  //   var but = $('.edit-button');
-  //   for(let i in but){but.eq(i).hide();}
-  //   for(let i in Th ){Th.eq(i).text(Th.eq(i).attr('id')+' : ') ;}
-  //   let key ;
-  //   buffer = data ;  //storage profile in buffer zone
-  //   Td.each( function() {
-  //     key = $(this).attr('id');
-  //     if( data.hasOwnProperty(key) ) $(this).text(data[key]); //show each profile data
-  //     else $(this).text("");
-  //     if(key == 'userId'||key == 'totalChat'){$(this).click(false);}  //disable editing of userid and totalchat
-  //   });
-  // });
   function editProfile() {
     if(  $(this).parent().children('.edit-button').is(':visible') ) return;
     else $(this).parent().children('.edit-button').show(); //show yes/no button
@@ -615,7 +571,6 @@ $(document).ready(function() {
     inner = $(this).find('#td-inner');
     inner.select();
   }
-
   function changeProfile(edit) {
     let name = $(this).attr('name');
     let td = $(this).parent().children('.userInfo-td');
@@ -636,9 +591,6 @@ $(document).ready(function() {
       else if( type=="time" ) td.find('#td-inner').val(origin);
       else if( type.indexOf('select')!=-1 ) td.find('#td-inner').val(origin);
     }
-
-    // td.on('click',editProfile); //restore click of userInfo-td
-    // console.log("open click"); //on click, off click has some bug QQ
   }
   function submitProfile() {
     let r = confirm("Are you sure to change profile?");
@@ -647,15 +599,12 @@ $(document).ready(function() {
       socket.emit('update profile',buffer);
     }
   }
-
-
   function toAgentStr(msg, name, time) {
     return "<p class='message' rel='" + time + "' style='text-align: right;'>" + msg + "<strong> : " + name + toTimeStr(time) + "</strong><br/></p>";
   }
   function toUserStr(msg, name, time) {
     return "<p class='message' rel='" + time + "'><strong>" + name + toTimeStr(time) + ": </strong>" + msg + "<br/></p>";
   }
-
   function toDateStr( input ) {
     var str = " ";
     let date = new Date(input);
@@ -669,27 +618,10 @@ $(document).ready(function() {
     let date = new Date(input);
     return " (" + addZero(date.getHours()) + ':' + addZero(date.getMinutes()) + ") ";
   }
-
   function addZero(val){
     return val<10 ? '0'+val : val;
   }
-
   function remove_href_msg(msg) {   //let last msg display correct, not well tested, may many bug
-    // if( msg.indexOf('target="_blank"')!=-1 && msg.indexOf('href')!=-1 ) {
-    //   let aPos = msg.indexOf('target="_blank"');
-    //   let bPos = msg.indexOf('href');
-    //   if( bPos>aPos ) { //image, video, audio, location
-    //     if( msg.indexOf('image')!=-1 ) return "send a image";
-    //     else if( msg.indexOf('audio')!=-1 ) return "send an audio";
-    //     else if( msg.indexOf('video')!=-1 ) return "send a video";
-    //     else if( msg.indexOf('https://www.google.com.tw/maps/') != -1) return "send a location";
-    //   }
-    //   else {  //url
-    //     let cPos = msg.lastIndexOf('target');
-    //     return msg.substring( bPos+6, cPos-2 ) ;
-    //   }
-    // }
-    // else return msg;
     return msg;
   }
 
