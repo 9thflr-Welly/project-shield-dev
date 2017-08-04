@@ -81,6 +81,10 @@
       </div>
 
       <div class="contentPanel">
+        <button type="button" class="sortlinks" id="sortAvg">sort by average chat times</button>
+        <button type="button" class="sortlinks" id="sortTotal">sort by total chat times</button>
+        <button type="button" class="sortlinks" id="sortFirst">sort by first chat time</button>
+        <button type="button" class="sortlinks" id="sortRecent">sort by recent chat time</button>
         <input type="text" class="datepicker" id="startdate" placeholder="start date" readonly></input>
         <input type="text" class="datepicker" id="enddate" placeholder="end date" readonly></input>
         <button type="button" class="filterDate" id="firsttime">filter first chat time</button>
@@ -94,6 +98,8 @@
           <option value="3">30~60 min</option>
           <option value="4">60up min</option>
         </select>
+
+        <input type="text" class="filterTimeInput" id="timeVal" placeholder="(min)"></input>
         <button type="button" class="filterTime" id="avgtime">filter average time</button>
         <button type="button" class="filterTime" id="totaltime">filter total time</button>
         <br>
@@ -102,10 +108,6 @@
         <button type="button" class="filterClean" style="margin-left: 10px;">clean</button>
 
         <section id="canvas">
-          <!-- <div id="no_use_id" class="tabcontent" style = "display: block;">
-            <div class="messagePanel">
-            </div>
-          </div> -->
         </section>
 
         <!-- Modal -->
@@ -118,42 +120,42 @@
               </div>
               <div class="modal-body">
                 <table class="info_input_table">
-                  <!-- <tr>
+                  <tr>
                     <th class="userInfo-th" id="nickname"></th>
                     <td class="userInfo-td" id="nickname"></td>
                     <td class="edit-button yes " name="yes">yes</td>
                     <td class="edit-button no " name="no">no</td>
-                  </tr>
-                  <tr>
-                    <th class="userInfo-th" id="userId"></th>
-                    <td class="userInfo-td" id="userId"></td>
-                    <td class="edit-button yes " name="yes">yes</td>
-                    <td class="edit-button no " name="no">no</td>
-                  </tr>
-                  <tr>
-                    <th class="userInfo-th" id="telephone"></th>
-                    <td class="userInfo-td" id="telephone"></td>
-                    <td class="edit-button yes " name="yes">yes</td>
-                    <td class="edit-button no " name="no">no</td>
-                  </tr>
-                  <tr>
-                    <th class="userInfo-th" id="年齡"></th>
-                    <td class="userInfo-td" id="年齡"></td>
-                    <td class="edit-button yes " name="yes">yes</td>
-                    <td class="edit-button no " name="no">no</td>
-                  </tr>
-                  <tr>
-                    <th class="userInfo-th" id="性別"></th>
-                    <td class="userInfo-td" id="性別"></td>
-                    <td class="edit-button yes " name="yes">yes</td>
-                    <td class="edit-button no " name="no">no</td>
-                  </tr>
-                  <tr>
-                    <th class="userInfo-th" id="地區"></th>
-                    <td class="userInfo-td" id="地區"></td>
-                    <td class="edit-button yes " name="yes">yes</td>
-                    <td class="edit-button no " name="no">no</td>
-                  </tr> -->
+                    </tr>
+                    <tr>
+                      <th class="userInfo-th" id="userId"></th>
+                      <td class="userInfo-td" id="userId"></td>
+                      <td class="edit-button yes " name="yes">yes</td>
+                      <td class="edit-button no " name="no">no</td>
+                    </tr>
+                    <tr>
+                      <th class="userInfo-th" id="telephone"></th>
+                      <td class="userInfo-td" id="telephone"></td>
+                      <td class="edit-button yes " name="yes">yes</td>
+                      <td class="edit-button no " name="no">no</td>
+                    </tr>
+                    <tr>
+                      <th class="userInfo-th" id="年齡"></th>
+                      <td class="userInfo-td" id="年齡"></td>
+                      <td class="edit-button yes " name="yes">yes</td>
+                      <td class="edit-button no " name="no">no</td>
+                    </tr>
+                    <tr>
+                      <th class="userInfo-th" id="性別"></th>
+                      <td class="userInfo-td" id="性別"></td>
+                      <td class="edit-button yes " name="yes">yes</td>
+                      <td class="edit-button no " name="no">no</td>
+                    </tr>
+                    <tr>
+                      <th class="userInfo-th" id="地區"></th>
+                      <td class="userInfo-td" id="地區"></td>
+                      <td class="edit-button yes " name="yes">yes</td>
+                      <td class="edit-button no " name="no">no</td>
+                    </tr>
                  </table>
               </div>
               <div class="modal-footer">

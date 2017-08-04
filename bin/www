@@ -303,6 +303,10 @@ bot.on('message', event => {
                   "type": "message",
                   "label": "服務時段",
                   "text": "服務時段"
+              },{
+                  "type": "message",
+                  "label": "問券調查",
+                  "text": "問券調查"
               }]
             }
           });
@@ -351,6 +355,8 @@ bot.on('message', event => {
         else if (event.message.type === 'text' && message_lineTochat.trim() === '問券調查') {
           setTimeout(() => {
             msgObj.message = '詢問客戶資料（性別）';
+            msgObj.owner = 'agent';//test
+            msgObj.name = 'autoreply' ;//test
             emitIO_and_pushDB(msgObj);
           }, 1000)
 
@@ -383,6 +389,8 @@ bot.on('message', event => {
 
           setTimeout(() => {
             msgObj.message = '詢問客戶資料（居住地）';
+            msgObj.owner = 'agent';//test
+            msgObj.name = 'autoreply' ;//test
             emitIO_and_pushDB(msgObj);
           }, 1000)
 
@@ -424,6 +432,8 @@ bot.on('message', event => {
 
           setTimeout(() => {
             msgObj.message = '詢問客戶資料（年齡層）';
+            msgObj.owner = 'agent';//test
+            msgObj.name = 'autoreply' ;//test
             emitIO_and_pushDB(msgObj);
           }, 1000)
 
@@ -487,6 +497,8 @@ bot.on('message', event => {
 
           setTimeout(() => {
             msgObj.message = '感謝您填寫問卷！';
+            msgObj.owner = 'agent';//test
+            msgObj.name = 'autoreply' ;//test
             emitIO_and_pushDB(msgObj);
           }, 1000);
 
@@ -499,8 +511,62 @@ bot.on('message', event => {
         }
         else {
           msgObj.message = message_lineTochat;
+          apiai(msgObj);
           emitIO_and_pushDB(msgObj);
         }
+
+        function apiai(obj) {
+          var apiai = require('apiai');
+          var app = apiai('5e29c1d48227420789ac915597c0f025');
+          var request = app.textRequest(obj.message, {
+              sessionId: '9ceb250a-dbcc-463e-98dd-e2a5e56649b0'
+          });
+          request.on('response', function(response) {
+            let action = response.result.action ;
+            let speech = response.result.fulfillment.speech ;
+            if(action != 'input.unknown'){
+              console.log(speech);
+              obj.owner = 'agent';
+              obj.name = 'api.ai';
+              obj.message = response.result.fulfillment.speech ;
+              emitIO_and_pushDB(obj) ;
+              console.log('api.ai:')
+              console.log(obj);
+              bot.push(obj.id,obj.message);
+              if(action == 'test' ){
+                event.reply({
+                  "type": "template",
+                  "altText": "this is a buttons template",
+                  "template": {
+                    "type": "buttons",
+                    "title": "問題選項",
+                    "text": "請選擇一個詢問主題",
+                    "actions": [{
+                        "type": "message",
+                        "label": "購買方案",
+                        "text": "購買方案"
+                    },{
+                        "type": "message",
+                        "label": "服務時段",
+                        "text": "服務時段"
+                    },{
+                        "type": "message",
+                        "label": "問券調查",
+                        "text": "問券調查"
+                    }]
+                  }
+                });
+              }
+            }else{console.log(action);}
+
+          });
+          request.on('error', function(error) {
+              console.log(error);
+          });
+          request.end();
+
+        }
+//test*/
 
         function updateProfile(event) {
           let survey = {id:'',para:'',value:''};
@@ -587,7 +653,7 @@ io.sockets.on('connection', (socket) => {
     });
     // 從SHIELD chat傳送訊息
     socket.on('send message', (data, callback) => {
-        console.log(data);
+        // console.log(data);
         var msg = data.msg.trim();
         agent_sendTo_receiver = data.id.trim();
         console.log(agent_sendTo_receiver);
@@ -757,7 +823,7 @@ io.sockets.on('connection', (socket) => {
         var msgObj = {
           owner: "agent",
           // name: socket.nickname,
-          name: "agent",
+          name: socket.nickname,
           time: nowTime,
         };
         function emitIO_and_pushDB(obj) {
@@ -894,11 +960,21 @@ io.sockets.on('connection', (socket) => {
       for( let i in chatData ) {
         if( chatData[i].Profile.userId == data.userId ) {
           let updateObj = {};
-          for( let prop in data ) {
-            updateObj[prop] = data[prop];
-          }
-          console.log(updateObj);
-          newDBRef.child(i).child("Profile").update(updateObj);
+          newDBRef.child(i).child("Profile").update({
+          //  "address": data.address,      //can edit to what u want to update
+          //  "age": data.age,
+            "nickname": data.nickname,
+            "telephone": data.telephone,
+            "性別": data.性別,
+            "地區": data.地區,
+            "年齡": data.年齡
+          });
+          break;
+          // for( let prop in data ) {
+          //   updateObj[prop] = data[prop];
+          // }
+          // console.log(updateObj);
+          // newDBRef.child(i).child("Profile").update(updateObj);
         }
       }
     });

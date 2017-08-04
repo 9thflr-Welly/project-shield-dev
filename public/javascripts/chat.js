@@ -67,8 +67,11 @@ $(document).ready(function() {
 
     for(let i=0;i<total_users;i++) {
       user_list.push(canvas_all_children[i].getAttribute('id'));
+      console.log(user_list);
       convert_list = Array.prototype.slice.call( canvas_all_children[i].getElementsByClassName("messagePanel")[0].getElementsByClassName("message") );
+      // console.log(convert_list);
       canvas_last_child_time_list.push(convert_list.slice(-1)[0].getAttribute('rel'))
+      console.log(canvas_last_child_time_list);
       if(over_fifteen_min - canvas_last_child_time_list[i] >= 60000) {
         // 更改display client的東西
         console.log('id = '+user_list[i]+' passed idle time');
@@ -221,23 +224,29 @@ $(document).ready(function() {
     );    //new a tablinks
   }
   function agentName() {    //enter agent name
-    while( person=="" ) {
-      person = prompt("Please enter your name");
-    }
-    console.log(person);
-    if (person != null) {
-      socket.emit('new user', person, (data) => {
-        if(data){
+    var userId = auth.currentUser.uid;
 
-        } else {
-          alert('username is already taken');
-        }
-      });
-      printAgent.append("Welcome <b>" + person + "</b>! You're now on board.");
-    }
-    else {
-      window.location.replace("/");
-    } //'name already taken'功能未做、push agent name 未做
+    database.ref('users/' + userId).on('value', snap => {
+      let profInfo = snap.val();
+      let profId = Object.keys(profInfo);
+      var person = snap.child(profId[0]).val().username;  //從DB獲取agent的nickname
+
+      if (person != '' && person != null) {
+        socket.emit('new user', person, (data) => {
+          if(data){}   //check whether username is already taken
+          else {
+            alert('username is already taken');
+            person = prompt("Please enter your name");  //update new username
+            database.ref('users/' + userId + '/' + profId).update({username : person});
+          }
+        });
+        printAgent.html("Welcome <b>" + person + "</b>! You're now on board.");
+      }
+      else{
+        person = prompt("Please enter your name");  //if username not exist,update username
+        database.ref('users/' + userId + '/' + profId).update({username : person});
+      }
+    });
   }
   socket.on("push tags to chat", data=> {
     console.log("data:");
@@ -508,97 +517,77 @@ $(document).ready(function() {
     sortRecentBool = tmp;
   }
   // buffer for showProfile
-  var buffer;
-  function showProfile() {
-    var targetId = $('#selected').attr('rel'); //get useridd of current selected user
-    if( targetId==undefined ) return;
-    console.log("show profile of userId " + targetId);
-
-    buffer = null;
-    for( let i in userProfiles ) {
-      if( userProfiles[i].userId == targetId ) {
-        buffer = userProfiles[i];
-        break;
-      }
+  /*======================= warren ====================================*/
+    var buffer;
+    function showProfile() {
+      var target = $('#selected').attr('rel'); //get useridd of current selected user
+      if(target === undefined){
+        $('#userInfo-submit').hide();
+        $('.modal-title').eq(0).html('No user selected!');
+      }else{$('#userInfo-submit').show();}
+      socket.emit('get profile',{id: target}) ;
     }
-    if( buffer==null ) console.log("Error 540");
-    console.log( "buffer: ");
-    console.log(buffer);
 
-    $('.info_input_table .userInfo-td').each( function() {
-      let data = buffer[ $(this).attr('id') ];
-      let type = $(this).attr('type');
-      let inner = $(this).find('#td-inner');
-      if( data!=undefined && data!=null && data!="" ) {
-        console.log("defined!");
-        if( type=='text' ) inner.text(data);
-        else if( type.indexOf('select')!=-1 ) inner.val(data);
-        else if( type=='time' ) {
-          let d = new Date(data);
-          console.log("date = "+d.toString());
-          inner.val(d.getFullYear()+'-'+addZero(d.getMonth()+1)+'-'+addZero(d.getDate())+'T'+addZero(d.getHours())+':'+addZero(d.getMinutes()));
+
+    socket.on('show profile',(data) => {
+      var Th = $('.userInfo-th') ;
+      var Td = $('.userInfo-td') ;
+      var but = $('.edit-button');
+      for(let i in but){but.eq(i).hide();} //hide all yes/no buttons
+      for(let i in Th ){Th.eq(i).text(Th.eq(i).attr('id')+' : ') ;}
+      $('.modal-title').html(data.nickname);
+      buffer = data ;  //storage profile in buffer zone
+      for(let j in Td){
+        for(let key in data ){
+          if(key == Td.eq(j).attr('id')){
+            Td.eq(j).text(data[key]); //show each profile data
+            if(key == 'userId'){Td.eq(j).click(false);}  //disable editing of userid
+          }
         }
       }
-      else {    ///if undefined, load default string, not prev string
-        console.log("undefined");
-        if( type=='text' ) inner.text("尚未輸入");
-        else if( type.indexOf('select')!=-1 ) inner.val("");
-        else if( type=='time' ) inner.val("");
-      }
     });
-  }
-  function editProfile() {
-    if(  $(this).parent().children('.edit-button').is(':visible') ) return;
-    else $(this).parent().children('.edit-button').show(); //show yes/no button
-    ///on click, off click has some strange bug, so change way ><
+    function editProfile() {
+      let name = $(this).attr('id');
+      let origin = $(this).text() ;
+      $(this).html('<input type="text" class="textarea" placeholder="'+name+'" value = "'+origin+'">');
+      $(this).parent().children('.edit-button').show(); //show yes/no button
+      $(this).children().focus(function () {
+        $(this).click(false);  //disable click when editing
+      })
+    //  for(let i in buffer){alert(i+':'+buffer[i]);}
+    }
+    function changeProfile() {
+      let id = $(this).parent().children('.userInfo-td').attr('id');
+      let name = $(this).attr('name');
+      let content =   $(this).parent().children('.userInfo-td').children().val();  //get agent's input
+      let origin = '';
+      for(let i in buffer){
+          if(i == id ){
+            origin = buffer[i]; //storage original profile data
+          }
+      }
+      $(this).parent().children('.userInfo-td').on('click',editProfile); //restore click of userInfo-td
+      $(this).parent().children('.edit-button').hide();  //hide yes/no button
 
-    let type = $(this).attr('type');
-    let set = $(this).attr('set');
-    let text = $(this).find('#td-inner').text();
-    let inner = $(this).find('#td-inner');
+      if(name == 'yes'){  //confirm edit, change data in buffer instead of DB
+        for(let i in buffer){
+          if(i == id ){
+            buffer[i] = content ;
+            $(this).parent().children('.userInfo-td').html(buffer[i]);
+            break;
+          }
+        }
+      }else{  //deny edit, restore data before editing
+        $(this).parent().children('.userInfo-td').html(origin);
+      }
+    }
+    function submitProfile() {
+      let r = confirm("Are you sure to change profile?");
+      if(r){
+        socket.emit('update profile',buffer);
+      }else{}
+    }
 
-    if( type=='text' ) {
-      if( set=='single' ) $(this).empty().html('<input type="text" class="textarea" id="td-inner" value="' + text +'" />');
-      else if( set=='multi' ) $(this).empty().html('<textarea type="text" class="textarea" id="td-inner" rows="4" columns = "20" style="resize: none;" >'+text+'</textarea>');
-      else console.log("error 606");
-    }
-    else if( type.indexOf('select')!=-1 ) {
-      //do nothing
-    }
-    else if( type=='time' ) {
-      //do nothing
-    }
-    inner = $(this).find('#td-inner');
-    inner.select();
-  }
-  function changeProfile(edit) {
-    let name = $(this).attr('name');
-    let td = $(this).parent().children('.userInfo-td');
-    let id = td.attr('id');
-    let type = td.attr('type');
-    let content = td.find('#td-inner').val();  //get agent's input
-    console.log("content = "+content);
-
-    $(this).parent().children('.edit-button').hide();  //hide yes/no button
-
-    if(name == 'yes'){  //confirm edit, change data in buffer instead of DB
-      buffer[id] = content;
-      if( type=="text") td.html('<p id="td-inner">'+content+'</p>');
-    }
-    else{  //deny edit, restore data before editing
-      let origin = buffer[id];
-      if( type=="text") td.html('<p id="td-inner">'+origin+'</p>');
-      else if( type=="time" ) td.find('#td-inner').val(origin);
-      else if( type.indexOf('select')!=-1 ) td.find('#td-inner').val(origin);
-    }
-  }
-  function submitProfile() {
-    let r = confirm("Are you sure to change profile?");
-    if(r){
-      console.log(buffer);
-      socket.emit('update profile',buffer);
-    }
-  }
   function toAgentStr(msg, name, time) {
     return "<p class='message' rel='" + time + "' style='text-align: right;'>" + msg + "<strong> : " + name + toTimeStr(time) + "</strong><br/></p>";
   }
