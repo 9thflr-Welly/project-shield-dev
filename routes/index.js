@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-var test_id;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -16,6 +15,13 @@ router.get('/chat', function(req, res, next) {
   res.render('chat', { title: 'SHIELD chat' });
 });
 
+router.get('/chatAll', function(req, res, next) {
+  res.render('chatAll', { title: 'SHIELD chat ver2' });
+});
+
+router.get('/tag', function(req, res, next) {
+  res.render('tag', { title: 'SHIELD tag' });
+});
 router.get('/history', function(req, res, next) {
   res.render('history', { title: 'SHIELD history' });
 });
@@ -40,13 +46,5 @@ router.get('/profile', function(req, res, next) {
   res.render('profile', { title: 'Profile' });
 });
 
-router.get('/test', function(req, res, next) {
-  res.render('test', { title: 'SHIELD test' });
-});
-
-router.post('/testing', function(req, res, next) {
-  test_id = req.body.id;
-  console.log(req.body.id + ' from route');
-})
 
 module.exports = router;
