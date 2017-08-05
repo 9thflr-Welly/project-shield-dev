@@ -58,6 +58,7 @@ $(document).ready(function() {
     let convert_list;
     // client list on the left needs to move down when idle more than a certain times
     let item_move_down;
+    let item_move_up;
     // 這邊需要依照canvas裡面的聊天室做處理
     let canvas = document.getElementById('canvas');
     // check how many users are chatting
@@ -67,22 +68,22 @@ $(document).ready(function() {
 
     for(let i=0;i<total_users;i++) {
       user_list.push(canvas_all_children[i].getAttribute('id'));
-      console.log(user_list);
+      // console.log(user_list);
       convert_list = Array.prototype.slice.call( canvas_all_children[i].getElementsByClassName("messagePanel")[0].getElementsByClassName("message") );
       // console.log(convert_list);
       canvas_last_child_time_list.push(convert_list.slice(-1)[0].getAttribute('rel'))
-      console.log(canvas_last_child_time_list);
+      // console.log(canvas_last_child_time_list);
       if(over_fifteen_min - canvas_last_child_time_list[i] >= 60000) {
         // 更改display client的東西
         console.log('id = '+user_list[i]+' passed idle time');
-        item_move_down = $('[rel="'+user_list[i]+'"]').parent();
-        $('#idle-roomes').append(item_move_down);
+        // item_move_down = $('[rel="'+user_list[i]+'"]').parent();
+        $('#idle-roomes').append($('[rel="'+user_list[i]+'"]').parent());
         $('#clients').find('[rel="'+user_list[i]+'"]').remove();
       }
       else {
         console.log('id = '+user_list[i]+' passed chat time');
-        item_move_down = $('[rel="'+user_list[i]+'"]').parent();
-        $('#clients').append(item_move_down);
+        // item_move_up = $('[rel="'+user_list[i]+'"]').parent();
+        $('#clients').append($('[rel="'+user_list[i]+'"]').parent());
         $('#idle-roomes').find('[rel="'+user_list[i]+'"]').remove();
       }
     }
