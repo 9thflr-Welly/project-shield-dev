@@ -41,7 +41,7 @@
                   <ul class="dropdown-menu dropdown-user">
                       <li><a href="/profile"><i class="fa fa-user fa-fw"></i> User Profile</a></li>
                       <li class="divider"></li>
-                      <li><a href="#" id="signout-btn"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
+                      <li><a href="/login" id="signout-btn"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
                   </ul>
                   <!-- /.dropdown-user -->
               </li>
@@ -91,6 +91,10 @@
                   <tr hidden>
                     <td>ID: </td>
                     <td id="prof-id"></td>
+                  </tr>
+                  <tr hidden>
+                    <td>Nickname: </td>
+                    <td id="prof-nick"></td>
                   </tr>
                   <tr>
                     <td>Date of Birth: </td>
@@ -145,6 +149,13 @@
                 <label for="prof-edit-name" class="col-2 col-form-label">Name: </label>
                 <div class="col-4">
                   <input class="form-control" type="text" value="" id="prof-edit-name">
+                </div>
+              </div>
+              <!-- 姓名 -->
+              <div class="form-group">
+                <label for="prof-edit-name" class="col-2 col-form-label">Nickname: </label>
+                <div class="col-4">
+                  <input class="form-control" type="text" value="" id="prof-edit-nick">
                 </div>
               </div>
               <!-- 出生日期 -->

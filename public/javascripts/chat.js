@@ -76,15 +76,15 @@ $(document).ready(function() {
       // console.log(canvas_last_child_time_list);
       if(over_fifteen_min - canvas_last_child_time_list[i] >= 900000) {
         // 更改display client的東西
-        console.log('id = '+user_list[i]+' passed idle time');
+        // console.log('id = '+user_list[i]+' passed idle time');
         // item_move_down = $('[rel="'+user_list[i]+'"]').parent();
-        $('#idle-roomes').append($('[rel="'+user_list[i]+'"]').parent());
-        $('#clients').find('[rel="'+user_list[i]+'"]').remove();
+        idles.append($('[rel="'+user_list[i]+'"]').parent());
+        clients.find('[rel="'+user_list[i]+'"]').remove();
       } else {
         console.log('id = '+user_list[i]+' passed chat time');
         // item_move_up = $('[rel="'+user_list[i]+'"]').parent();
-        $('#clients').append($('[rel="'+user_list[i]+'"]').parent());
-        $('#idle-roomes').find('[rel="'+user_list[i]+'"]').remove();
+        clients.append($('[rel="'+user_list[i]+'"]').parent());
+        idles.find('[rel="'+user_list[i]+'"]').remove();
       }
     }
     // console.log(user_list);
@@ -116,7 +116,7 @@ $(document).ready(function() {
     setTimeout(function() {
       socket.emit('get json from back');
     }, 10);  //load history msg
-    setTimeout(agentName, 100); //enter agent name
+    setTimeout(agentName, 1000); //enter agent name
     setTimeout(function() {
       socket.emit("get tags from chat")
     }, 100);
@@ -236,22 +236,24 @@ $(document).ready(function() {
     database.ref('users/' + userId).on('value', snap => {
       let profInfo = snap.val();
       let profId = Object.keys(profInfo);
-      var person = snap.child(profId[0]).val().username;  //從DB獲取agent的nickname
+      let person = snap.child(profId[0]).val().nickname;  //從DB獲取agent的nickname
+      // console.log(person);
 
       if (person != '' && person != null) {
         socket.emit('new user', person, (data) => {
+          // console.log(data);
           if(data){}   //check whether username is already taken
           else {
             alert('username is already taken');
             person = prompt("Please enter your name");  //update new username
-            database.ref('users/' + userId + '/' + profId).update({username : person});
+            database.ref('users/' + userId + '/' + profId).update({nickname : person});
           }
         });
         printAgent.html("Welcome <b>" + person + "</b>! You're now on board.");
       }
       else{
         person = prompt("Please enter your name");  //if username not exist,update username
-        database.ref('users/' + userId + '/' + profId).update({username : person});
+        database.ref('users/' + userId + '/' + profId).update({nickname : person});
       }
     });
   }
@@ -288,7 +290,7 @@ $(document).ready(function() {
 
     if (Array.isArray(designated_user_id)) {
       for (var i=0; i < name_list.length;i++) {
-        console.log(i+'at line212');
+
         socket.emit('send message2', {id: name_list[i] , msg: messageInput.val()}, (data) => {
           messageContent.append('<span class="error">' + data + "</span><br/>");
           console.log('this is designated_user_id[i]');
@@ -340,8 +342,20 @@ $(document).ready(function() {
 
     if (name_list.indexOf(data.id) !== -1) {    //if its chated user
       let str;
-      if( data.owner == "agent" ) str = toAgentStr(data.message, data.name, data.time);
-      else str = toUserStr(data.message, data.name, data.time);
+      let designated_chat_room_length = $("#" + data.id + "-content p.message").length;
+      let designated_chat_room_msg_time = $("#" + data.id + "-content p.message")[designated_chat_room_length-1].getAttribute('rel');
+      // console.log(designated_chat_room_length);
+      // console.log(designated_chat_room_msg_time);
+      // 如果現在時間多上一筆聊天記錄15分鐘
+      if(data.time - designated_chat_room_msg_time >= 900000){
+        $("#" + data.id + "-content").append('New Session starts-------------------');
+        if( data.owner == "agent" ) str = toAgentStr(data.message, data.name, data.time);
+        else str = toUserStr(data.message, data.name, data.time);
+      } else {
+        if( data.owner == "agent" ) str = toAgentStr(data.message, data.name, data.time);
+        else str = toUserStr(data.message, data.name, data.time);
+      }
+
       $("#" + data.id + "-content").append(str);    //push message into right canvas
       $('#'+data.id+'-content').scrollTop($('#'+data.id+'-content')[0].scrollHeight);  //scroll to down
 
