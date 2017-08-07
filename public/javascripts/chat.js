@@ -5,6 +5,7 @@ $(document).ready(function() {
   var messageInput = $('#message');
   var messageContent = $('#chat');
   var clients = $('#clients');
+  var idles = $('#idle-roomes');
   var printAgent = $('#printAgent');
   var canvas = $("#canvas");
   var searchBox = $('.searchBox');
@@ -73,14 +74,13 @@ $(document).ready(function() {
       // console.log(convert_list);
       canvas_last_child_time_list.push(convert_list.slice(-1)[0].getAttribute('rel'))
       // console.log(canvas_last_child_time_list);
-      if(over_fifteen_min - canvas_last_child_time_list[i] >= 60000) {
+      if(over_fifteen_min - canvas_last_child_time_list[i] >= 900000) {
         // 更改display client的東西
         console.log('id = '+user_list[i]+' passed idle time');
         // item_move_down = $('[rel="'+user_list[i]+'"]').parent();
         $('#idle-roomes').append($('[rel="'+user_list[i]+'"]').parent());
         $('#clients').find('[rel="'+user_list[i]+'"]').remove();
-      }
-      else {
+      } else {
         console.log('id = '+user_list[i]+' passed chat time');
         // item_move_up = $('[rel="'+user_list[i]+'"]').parent();
         $('#clients').append($('[rel="'+user_list[i]+'"]').parent());
@@ -103,7 +103,13 @@ $(document).ready(function() {
   $(document).on('click', '#userInfoBtn', showProfile);
   $(document).on('click', '.userInfo-td[modify="true"]', editProfile);
   $(document).on('click', '.edit-button', changeProfile);
-  $(document).on('click','#userInfo-submit',submitProfile)
+  $(document).on('click','#userInfo-submit',submitProfile);
+  $(document).on('click','#sortAvg',sortAvgChatTime);
+  $(document).on('click','#sortTotal',sortTotalChatTime);
+  $(document).on('click','#sortFirst',sortFirstChatTime);
+  $(document).on('click','#sortRecent',sortRecentChatTime);
+
+
 
   if (window.location.pathname === '/chat') {
     console.log("Start loading history message...");
@@ -214,7 +220,7 @@ $(document).ready(function() {
       totalChatTime = profile.totalChat;
     }
 
-    clients.append("<b><button rel=\""+profile.userId+"\" class=\"tablinks\""
+    idles.append("<b><button rel=\""+profile.userId+"\" class=\"tablinks\""
       + "data-avgTime=\""+ avgChatTime +"\" "
       + "data-totalTime=\"" + totalChatTime +"\" "
       + "data-firstTime=\"" + profile.firstChat +"\" "
@@ -480,7 +486,7 @@ $(document).ready(function() {
     });
   });
   function sortUsers(ref, up_or_down, operate) {
-    let arr = $('#clients b');
+    let arr = $('#idle-roomes b');
     for( let i=0; i<arr.length-1; i++ ) {
       for( let j=i+1; j<arr.length; j++ ) {
         let a = arr.eq(i).children(".tablinks").attr("data-"+ref)-'0';
@@ -490,7 +496,8 @@ $(document).ready(function() {
         }
       }
     }
-    $('#clients').append(arr);
+    // $('#clients').append(arr);
+    idles.append(arr);
 
   } //end sort func
   function sortAvgChatTime() {

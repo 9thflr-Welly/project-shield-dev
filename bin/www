@@ -59,9 +59,9 @@ var receiverId = '';
 var agent_sendTo_receiver;
 // LINE bot設定
 var bot = linebot({
-    channelId: '1516667468',
-    channelSecret: 'd89c9a5ef9ae83fbdfd2fc59ab451f98',
-    channelAccessToken: 'yeeDeC5dExJDeVEPPf2dMTlAoZE4izrqX6bBaldhddpG7esOFEpxm5m5dMIIB7pz0zIS49QZxJBFgAkxQZWmfy9toaiTR+B/q1pz7F5xkf+dljkSJV1krOOtrT93BSSYydIZLnt0zxX8JCqWF4uE4wdB04t89/1O/w1cDnyilFU='
+    channelId: '1522555697',
+    channelSecret: 'bf698f41fcc086655174327b8ad752d5',
+    channelAccessToken: '+hGZzOkZqSikClHB5FYvYQqSoLGa4I+RVDyc3II8V92kGUxuzEvSLQpX8drq2AmLcbmc3RoZLcL0OnYJJGut9X12SB/MlL/2l58mPwXKSAEw2EtFl7pwAQx2nuB8d66Juu5YaqCKaB6E/+14vd6SHQdB04t89/1O/w1cDnyilFU='
 });
 const linebotParser = bot.parser();
 /**
