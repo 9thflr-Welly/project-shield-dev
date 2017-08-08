@@ -73,11 +73,15 @@ $(document).ready(function() {
       convert_list = Array.prototype.slice.call( canvas_all_children[i].getElementsByClassName("messagePanel")[0].getElementsByClassName("message") );
       // console.log(convert_list);
       canvas_last_child_time_list.push(convert_list.slice(-1)[0].getAttribute('rel'))
+      // if $('#'+user_list[i]+'-content') is in chat area $('#'+user_list[i]+'-content').append('<p class="message-day" style="text-align: center">Session End-------------------------------</p>')
+      if(over_fifteen_min - canvas_last_child_time_list[i] >= 900000 && clients.has($('#'+user_list[i]+'-content')) && !idles.has($('#'+user_list[i]+'-content'))){
+        $('#'+user_list[i]+'-content').append('<p class="message-day" style="text-align: center">Session End-------------------------------</p>');
+      }
       // console.log(canvas_last_child_time_list);
-      if(over_fifteen_min - canvas_last_child_time_list[i] >= 900000) {
+      if(over_fifteen_min - canvas_last_child_time_list[i] >= 960000) {
         // 更改display client的東西
         // console.log('id = '+user_list[i]+' passed idle time');
-        // item_move_down = $('[rel="'+user_list[i]+'"]').parent();
+
         idles.append($('[rel="'+user_list[i]+'"]').parent());
         clients.find('[rel="'+user_list[i]+'"]').remove();
       } else {
@@ -127,7 +131,7 @@ $(document).ready(function() {
   } //end loadMsg func
   socket.on('push json to front', (data) => {   //www emit data of history msg
     console.log("push json to front");
-    console.log(data);
+    // console.log(data);
     for( i in data ) pushMsg(data[i]);    //one user do function one time
     sortUsers("recentTime", sortRecentBool, function(a,b){ return a<b; } );
     // closeIdleRoom();
@@ -636,5 +640,8 @@ $(document).ready(function() {
     return msg;
   }
 
+  function determineSessionEnds(){
+
+  }
 
 }); //document ready close tag
