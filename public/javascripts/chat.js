@@ -73,20 +73,13 @@ $(document).ready(function() {
       convert_list = Array.prototype.slice.call( canvas_all_children[i].getElementsByClassName("messagePanel")[0].getElementsByClassName("message") );
       // console.log(convert_list);
       canvas_last_child_time_list.push(convert_list.slice(-1)[0].getAttribute('rel'))
-      // if $('#'+user_list[i]+'-content') is in chat area $('#'+user_list[i]+'-content').append('<p class="message-day" style="text-align: center">Session End-------------------------------</p>')
-      if(over_fifteen_min - canvas_last_child_time_list[i] >= 900000 && clients.has($('#'+user_list[i]+'-content')) && !idles.has($('#'+user_list[i]+'-content'))){
-        $('#'+user_list[i]+'-content').append('<p class="message-day" style="text-align: center">Session End-------------------------------</p>');
-      }
       // console.log(canvas_last_child_time_list);
-      if(over_fifteen_min - canvas_last_child_time_list[i] >= 960000) {
-        // 更改display client的東西
-        // console.log('id = '+user_list[i]+' passed idle time');
-
+      if(over_fifteen_min - canvas_last_child_time_list[i] >= 300000) {
+        console.log('id = '+user_list[i]+' passed chat time');
         idles.append($('[rel="'+user_list[i]+'"]').parent());
         clients.find('[rel="'+user_list[i]+'"]').remove();
       } else {
-        console.log('id = '+user_list[i]+' passed chat time');
-        // item_move_up = $('[rel="'+user_list[i]+'"]').parent();
+
         clients.append($('[rel="'+user_list[i]+'"]').parent());
         idles.find('[rel="'+user_list[i]+'"]').remove();
       }
@@ -294,7 +287,6 @@ $(document).ready(function() {
 
     if (Array.isArray(designated_user_id)) {
       for (var i=0; i < name_list.length;i++) {
-
         socket.emit('send message2', {id: name_list[i] , msg: messageInput.val()}, (data) => {
           messageContent.append('<span class="error">' + data + "</span><br/>");
           console.log('this is designated_user_id[i]');
@@ -350,7 +342,7 @@ $(document).ready(function() {
       let designated_chat_room_msg_time = $("#" + data.id + "-content p.message")[designated_chat_room_length-1].getAttribute('rel');
       // console.log(designated_chat_room_length);
       // console.log(designated_chat_room_msg_time);
-      // 如果現在時間多上一筆聊天記錄15分鐘
+      // 上一筆聊天記錄時間超過15分鐘
       if(data.time - designated_chat_room_msg_time >= 900000){
         $("#" + data.id + "-content").append('New Session starts-------------------');
         if( data.owner == "agent" ) str = toAgentStr(data.message, data.name, data.time);
