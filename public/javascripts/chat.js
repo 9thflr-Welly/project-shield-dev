@@ -28,71 +28,12 @@ $(document).ready(function() {
     CLICKED: "#ccc",
   }
 
-  function clickMsg(){
-    $("#selected").attr('id','').css("background-color", "");   //selected tablinks change, clean prev's color
-    $(this).attr('id','selected').css("background-color",COLOR.CLICKED);    //clicked tablinks color
-
-    if( $(this).find('span').css("font-weight")=="bold" ) {
-      $(this).find('span').css("font-weight", "normal");                //read msg, let msg dis-bold
-      socket.emit("read message", {id: $(this).attr('rel')} );          //tell socket that this user isnt unRead
-    }
-
-    var target = $(this).attr('rel');         //find the message canvas
-    $("#"+target).show().siblings().hide();   //show it, and close others
-    $('#user-rooms').val(target);             //change value in select bar
-    $('#'+target+'-content').scrollTop($('#'+target+'-content')[0].scrollHeight);   //scroll to down
-
-    console.log('click tablink executed');
-  }
-  function clickSpan() {  //close the message canvas
-    let userId = $(this).parent().css("display", "none").attr("id");
-    $(".tablinks[rel='" + userId +"'] ").attr("id", "").css("background-color","");   //clean tablinks color
-  }
-
-  function closeIdleRoom() {
-    // declare current datetime and parse into ms
-    // get the message sent time in ms
-    let new_date = new Date();
-    let over_fifteen_min = Date.parse(new_date);
-    let canvas_last_child_time_list = [];
-    //convert from htmlcollection to array
-    let convert_list;
-    // client list on the left needs to move down when idle more than a certain times
-    let item_move_down;
-    let item_move_up;
-    // 這邊需要依照canvas裡面的聊天室做處理
-    let canvas = document.getElementById('canvas');
-    // check how many users are chatting
-    let total_users = document.getElementById('canvas').children.length;
-    // children under canvas
-    let canvas_all_children = canvas.children;
-
-    for(let i=0;i<total_users;i++) {
-      user_list.push(canvas_all_children[i].getAttribute('id'));
-      // console.log(user_list);
-      convert_list = Array.prototype.slice.call( canvas_all_children[i].getElementsByClassName("messagePanel")[0].getElementsByClassName("message") );
-      // console.log(convert_list);
-      canvas_last_child_time_list.push(convert_list.slice(-1)[0].getAttribute('rel'))
-      // console.log(canvas_last_child_time_list);
-      if(over_fifteen_min - canvas_last_child_time_list[i] >= 300000) {
-        console.log('id = '+user_list[i]+' passed chat time');
-        idles.append($('[rel="'+user_list[i]+'"]').parent());
-        clients.find('[rel="'+user_list[i]+'"]').remove();
-      } else {
-
-        clients.append($('[rel="'+user_list[i]+'"]').parent());
-        idles.find('[rel="'+user_list[i]+'"]').remove();
-      }
-    }
-    // console.log(user_list);
-
-    user_list = [];
-    convert_list = [];
-    canvas_last_child_time_list = [];
-  }
   setInterval(() => {
     closeIdleRoom();
   }, 20000)
+  setInterval(() => {
+    sessionReminder();
+  }, 180000)
 
   $(document).on('click', '.tablinks', clickMsg);
   $(document).on('click', '#signout-btn', logout); //登出
@@ -149,6 +90,8 @@ $(document).ready(function() {
       }
       if( historyMsg[i].owner == "agent" ) {    //plus every history msg into string
         historyMsgStr += toAgentStr(historyMsg[i].message, historyMsg[i].name, historyMsg[i].time);
+      } else if( historyMsg[i].owner == "agent" && historyMsg[i].message == '已過3分鐘無訊息，如有需求請傳遞訊息。' ) {
+        historyMsgStr += toAutoStr(historyMsg[i].message, historyMsg[i].name);
       }
       else historyMsgStr += toUserStr(historyMsg[i].message, historyMsg[i].name, historyMsg[i].time);
     }
@@ -197,11 +140,11 @@ $(document).ready(function() {
       sum /= 60000;
       totalChatTime = sum;
       avgChatTime = sum/times.length;
-      console.log("total = " + totalChatTime);
-      console.log("avg = ");
-      console.log(avgChatTime);
-      console.log("times.length = ");
-      console.log(times.length);
+      // console.log("total = " + totalChatTime);
+      // console.log("avg = ");
+      // console.log(avgChatTime);
+      // console.log("times.length = ");
+      // console.log(times.length);
       if( isNaN(avgChatTime)||avgChatTime<1 ) avgChatTime = 1;
       if( isNaN(totalChatTime)||totalChatTime<1 ) totalChatTime = 1;
 
@@ -255,8 +198,8 @@ $(document).ready(function() {
     });
   }
   socket.on("push tags to chat", data=> {
-    console.log("data:");
-    console.log(data);
+    // console.log("data:");
+    // console.log(data);
     let count = 0;
     for( let i in data ) {
       let name = data[i].name;
@@ -321,7 +264,7 @@ $(document).ready(function() {
   });
   /*  =================================  */
   socket.on('new message2', (data) => {   //if www push "new message2"
-    console.log("Message get! identity = " + data.owner + ", name = " + data.name);
+    // console.log("Message get! identity = " + data.owner + ", name = " + data.name);
     //owner = "user", "agent" ; name = "Colman", "Ted", others...
     displayMessage( data ); //update canvas
     displayClient( data );  //update tablinks
@@ -335,17 +278,22 @@ $(document).ready(function() {
     // messageContent.append('<b>' + data.name + ': </b>' + data.msg + "<br/>");
   });
   function displayMessage( data ) {     //update canvas
+    // console.log(data);
 
     if (name_list.indexOf(data.id) !== -1) {    //if its chated user
       let str;
-      let designated_chat_room_length = $("#" + data.id + "-content p.message").length;
-      let designated_chat_room_msg_time = $("#" + data.id + "-content p.message")[designated_chat_room_length-1].getAttribute('rel');
+      let designated_chat_room_length = $("#" + data.id + "-content p.message-user").length;
+      let designated_chat_room_msg_time = $("#" + data.id + "-content p.message-user")[designated_chat_room_length-1].getAttribute('rel');
       // console.log(designated_chat_room_length);
       // console.log(designated_chat_room_msg_time);
-      // 上一筆聊天記錄時間超過15分鐘
-      if(data.time - designated_chat_room_msg_time >= 900000){
-        $("#" + data.id + "-content").append('New Session starts-------------------');
+      // 上一筆聊天記錄時間超過5分鐘
+      if(data.time - designated_chat_room_msg_time >= 300000){
+        $("#" + data.id + "-content").append('<p class="message-day" style="text-align: center">New Session starts-------------------</p>');
         if( data.owner == "agent" ) str = toAgentStr(data.message, data.name, data.time);
+        else str = toUserStr(data.message, data.name, data.time);
+      } else if( data.time - designated_chat_room_msg_time >= 180000 ){
+        if( data.owner == "agent" && data.message == '已過3分鐘無訊息，如有需求請傳遞訊息。' ) str = toAutoStr(data.message, data.name);
+        else if( data.owner == "agent" && data.message != '已過3分鐘無訊息，如有需求請傳遞訊息。' ) str = toAgentStr(data.message, data.name, data.time);
         else str = toUserStr(data.message, data.name, data.time);
       } else {
         if( data.owner == "agent" ) str = toAgentStr(data.message, data.name, data.time);
@@ -368,7 +316,8 @@ $(document).ready(function() {
         + "-------------------------------------------------------Present Message-------------------------------------------------------"
         +" </italic></strong></p>";
 
-      if( data.owner == "agent" ) historyMsgStr += toAgentStr(data.message, data.name, data.time);
+      if( data.owner == "agent" && data.message == '已過3分鐘無訊息，如有需求請傳遞訊息。' ) historyMsgStr += toAutoStr(data.message, data.name);
+      else if( data.owner == "agent" && data.message != '已過3分鐘無訊息，如有需求請傳遞訊息。' ) historyMsgStr += toAgentStr(data.message, data.name, data.time);
       else historyMsgStr += toUserStr(data.message, data.name, data.time);
 
       canvas.append(      //new a canvas
@@ -607,10 +556,13 @@ $(document).ready(function() {
     }
 
   function toAgentStr(msg, name, time) {
-    return "<p class='message' rel='" + time + "' style='text-align: right;'>" + msg + "<strong> : " + name + toTimeStr(time) + "</strong><br/></p>";
+    return "<p class='message-agent' rel='" + time + "' style='text-align: right;'>" + msg + "<strong> : " + name + toTimeStr(time) + "</strong><br/></p>";
   }
   function toUserStr(msg, name, time) {
-    return "<p class='message' rel='" + time + "'><strong>" + name + toTimeStr(time) + ": </strong>" + msg + "<br/></p>";
+    return "<p class='message-user' rel='" + time + "'><strong>" + name + toTimeStr(time) + ": </strong>" + msg + "<br/></p>";
+  }
+  function toAutoStr(msg, name) {
+    return "<p class='message-autoreply' style='text-align: right;'>" + msg + "<strong> : autoreply " + toTimeStr(time) + "</strong><br/></p>";
   }
   function toDateStr( input ) {
     var str = " ";
@@ -632,8 +584,93 @@ $(document).ready(function() {
     return msg;
   }
 
-  function determineSessionEnds(){
+  function clickMsg(){
+    $("#selected").attr('id','').css("background-color", "");   //selected tablinks change, clean prev's color
+    $(this).attr('id','selected').css("background-color",COLOR.CLICKED);    //clicked tablinks color
 
+    if( $(this).find('span').css("font-weight")=="bold" ) {
+      $(this).find('span').css("font-weight", "normal");                //read msg, let msg dis-bold
+      socket.emit("read message", {id: $(this).attr('rel')} );          //tell socket that this user isnt unRead
+    }
+
+    var target = $(this).attr('rel');         //find the message canvas
+    $("#"+target).show().siblings().hide();   //show it, and close others
+    $('#user-rooms').val(target);             //change value in select bar
+    $('#'+target+'-content').scrollTop($('#'+target+'-content')[0].scrollHeight);   //scroll to down
+
+    // console.log('click tablink executed');
+  }
+  function clickSpan() {  //close the message canvas
+    let userId = $(this).parent().css("display", "none").attr("id");
+    $(".tablinks[rel='" + userId +"'] ").attr("id", "").css("background-color","");   //clean tablinks color
+  }
+
+  function closeIdleRoom() {
+    // declare current datetime and parse into ms
+    // get the message sent time in ms
+    let new_date = new Date();
+    let over_fifteen_min = Date.parse(new_date);
+    let canvas_last_child_time_list = [];
+    //convert from htmlcollection to array
+    let convert_list;
+    // 這邊需要依照canvas裡面的聊天室做處理
+    let canvas = document.getElementById('canvas');
+    // check how many users are chatting
+    let total_users = document.getElementById('canvas').children.length;
+    // children under canvas
+    let canvas_all_children = canvas.children;
+    // console.log(canvas_all_children);
+
+    for(let i=0;i<total_users;i++) {
+      user_list.push(canvas_all_children[i].getAttribute('id'));
+      // console.log(user_list);
+      convert_list = Array.prototype.slice.call( canvas_all_children[i].getElementsByClassName("messagePanel")[0].getElementsByClassName("message-user") );
+      // console.log(convert_list);
+      canvas_last_child_time_list.push(convert_list.slice(-1)[0].getAttribute('rel'))
+      // console.log(canvas_last_child_time_list);
+      if(over_fifteen_min - canvas_last_child_time_list[i] >= 300000) {
+        // console.log('id = '+user_list[i]+' passed chat time');
+        idles.append($('[rel="'+user_list[i]+'"]').parent());
+        clients.find('[rel="'+user_list[i]+'"]').remove();
+      } else {
+        clients.append($('[rel="'+user_list[i]+'"]').parent());
+        idles.find('[rel="'+user_list[i]+'"]').remove();
+      }
+    }
+    // console.log(user_list);
+
+    user_list = [];
+    convert_list = [];
+    canvas_last_child_time_list = [];
+  }
+
+
+
+  function sessionReminder(){
+    let new_date = new Date();
+    let time_limit = Date.parse(new_date);
+    let canvas_last_child_time_list = [];
+    let convert_list;
+    let canvas = document.getElementById('canvas');
+    let total_users = document.getElementById('canvas').children.length;
+    let canvas_all_children = canvas.children;
+
+    for(let i=0;i<total_users;i++) {
+      user_list.push(canvas_all_children[i].getAttribute('id'));
+      convert_list = Array.prototype.slice.call( canvas_all_children[i].getElementsByClassName("messagePanel")[0].getElementsByClassName("message-user") );
+      canvas_last_child_time_list.push(convert_list.slice(-1)[0].getAttribute('rel'));
+
+      if(time_limit - canvas_last_child_time_list[i] >= 180000 && time_limit - canvas_last_child_time_list[i] < 300000 && clients.find($('b button[rel="'+user_list[i]+'"]')).length) {
+        // 傳訊息給該客戶表示session快要結束如果沒有再傳訊息就會被列為一則訊息
+        socket.emit('send message2', {id: user_list[i] , msg: '已過3分鐘無訊息，如有需求請傳遞訊息。'});
+      } else if(time_limit - canvas_last_child_time_list[i] >= 300000 && time_limit - canvas_last_child_time_list[i] < 360000 && clients.find($('b button[rel="'+user_list[i]+'"]')).length) {
+        $("#" + user_list[i] + "-content").append('<p class="message-day" style="text-align: center">Session Ends-------------------</p>');
+      }
+    }
+
+    user_list = [];
+    convert_list = [];
+    canvas_last_child_time_list = [];
   }
 
 }); //document ready close tag
