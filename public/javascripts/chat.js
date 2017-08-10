@@ -33,7 +33,7 @@ $(document).ready(function() {
   }, 20000)
   setInterval(() => {
     sessionReminder();
-  }, 180000)
+  }, 200000)
 
   $(document).on('click', '.tablinks', clickMsg);
   $(document).on('click', '#signout-btn', logout); //登出
@@ -50,7 +50,7 @@ $(document).ready(function() {
 
 
   if (window.location.pathname === '/chat') {
-    console.log("Start loading history message...");
+    // console.log("Start loading history message...");
     setTimeout(function() {
       socket.emit('get json from back');
     }, 10);  //load history msg
@@ -60,11 +60,11 @@ $(document).ready(function() {
     }, 100);
   }
   function loadMsg() {
-    console.log("Start loading msg...");
+    // console.log("Start loading msg...");
     socket.emit('get json from back');    //emit a request to www, request for history msg
   } //end loadMsg func
   socket.on('push json to front', (data) => {   //www emit data of history msg
-    console.log("push json to front");
+    // console.log("push json to front");
     // console.log(data);
     for( i in data ) pushMsg(data[i]);    //one user do function one time
     sortUsers("recentTime", sortRecentBool, function(a,b){ return a<b; } );
@@ -271,9 +271,9 @@ $(document).ready(function() {
 
     if( name_list.indexOf(data.id) == -1 ) {  //if its never chated user, push his name into name list
       name_list.push(data.id);
-      console.log("push into name_list!");
+      // console.log("push into name_list!");
     }
-    else console.log("this msgOwner already exist");
+    // else console.log("this msgOwner already exist");
 
     // messageContent.append('<b>' + data.name + ': </b>' + data.msg + "<br/>");
   });
@@ -285,17 +285,20 @@ $(document).ready(function() {
       let designated_chat_room_length = $("#" + data.id + "-content p.message-user").length;
       let designated_chat_room_msg_time = $("#" + data.id + "-content p.message-user")[designated_chat_room_length-1].getAttribute('rel');
       // console.log(designated_chat_room_length);
-      // console.log(designated_chat_room_msg_time);
+      console.log(data.time, designated_chat_room_msg_time);
       // 上一筆聊天記錄時間超過5分鐘
-      if(data.time - designated_chat_room_msg_time >= 300000){
-        $("#" + data.id + "-content").append('<p class="message-day" style="text-align: center">New Session starts-------------------</p>');
+      if( data.time - designated_chat_room_msg_time >= 390000 ){
+        console.log('6 min');
+        $("#" + data.id + "-content").append('<p class="message-day" style="text-align: center">New Session starts</p>');
         if( data.owner == "agent" ) str = toAgentStr(data.message, data.name, data.time);
         else str = toUserStr(data.message, data.name, data.time);
-      } else if( data.time - designated_chat_room_msg_time >= 180000 ){
-        if( data.owner == "agent" && data.message == '已過3分鐘無訊息，如有需求請傳遞訊息。' ) str = toAutoStr(data.message, data.name);
+      } else if( data.time - designated_chat_room_msg_time >= 180000  || data.time - designated_chat_room_msg_time < 390000 ){
+        console.log('3 min');
+        if( data.owner == "agent" && data.message == '已過3分鐘無訊息，如有需求請傳遞訊息。' ) str = toAutoStr(data.message, data.name, data.time);
         else if( data.owner == "agent" && data.message != '已過3分鐘無訊息，如有需求請傳遞訊息。' ) str = toAgentStr(data.message, data.name, data.time);
         else str = toUserStr(data.message, data.name, data.time);
       } else {
+        console.log('less than 3');
         if( data.owner == "agent" ) str = toAgentStr(data.message, data.name, data.time);
         else str = toUserStr(data.message, data.name, data.time);
       }
@@ -336,7 +339,7 @@ $(document).ready(function() {
     let font_weight = data.owner=="user" ? "bold" : "normal";   //if msg is by user, mark it unread
 
     if (name_list.indexOf(data.id) !== -1 ) {
-      console.log('user existed');
+      // console.log('user existed');
       $(".tablinks[rel='"+data.id+"'] span").text(toTimeStr(data.time)+remove_href_msg(data.message)).css("font-weight", font_weight);
       $(".tablinks[rel='"+data.id+"']").attr("data-recentTime", data.time);
       //update tablnks's last msg
@@ -561,8 +564,8 @@ $(document).ready(function() {
   function toUserStr(msg, name, time) {
     return "<p class='message-user' rel='" + time + "'><strong>" + name + toTimeStr(time) + ": </strong>" + msg + "<br/></p>";
   }
-  function toAutoStr(msg, name) {
-    return "<p class='message-autoreply' style='text-align: right;'>" + msg + "<strong> : autoreply " + toTimeStr(time) + "</strong><br/></p>";
+  function toAutoStr(msg, name, time) {
+    return "<p class='message-autoreply' rel='" + time + "' style='text-align: right;'>" + msg + "<strong> : autoreply " + toTimeStr(time) + "</strong><br/></p>";
   }
   function toDateStr( input ) {
     var str = " ";
@@ -625,10 +628,13 @@ $(document).ready(function() {
       user_list.push(canvas_all_children[i].getAttribute('id'));
       // console.log(user_list);
       convert_list = Array.prototype.slice.call( canvas_all_children[i].getElementsByClassName("messagePanel")[0].getElementsByClassName("message-user") );
-      // console.log(convert_list);
-      canvas_last_child_time_list.push(convert_list.slice(-1)[0].getAttribute('rel'))
+      // console.log(convert_list.slice(-1)[0]);
+      if(convert_list.slice(-1)[0] !== undefined){
+        canvas_last_child_time_list.push(convert_list.slice(-1)[0].getAttribute('rel'))
+      }
+
       // console.log(canvas_last_child_time_list);
-      if(over_fifteen_min - canvas_last_child_time_list[i] >= 300000) {
+      if(over_fifteen_min - canvas_last_child_time_list[i] >= 480000) {
         // console.log('id = '+user_list[i]+' passed chat time');
         idles.append($('[rel="'+user_list[i]+'"]').parent());
         clients.find('[rel="'+user_list[i]+'"]').remove();
@@ -649,8 +655,11 @@ $(document).ready(function() {
   function sessionReminder(){
     let new_date = new Date();
     let time_limit = Date.parse(new_date);
+    let text_content;
     let canvas_last_child_time_list = [];
+    let canvas_last_auto_time_list = [];
     let convert_list;
+    let convert_autoreply_list;
     let canvas = document.getElementById('canvas');
     let total_users = document.getElementById('canvas').children.length;
     let canvas_all_children = canvas.children;
@@ -658,13 +667,44 @@ $(document).ready(function() {
     for(let i=0;i<total_users;i++) {
       user_list.push(canvas_all_children[i].getAttribute('id'));
       convert_list = Array.prototype.slice.call( canvas_all_children[i].getElementsByClassName("messagePanel")[0].getElementsByClassName("message-user") );
-      canvas_last_child_time_list.push(convert_list.slice(-1)[0].getAttribute('rel'));
+      convert_autoreply_list = Array.prototype.slice.call( canvas_all_children[i].getElementsByClassName("messagePanel")[0].getElementsByClassName("message-autoreply") );
+      // console.log(convert_autoreply_list);
+      // console.log(canvas_all_children[i].getElementsByClassName("messagePanel")[0].getElementsByClassName("message-autoreply"));
+      // console.log(convert_autoreply_list.slice(-1)[0]);
 
-      if(time_limit - canvas_last_child_time_list[i] >= 180000 && time_limit - canvas_last_child_time_list[i] < 300000 && clients.find($('b button[rel="'+user_list[i]+'"]')).length) {
-        // 傳訊息給該客戶表示session快要結束如果沒有再傳訊息就會被列為一則訊息
+      if(convert_list.slice(-1)[0] !== undefined){
+        canvas_last_child_time_list.push(convert_list.slice(-1)[0].getAttribute('rel'));
+      }
+
+      if(convert_autoreply_list[0] !== undefined){
+        console.log('got in');
+        // console.log(convert_autoreply_list);
+        canvas_last_auto_time_list.push(convert_autoreply_list.slice(-1)[0].getAttribute('rel'));
+      }
+
+      // console.log(canvas_last_child_time_list[i]);
+      // console.log(time_limit - canvas_last_child_time_list[i] >= 180000);
+      // console.log(clients.find($('button[rel="'+user_list[i]+'"]')).length);
+
+      let text = $('#'+user_list[i]+'-content p.message-autoreply:last-child').text();
+      // console.log(text);
+      if($('#'+user_list[i]+'-content p.message-autoreply:last-child').text() != ''){
+        let text = $('#'+user_list[i]+'-content p.message-autoreply:last-child').text()
+        console.log(text.substr(0, 18));
+        text_content = text.substr(0, 18);
+      }
+
+      console.log(canvas_last_auto_time_list[i]);
+      console.log(time_limit - canvas_last_auto_time_list[i] >= 180000);
+      console.log(clients.find($('button[rel="'+user_list[i]+'"]')).length > 0);
+      console.log(text_content == '已過3分鐘無訊息，如有需求請傳遞訊息');
+
+      if(time_limit - canvas_last_auto_time_list[i] >= 180000 && clients.find($('button[rel="'+user_list[i]+'"]')).length > 0 && text_content == '已過3分鐘無訊息，如有需求請傳遞訊息。') {
+        $("#" + user_list[i] + "-content").append('<p class="message-day" style="text-align: center">Session Ends</p>');
+      } else if((time_limit - canvas_last_child_time_list[i] >= 180000 & time_limit - canvas_last_child_time_list[i] < 360000) && clients.find($('button[rel="'+user_list[i]+'"]')).length) {
         socket.emit('send message2', {id: user_list[i] , msg: '已過3分鐘無訊息，如有需求請傳遞訊息。'});
-      } else if(time_limit - canvas_last_child_time_list[i] >= 300000 && time_limit - canvas_last_child_time_list[i] < 360000 && clients.find($('b button[rel="'+user_list[i]+'"]')).length) {
-        $("#" + user_list[i] + "-content").append('<p class="message-day" style="text-align: center">Session Ends-------------------</p>');
+      } else {
+        console.log('nothing happens');
       }
     }
 
