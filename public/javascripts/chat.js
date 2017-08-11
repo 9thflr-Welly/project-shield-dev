@@ -47,8 +47,6 @@ $(document).ready(function() {
   $(document).on('click','#sortFirst',sortFirstChatTime);
   $(document).on('click','#sortRecent',sortRecentChatTime);
 
-
-
   if (window.location.pathname === '/chat') {
     // console.log("Start loading history message...");
     setTimeout(function() {
@@ -285,15 +283,15 @@ $(document).ready(function() {
       let designated_chat_room_length = $("#" + data.id + "-content p.message-user").length;
       let designated_chat_room_msg_time = $("#" + data.id + "-content p.message-user")[designated_chat_room_length-1].getAttribute('rel');
       // console.log(designated_chat_room_length);
-      console.log(data.time, designated_chat_room_msg_time);
+      // console.log(data.time, designated_chat_room_msg_time);
       // 上一筆聊天記錄時間超過5分鐘
       if( data.time - designated_chat_room_msg_time >= 390000 ){
-        console.log('6 min');
+        // console.log('6 min');
         $("#" + data.id + "-content").append('<p class="message-day" style="text-align: center">New Session starts</p>');
         if( data.owner == "agent" ) str = toAgentStr(data.message, data.name, data.time);
         else str = toUserStr(data.message, data.name, data.time);
       } else if( data.time - designated_chat_room_msg_time >= 180000  || data.time - designated_chat_room_msg_time < 390000 ){
-        console.log('3 min');
+        // console.log('3 min');
         if( data.owner == "agent" && data.message == '已過3分鐘無訊息，如有需求請傳遞訊息。' ) str = toAutoStr(data.message, data.name, data.time);
         else if( data.owner == "agent" && data.message != '已過3分鐘無訊息，如有需求請傳遞訊息。' ) str = toAgentStr(data.message, data.name, data.time);
         else str = toUserStr(data.message, data.name, data.time);
@@ -667,7 +665,6 @@ $(document).ready(function() {
     for(let i=0;i<total_users;i++) {
       user_list.push(canvas_all_children[i].getAttribute('id'));
       convert_list = Array.prototype.slice.call( canvas_all_children[i].getElementsByClassName("messagePanel")[0].getElementsByClassName("message-user") );
-      convert_autoreply_list = Array.prototype.slice.call( canvas_all_children[i].getElementsByClassName("messagePanel")[0].getElementsByClassName("message-autoreply") );
       // console.log(convert_autoreply_list);
       // console.log(canvas_all_children[i].getElementsByClassName("messagePanel")[0].getElementsByClassName("message-autoreply"));
       // console.log(convert_autoreply_list.slice(-1)[0]);
@@ -676,35 +673,35 @@ $(document).ready(function() {
         canvas_last_child_time_list.push(convert_list.slice(-1)[0].getAttribute('rel'));
       }
 
-      if(convert_autoreply_list[0] !== undefined){
-        console.log('got in');
-        // console.log(convert_autoreply_list);
-        canvas_last_auto_time_list.push(convert_autoreply_list.slice(-1)[0].getAttribute('rel'));
-      }
-
       // console.log(canvas_last_child_time_list[i]);
       // console.log(time_limit - canvas_last_child_time_list[i] >= 180000);
       // console.log(clients.find($('button[rel="'+user_list[i]+'"]')).length);
 
-      let text = $('#'+user_list[i]+'-content p.message-autoreply:last-child').text();
+      // let text = $('#'+user_list[i]+'-content p.message-autoreply:last-child').text();
       // console.log(text);
       if($('#'+user_list[i]+'-content p.message-autoreply:last-child').text() != ''){
         let text = $('#'+user_list[i]+'-content p.message-autoreply:last-child').text()
-        console.log(text.substr(0, 18));
+        // console.log(text.substr(0, 18));
         text_content = text.substr(0, 18);
       }
 
-      console.log(canvas_last_auto_time_list[i]);
-      console.log(time_limit - canvas_last_auto_time_list[i] >= 180000);
-      console.log(clients.find($('button[rel="'+user_list[i]+'"]')).length > 0);
-      console.log(text_content == '已過3分鐘無訊息，如有需求請傳遞訊息');
+      // console.log('3 min mark:');
+      // console.log((time_limit - canvas_last_child_time_list[i] >= 180000 && time_limit - canvas_last_child_time_list[i] < 360000));
+      // console.log(clients.find($('button[rel="'+user_list[i]+'"]')).length > 0);
 
-      if(time_limit - canvas_last_auto_time_list[i] >= 180000 && clients.find($('button[rel="'+user_list[i]+'"]')).length > 0 && text_content == '已過3分鐘無訊息，如有需求請傳遞訊息。') {
+      // console.log('6 min mark:');
+      // console.log(clients.find($('button[rel="'+user_list[i]+'"]')).length > 0);
+      // console.log(text_content == '已過3分鐘無訊息，如有需求請傳遞訊息');
+
+      // console.log(canvas_last_auto_time_list[i]);
+      // console.log($('#'+user_list[i]+'-content p.message-day:last-child').text());
+
+      if(clients.find( $('button[rel="'+user_list[i]+'"]')).length > 0 && text_content == '已過3分鐘無訊息，如有需求請傳遞訊息' ) {
         $("#" + user_list[i] + "-content").append('<p class="message-day" style="text-align: center">Session Ends</p>');
-      } else if((time_limit - canvas_last_child_time_list[i] >= 180000 & time_limit - canvas_last_child_time_list[i] < 360000) && clients.find($('button[rel="'+user_list[i]+'"]')).length) {
-        socket.emit('send message2', {id: user_list[i] , msg: '已過3分鐘無訊息，如有需求請傳遞訊息。'});
+      } else if((time_limit - canvas_last_child_time_list[i] >= 180000 && time_limit - canvas_last_child_time_list[i] < 360000) && clients.find($('button[rel="'+user_list[i]+'"]')).length > 0) {
+        socket.emit('send message2', {id: user_list[i], msg: '已過3分鐘無訊息，如有需求請傳遞訊息。'});
       } else {
-        console.log('nothing happens');
+        // console.log('nothing happens');
       }
     }
 
