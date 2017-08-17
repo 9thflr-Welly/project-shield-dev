@@ -77,50 +77,40 @@
       <!-- 任務內容 -->
       <form>
         <div class="form-group row">
-          <label for="task-name" class="col-2 col-form-label">Content</label>
+          <label for="subject" class="col-2 col-form-label">Subject</label>
           <div class="col-4">
-            <input class="form-control" type="text" value="" id="task-name">
+            <input class="form-control" type="text" value="" id="form-subject">
           </div>
-        </div>
-        <!-- 分類 -->
-        <div class="form-group row">
-          <label for="category">Category</label>
-          <select class="form-control" id="category">
-            <option>9th floor</option>
-            <option>yy architects</option>
-            <option>Fong Yu Invest</option>
-            <option>Tinichats</option>
-          </select>
         </div>
         <!-- 狀態 -->
         <div class="form-group row">
           <label for="status">Status</label>
-          <select class="form-control" id="status">
+          <select class="form-control" id="form-status">
+            <option>Open</option>
             <option>Pending</option>
-            <option>Progress</option>
-            <option>Testing</option>
-            <option>Solved</option>
+            <option>Resolved</option>
             <option>Closed</option>
           </select>
         </div>
         <!-- 緊急 -->
         <div class="form-group row">
           <label for="priority">Priority</label>
-          <select class="form-control" id="priority">
-            <option>High</option>
-            <option>Normal</option>
+          <select class="form-control" id="form-priority">
             <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+            <option>Urgent</option>
           </select>
         </div>
 
         <!-- 說明 -->
         <div class="form-group row">
           <label for="description">Description</label>
-          <textarea class="form-control" id="description" rows="3"></textarea>
+          <textarea class="form-control" id="form-description" rows="3"></textarea>
         </div>
         <br />
-        <button type="button" class="btn btn-default" id="tform-goback">Back</button>
-        <button type="button" class="btn btn-primary" id="tform-submit">Submit</button>
+        <button type="button" class="btn btn-default" id="form-goback">Back</button>
+        <button type="button" class="btn btn-primary" id="form-submit">Submit</button>
         <br />
         <br />
       </form>
@@ -131,6 +121,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/3.9.0/firebase.js"></script>
     <script src="javascripts/firebaseConfig.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
     <script src="javascripts/ticket.js"></script>
     <script src="javascripts/sb-admin-2.js"></script>
   </body>

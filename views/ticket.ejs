@@ -79,10 +79,6 @@
         </div>
         <div id="header-right">
           <div class="add-btn">
-            <!-- Button trigger modal -->
-            <button type="button" class="btn btn-default inner-add" data-toggle="modal" data-target="#quickAdd">
-              <span class="fa fa-plus fa-fw"></span> Quick Add
-            </button>
             <a href="/tform" class="btn btn-default inner-add-complete">
               <span class="fa fa-plus fa-fw"></span> Add a Ticket
             </a>
@@ -109,12 +105,12 @@
           <table class="table table-striped" id="open-Table">
             <thead>
               <tr>
-                <th hidden> ID </th>
+                <th id="id" onclick="sortOpenTable(0)"> ID </th>
                 <th id="co" onclick="sortOpenTable(1)"> Content </th>
-                <th id="ca" onclick="sortOpenTable(2)"> Category </th>
-                <th id="st" onclick="sortOpenTable(3)"> Status </th>
-                <th id="pr" onclick="sortOpenTable(4)"> Priority </th>
-                <th id="ow" onclick="sortOpenTable(5)"> Owner </th>
+                <!-- <th id="ca" onclick="sortOpenTable(2)"> Category </th> -->
+                <th id="st" onclick="sortOpenTable(2)"> Status </th>
+                <th id="pr" onclick="sortOpenTable(3)"> Priority </th>
+                <!-- <th id="ow" onclick="sortOpenTable(4)"> Owner </th> -->
                 <th>  </th>
               </tr>
             </thead>
@@ -127,12 +123,12 @@
           <table class="table table-striped" id="close-Table">
             <thead>
               <tr>
-                <th hidden> ID </th>
+                <th id="id" onclick="sortCloseTable(0)"> ID </th>
                 <th id="co" onclick="sortCloseTable(1)"> Content </th>
-                <th id="ca" onclick="sortCloseTable(2)"> Category </th>
-                <th id="st" onclick="sortCloseTable(3)"> Status </th>
-                <th id="pr" onclick="sortCloseTable(4)"> Priority </th>
-                <th id="ow" onclick="sortCloseTable(5)"> Owner </th>
+                <!-- <th id="ca" onclick="sortCloseTable(2)"> Category </th> -->
+                <th id="st" onclick="sortCloseTable(2)"> Status </th>
+                <th id="pr" onclick="sortCloseTable(3)"> Priority </th>
+                <!-- <th id="ow" onclick="sortCloseTable(4)"> Owner </th> -->
                 <th>  </th>
               </tr>
             </thead>
@@ -140,62 +136,6 @@
             </tbody>
 
           </table>
-        </div>
-      </div>
-    </div>
-
-
-    <!-- Modal -->
-    <div class="modal fade" id="quickAdd" tabindex="-1" role="dialog" aria-labelledby="quickAddTitle" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="quickAddTitle"></h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <!-- Form Content -->
-            <form>
-              <div class="form-group">
-                <label for="modal-task-name" class="col-2 col-form-label">Content:  </label>
-                <div class="col-4">
-                  <input class="form-control" type="text" value="" id="modal-task-name">
-                </div>
-              </div>
-              <!-- 分類 -->
-              <div class="form-group">
-                <label for="modal-category">Category:  </label>
-                <select class="form-control" id="modal-category">
-                  <option>9th floor</option>
-                  <option>yy architects</option>
-                  <option>Fong Yu Invest</option>
-                  <option>Tinichats</option>
-                </select>
-              </div>
-              <!-- 緊急 -->
-              <div class="form-group">
-                <label for="modal-priority">Priority:  </label>
-                <select class="form-control" id="modal-priority">
-                  <option>High</option>
-                  <option>Normal</option>
-                  <option>Low</option>
-                </select>
-              </div>
-              <!-- 說明 -->
-              <div class="form-group">
-                <label for="modal-description">Description:  </label>
-                <textarea class="form-control" id="modal-description" rows="3"></textarea>
-              </div>
-
-            </form>
-
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" id="modal-submit">Submit</button>
-          </div>
         </div>
       </div>
     </div>
@@ -224,10 +164,10 @@
                 <span id="view-name"></span>
               </div>
               <!-- 分類 -->
-              <div class="form-group">
+              <!-- <div class="form-group">
                 <label for="category">Category:  </label>
                 <span id="view-cate"></span>
-              </div>
+              </div> -->
               <!-- 狀態 -->
               <div class="form-group">
                 <label for="status">Status:  </label>
@@ -239,10 +179,10 @@
                 <span id="view-prio"></span>
               </div>
               <!-- 負責人 -->
-              <div class="form-group">
+              <!-- <div class="form-group">
                 <label for="owner" class="col-2 col-form-label">Owner:  </label>
                 <span id="view-owne"></span>
-              </div>
+              </div> -->
               <!-- 說明 -->
               <div class="form-group">
                 <label for="description">Description:  </label>
@@ -392,6 +332,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/3.9.0/firebase.js"></script>
     <script src="javascripts/firebaseConfig.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
     <script src="javascripts/ticket.js"></script>
     <script src="javascripts/sb-admin-2.js"></script>
   </body>
