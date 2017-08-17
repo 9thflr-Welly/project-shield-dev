@@ -4,7 +4,7 @@ var   sublist  = [];
 $(document).ready(function() {
 
   if(window.location.pathname === '/ticket'){
-    document.getElementById("defaultOpen").click();
+    document.getElementById("defaultOpen").click(); // open tab selected
     setTimeout(loadTable, 1000);
   }
 
