@@ -4,6 +4,7 @@ var sublist  = []
 var DataTicket
 var DataAgent
 var DataContact
+var DataSolution
 
 $(document).ready(function() {
   var socket = io.connect()
@@ -28,10 +29,17 @@ $(document).ready(function() {
   })
 
   socket.on('all contacts info', data => {
-    // console.log('Contact: ')
-    // console.log(data[0])
+    console.log('Contact: ')
+    console.log(data)
     DataContact = data
   })
+
+  socket.on('all solutions info', data => {
+    // console.log('Solutions: ')
+    // console.log(data)
+    DataSolution = data
+  })
+
 
 })
 
@@ -84,7 +92,7 @@ function loadTable(){
 }
 
 function submitAdd(){
-  
+
 }
 
 function statusMark(status){
