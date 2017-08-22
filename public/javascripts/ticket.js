@@ -23,6 +23,23 @@ $(document).ready(function() {
   $('#editModal').on('hidden.bs.modal', reset); //editModal 收起來
   $('#viewModal').on('hidden.bs.modal', reset); //viewModal 收起來
 
+  //=========[SEARCH by TEXT]=========
+  $("#exampleInputAmount").keyup(function() {
+    var open_rows = $('#open-ticket-list tr');
+    var close_rows = $('#closed-ticket-list tr');
+    var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+    open_rows.show().filter(function() {
+      var text1 = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+      return !~text1.indexOf(val);
+    }).hide();
+
+    close_rows.show().filter(function() {
+      var text2 = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+      return !~text2.indexOf(val);
+    }).hide();
+  });
+
 })
 
 //functions
