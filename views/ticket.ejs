@@ -107,10 +107,8 @@
               <tr>
                 <th id="id" onclick="sortOpenTable(0)"> ID </th>
                 <th id="co" onclick="sortOpenTable(1)"> Content </th>
-                <!-- <th id="ca" onclick="sortOpenTable(2)"> Category </th> -->
                 <th id="st" onclick="sortOpenTable(2)"> Status </th>
                 <th id="pr" onclick="sortOpenTable(3)"> Priority </th>
-                <!-- <th id="ow" onclick="sortOpenTable(4)"> Owner </th> -->
                 <th>  </th>
               </tr>
             </thead>
@@ -125,10 +123,8 @@
               <tr>
                 <th id="id" onclick="sortCloseTable(0)"> ID </th>
                 <th id="co" onclick="sortCloseTable(1)"> Content </th>
-                <!-- <th id="ca" onclick="sortCloseTable(2)"> Category </th> -->
                 <th id="st" onclick="sortCloseTable(2)"> Status </th>
                 <th id="pr" onclick="sortCloseTable(3)"> Priority </th>
-                <!-- <th id="ow" onclick="sortCloseTable(4)"> Owner </th> -->
                 <th>  </th>
               </tr>
             </thead>
@@ -155,66 +151,39 @@
             <form>
               <!-- 編號 -->
               <div class="form-group">
-                <label for="task-name" class="col-2 col-form-label">ID:  </label>
+                <label>ID:  </label>
                 <span id="view-id"></span>
               </div>
-              <!-- 任務內容 -->
+              <!-- 主題 -->
               <div class="form-group">
-                <label for="task-name" class="col-2 col-form-label">Content:  </label>
-                <span id="view-name"></span>
+                <label>Subject:  </label>
+                <span id="view-subject"></span>
               </div>
-              <!-- 分類 -->
-              <!-- <div class="form-group">
-                <label for="category">Category:  </label>
-                <span id="view-cate"></span>
-              </div> -->
-              <!-- 狀態 -->
+              <!-- email -->
               <div class="form-group">
-                <label for="status">Status:  </label>
-                <span id="view-stat"></span>
+                <label>Email:  </label>
+                <span id="view-email"></span>
               </div>
-              <!-- 緊急 -->
+              <!-- phone -->
               <div class="form-group">
-                <label for="priority">Priority:  </label>
-                <span id="view-prio"></span>
+                <label>Phone:  </label>
+                <span id="view-phone"></span>
               </div>
-              <!-- 負責人 -->
-              <!-- <div class="form-group">
-                <label for="owner" class="col-2 col-form-label">Owner:  </label>
-                <span id="view-owne"></span>
-              </div> -->
+              <!-- status -->
+              <div class="form-group">
+                <label>Status:  </label>
+                <span id="view-status"></span>
+              </div>
+              <!-- priority -->
+              <div class="form-group">
+                <label>Priority:  </label>
+                <span id="view-priority"></span>
+              </div>
               <!-- 說明 -->
               <div class="form-group">
-                <label for="description">Description:  </label>
-                <span id="view-desc"></span>
+                <label>Description:  </label>
+                <span id="view-description"></span>
               </div>
-              <!-- 建立人 -->
-              <div class="form-group">
-                <label for="description">Initiator:  </label>
-                <span id="view-inir"></span>
-              </div>
-              <!-- 建立日期 -->
-              <div class="form-group">
-                <label for="description">Initiated Date:  </label>
-                <span id="view-inid"></span>
-              </div>
-              <!-- 修改人 -->
-              <div class="form-group">
-                <label for="description">Modifier:  </label>
-                <span id="view-modr"></span>
-              </div>
-              <!-- 修改日期 -->
-              <div class="form-group">
-                <label for="description">Modified Date:  </label>
-                <span id="view-modd"></span>
-              </div>
-              <!-- 子任務 -->
-              <div class="form-group">
-                <label for="subtasks">Tasks:  </label>
-                <br />
-                <ul id="view-subt"></ul>
-              </div>
-
             </form>
 
           </div>
@@ -236,89 +205,61 @@
             </button>
           </div>
           <div class="modal-body">
-
+            <div id="loading" class="loading"></div>
             <form>
               <!-- 編號 -->
               <div class="form-group">
-                <label for="task-name" class="col-2 col-form-label">ID</label>
+                <label>ID:  </label>
                 <span id="edit-id"></span>
               </div>
-              <!-- 任務內容 -->
+              <!-- 主題 -->
               <div class="form-group">
-                <label for="edit-task-name" class="col-2 col-form-label">Content:  </label>
+                <label class="col-2 col-form-label">Subject</label>
                 <div class="col-4">
-                  <input class="form-control" type="text" value="" id="edit-task-name">
+                  <input class="form-control" type="text" value="" id="edit-subject">
                 </div>
               </div>
-              <!-- 分類 -->
+              <!-- email -->
               <div class="form-group">
-                <label for="edit-category">Category:  </label>
-                <select class="form-control" id="edit-category">
-                  <option>9th floor</option>
-                  <option>yy architects</option>
-                  <option>Fong Yu Invest</option>
-                  <option>Tinichats</option>
-                </select>
+                <label class="col-2 col-form-label">Email</label>
+                <div class="col-4">
+                  <input class="form-control" type="text" value="" id="edit-email">
+                </div>
+              </div>
+              <!-- phone -->
+              <div class="form-group">
+                <label class="col-2 col-form-label">Phone</label>
+                <div class="col-4">
+                  <input class="form-control" type="text" value="" id="edit-phone">
+                </div>
               </div>
               <!-- 狀態 -->
               <div class="form-group">
-                <label for="edit-status">Status:  </label>
+                <label>Status</label>
                 <select class="form-control" id="edit-status">
+                  <option>Open</option>
                   <option>Pending</option>
-                  <option>Progress</option>
-                  <option>Testing</option>
-                  <option>Solved</option>
+                  <option>Resolved</option>
                   <option>Closed</option>
                 </select>
               </div>
               <!-- 緊急 -->
               <div class="form-group">
-                <label for="edit-priority">Priority:  </label>
+                <label>Priority</label>
                 <select class="form-control" id="edit-priority">
-                  <option>High</option>
-                  <option>Normal</option>
                   <option>Low</option>
+                  <option>Medium</option>
+                  <option>High</option>
+                  <option>Urgent</option>
                 </select>
               </div>
-              <!-- 負責人 -->
-              <div class="form-group">
-                <label for="edit-owner" class="col-2 col-form-label">Owner:  </label>
-                <div class="col-4">
-                  <input class="form-control" type="text" value="" id="edit-owner">
-                </div>
-              </div>
+
               <!-- 說明 -->
               <div class="form-group">
-                <label for="edit-description">Description</label>
+                <label>Description</label>
                 <textarea class="form-control" id="edit-description" rows="3"></textarea>
               </div>
-
-              <!-- 建立人 -->
-              <div class="form-group">
-                <label for="edit-inir" class="col-2 col-form-label">Initiator:  </label>
-                <span id="edit-inir"></span>
-              </div>
-              <!-- 建立日期 -->
-              <div class="form-group">
-                <label for="edit-inid" class="col-2 col-form-label">Initiated Date:  </label>
-                <span id="edit-inid"></span>
-              </div>
-              <!-- 子任務 -->
-              <div class="form-group">
-                <label for="edit-subt" class="col-2 col-form-label">Tasks:  </label>
-                <div class="input-group">
-                  <input type="text" class="form-control" placeholder="" id="sub-input">
-                  <span class="input-group-btn">
-                    <button class="btn btn-secondary" type="button" id="add-sub">Add</button>
-                  </span>
-                </div>
-                <br />
-                <ul id="edit-subt">
-                </ul>
-              </div>
-              <br />
             </form>
-
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

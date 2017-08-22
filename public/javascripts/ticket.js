@@ -1,10 +1,8 @@
 var key
 var sublist  = []
 
-var DataTicket
-var DataAgent
-var DataContact
-var DataSolution
+var yourdomain = 'fongyu';
+var api_key = '4qydTzwnD7xRGaTt7Hqw';
 
 $(document).ready(function() {
   var socket = io.connect()
@@ -15,87 +13,154 @@ $(document).ready(function() {
   }
 
   $(document).on('click', '#signout-btn', logout) //登出
-
-  socket.on('all tickets info', data => {
-    // console.log('Ticket: ')
-    // console.log(data[0])
-    DataTicket = data
-  })
-
-  socket.on('all agents info', data => {
-    // console.log('Agent: ')
-    // console.log(data[0])
-    DataAgent = data
-  })
-
-  socket.on('all contacts info', data => {
-    console.log('Contact: ')
-    console.log(data)
-    DataContact = data
-  })
-
-  socket.on('all solutions info', data => {
-    // console.log('Solutions: ')
-    // console.log(data)
-    DataSolution = data
-  })
-
+  $(document).on('click', '#form-goback', goBack) //上一頁
+  $(document).on('click', '#form-submit', submitAdd) //ticket form 送出
+  $(document).on('click', '#edit-submit', changeEdit) //ticket form 送出
+  $(document).on('click', '#deleBtn', deleteTicket) //ticket form 送出
+  // modal效果
+  $(document).on('click', '#editBtn', modalEdit); //editModal 打開
+  $(document).on('click', '#viewBtn', modalView); //viewModal 打開
+  $('#editModal').on('hidden.bs.modal', reset); //editModal 收起來
+  $('#viewModal').on('hidden.bs.modal', reset); //viewModal 收起來
 
 })
 
 //functions
 function loadTable(){
-  // console.log('loaded')
-  // console.log(DataTicket);
-
-  for(let i=0;i < DataTicket.length;i++){
-      if(DataTicket[i].status === 5) {
-        $('#closed-ticket-list').prepend(
-          '<tr>' +
-            '<td id="' + DataTicket[i].id + '">' + DataTicket[i].id + '</td>' +
-            '<td>' + DataTicket[i].subject + '</td>' +
-            // '<td class="category">' + DataTicket[i].category + '</td>' +
-            '<td>' + statusMark(DataTicket[i].status) + '</td>' +
-            '<td>' + priorityMark(DataTicket[i].priority) + '</td>' +
-            // '<td class="owner">' + DataTicket[i].owner + '</td>' +
-            '<td>' +
-              '<button type="button" id="editBtn" data-toggle="modal" data-target="#editModal">Edit</button>' +
-              ' ' +
-              '<button type="button" id="viewBtn" data-toggle="modal" data-target="#viewModal">View</button>' +
-              ' ' +
-              '<button type="button" id="deleBtn">Delete</button>' +
-            '</td>' +
-          '</tr>'
-        );
-      } else {
-        $('#open-ticket-list').prepend(
-          '<tr>' +
-            '<td id="' + DataTicket[i].id + '">' + DataTicket[i].id + '</td>' +
-            '<td>' + DataTicket[i].subject + '</td>' +
-            // '<td class="category">' + DataTicket[i].category + '</td>' +
-            '<td>' + statusMark(DataTicket[i].status) + '</td>' +
-            '<td>' + priorityMark(DataTicket[i].priority) + '</td>' +
-            // '<td class="owner">' + DataTicket[i].owner + '</td>' +
-            '<td>' +
-              '<button type="button" id="editBtn" data-toggle="modal" data-target="#editModal">Edit</button>' +
-              ' ' +
-              '<button type="button" id="viewBtn" data-toggle="modal" data-target="#viewModal">View</button>' +
-              ' ' +
-              '<button type="button" id="deleBtn">Delete</button>' +
-            '</td>' +
-          '</tr>'
-        );
+  $.ajax(
+    {
+      url: "https://"+yourdomain+".freshdesk.com/api/v2/tickets?include=requester",
+      type: 'GET',
+      contentType: "application/json; charset=utf-8",
+      dataType: "json",
+      headers: {
+        "Authorization": "Basic " + btoa(api_key + ":x")
+      },
+      success: function(data, textStatus, jqXHR) {
+        // console.log(data);
+        for(let i=0;i < data.length;i++){
+            if(data[i].status === 5) {
+              $('#closed-ticket-list').prepend(
+                '<tr>' +
+                  '<td id="' + data[i].id + '">' + data[i].id + '</td>' +
+                  '<td>' + data[i].subject + '</td>' +
+                  '<td>' + statusNumberToText(data[i].status) + '</td>' +
+                  '<td>' + priorityNumberToText(data[i].priority) + '</td>' +
+                  '<td>' +
+                    '<button type="button" id="editBtn" data-toggle="modal" data-target="#editModal">Edit</button>' +
+                    ' ' +
+                    '<button type="button" id="viewBtn" data-toggle="modal" data-target="#viewModal">View</button>' +
+                    ' ' +
+                    '<button type="button" id="deleBtn">Delete</button>' +
+                  '</td>' +
+                '</tr>'
+              );
+            } else {
+              $('#open-ticket-list').prepend(
+                '<tr>' +
+                  '<td id="' + data[i].id + '">' + data[i].id + '</td>' +
+                  '<td>' + data[i].subject + '</td>' +
+                  '<td>' + statusNumberToText(data[i].status) + '</td>' +
+                  '<td>' + priorityNumberToText(data[i].priority) + '</td>' +
+                  '<td>' +
+                    '<button type="button" id="editBtn" data-toggle="modal" data-target="#editModal">Edit</button>' +
+                    ' ' +
+                    '<button type="button" id="viewBtn" data-toggle="modal" data-target="#viewModal">View</button>' +
+                    ' ' +
+                    '<button type="button" id="deleBtn">Delete</button>' +
+                  '</td>' +
+                '</tr>'
+              );
+            }
+          }
+      },
+      error: function(jqXHR, tranStatus) {
+        console.log('error');
       }
-
-
     }
+  );
+
+
 }
 
 function submitAdd(){
+  let subject = $('#form-subject').val();
+  let email = $('#form-email').val();
+  let phone = $('#form-phone').val();
+  let status = $('#form-status option:selected').text();
+  let priority = $('#form-priority option:selected').text();
+  let description = $('#form-description').val();
+  ticket_data = '{ "description": "'+description+'", "subject": "'+subject+'", "email": "'+email+'", "phone": "'+phone+'", "priority": '+priorityTextToMark(priority)+', "status": '+statusTextToMark(status)+' }';
+
+  // 驗證
+  let email_reg = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()\.,;\s@\"]+\.{0,1})+[^<>()\.,;:\s@\"]{2,})$/;
+  let phone_reg = /\b[0-9]+\b/;
+  if(!email_reg.test(email)){
+    $('#error').append('請輸入正確的email格式');
+    $('#form-email').css('border', '1px solid red');
+    setTimeout(() => {
+      $('#error').empty();
+      $('#form-email').css('border', '1px solid #ccc');
+    }, 3000);
+  } else if(!phone_reg.test(phone)) {
+    $('#error').append('請輸入正確的電話格式');
+    $('#form-phone').css('border', '1px solid red');
+    setTimeout(() => {
+      $('#error').empty();
+      $('#form-phone').css('border', '1px solid #ccc');
+    }, 3000);
+  } else if($('#form-subject').val().trim() === '') {
+    $('#error').append('請輸入主題');
+    $('#form-subject').css('border', '1px solid red');
+    setTimeout(() => {
+      $('#error').empty();
+      $('#form-subject').css('border', '1px solid #ccc');
+    }, 3000);
+  } else if($('#form-description').val().trim() === '') {
+    $('#error').append('請輸入內容');
+    $('#form-description').css('border', '1px solid red');
+    setTimeout(() => {
+      $('#error').empty();
+      $('#form-description').css('border', '1px solid #ccc');
+    }, 3000);
+  } else {
+    $.ajax(
+      {
+        url: "https://"+yourdomain+".freshdesk.com/api/v2/tickets",
+        type: 'POST',
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        headers: {
+          "Authorization": "Basic " + btoa(api_key + ":x")
+        },
+        data: ticket_data,
+        success: function(data, textStatus, jqXHR) {
+          console.log('works');
+        },
+        error: function(jqXHR, tranStatus) {
+          x_request_id = jqXHR.getResponseHeader('X-Request-Id');
+          response_text = jqXHR.responseText;
+        }
+      }
+    );
+
+    $('#form-subject').val('');
+    $('#form-email').val('');
+    $('#form-phone').val('');
+    $('#form-description').val('');
+
+    setTimeout(() => {
+      location.href = '/';
+    }, 1000)
+  }
 
 }
 
-function statusMark(status){
+function goBack(){
+  window.history.back();
+}
+
+function statusNumberToText(status){
   switch(status) {
     case 5:
         return 'Closed';
@@ -111,7 +176,7 @@ function statusMark(status){
   }
 }
 
-function priorityMark(priority){
+function priorityNumberToText(priority){
   switch(priority) {
     case 4:
         return 'Urgent';
@@ -124,6 +189,38 @@ function priorityMark(priority){
         break;
     default:
         return 'Low';
+  }
+}
+
+function statusTextToMark(status){
+  switch(status) {
+    case 'Closed':
+        return 5;
+        break;
+    case 'Resolved':
+        return 4;
+        break;
+    case 'Pending':
+        return 3;
+        break;
+    default:
+        return 2;
+  }
+}
+
+function priorityTextToMark(priority){
+  switch(priority) {
+    case 'Urgent':
+        return 4;
+        break;
+    case 'High':
+        return 3;
+        break;
+    case 'Medium':
+        return 2;
+        break;
+    default:
+        return 1;
   }
 }
 
@@ -155,6 +252,203 @@ function logout(){
   })
 }
 
+function deleteTicket(){
+  let id = $(this).parent().parent().find('td:first').text();
+  let confirm_delete = confirm('Are you sure?');
+
+  if(confirm_delete){
+    $.ajax(
+      {
+        url: "https://"+yourdomain+".freshdesk.com/api/v2/tickets/"+id,
+        type: 'DELETE',
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        headers: {
+          "Authorization": "Basic " + btoa(api_key + ":x")
+        },
+        success: function(data, textStatus, jqXHR) {
+          console.log('deleted');
+        },
+        error: function(jqXHR, tranStatus) {
+          console.log('error');
+        }
+      }
+    );
+
+    setTimeout(() => {
+      location.reload();
+    }, 1000)
+  }
+
+}
+
+function reset(){
+  $('#view-id').text(''); //主題
+  $('#view-subject').text(''); //主題
+  $('#view-email').text(''); //email
+  $('#view-phone').text(''); //電話
+  $('#view-status').text(''); //狀態
+  $('#view-priority').text(''); //緊急
+  $('#view-description').text(''); //說明
+
+  $('#edit-id').text(''); // 編號
+  $('#edit-subject').val(''); //主題
+  $('#edit-email').val(''); //email
+  $('#edit-phone').val(''); //電話
+  $('#edit-status').val('Open'); //狀態
+  $('#edit-priority').val('Low'); //緊急
+  $('#edit-description').val(''); //說明
+}
+
+// Modal Actions
+function modalEdit(){
+  let id = $(this).parent().parent().find('td:first').text();
+  let contact_id;
+
+  $.ajax(
+    {
+      url: "https://"+yourdomain+".freshdesk.com/api/v2/tickets/"+id+"?include=requester",
+      type: 'GET',
+      contentType: "application/json; charset=utf-8",
+      dataType: "json",
+      headers: {
+        "Authorization": "Basic " + btoa(api_key + ":x")
+      },
+      success: function(data, textStatus, jqXHR) {
+        // console.log(data);
+        contact_id = data.requester_id;
+        $('#edit-id').text(data.id);
+        $('#edit-subject').val(data.subject);
+        $('#edit-email').val(data.requester.email);
+        $('#edit-status').val(statusNumberToText(data.status));
+        $('#edit-priority').val(priorityNumberToText(data.priority));
+        $('#edit-description').val(data.description_text.trim());
+      },
+      error: function(jqXHR, tranStatus) {
+        x_request_id = jqXHR.getResponseHeader('X-Request-Id');
+        response_text = jqXHR.responseText;
+      }
+    }
+  );
+
+  setTimeout(() => {
+    $.ajax(
+      {
+        url: "https://"+yourdomain+".freshdesk.com/api/v2/contacts/"+contact_id,
+        type: 'GET',
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        headers: {
+          "Authorization": "Basic " + btoa(api_key + ":x")
+        },
+        success: function(data, textStatus, jqXHR) {
+          // console.log(data);
+          $('#edit-phone').val(data.phone);
+        },
+        error: function(jqXHR, tranStatus) {
+          x_request_id = jqXHR.getResponseHeader('X-Request-Id');
+          response_text = jqXHR.responseText;
+        }
+      }
+    );
+  }, 1000)
+
+}
+function modalView(){
+  let id = $(this).parent().parent().find('td:first').text();
+
+  $.ajax(
+    {
+      url: "https://"+yourdomain+".freshdesk.com/api/v2/tickets/"+id+"?include=requester",
+      type: 'GET',
+      contentType: "application/json; charset=utf-8",
+      dataType: "json",
+      headers: {
+        "Authorization": "Basic " + btoa(api_key + ":x")
+      },
+      success: function(data, textStatus, jqXHR) {
+        // console.log(data);
+        $('#view-id').text(data.id);
+        $('#view-subject').text(data.subject);
+        $('#view-email').text(data.requester.email);
+        $('#view-phone').text(data.requester.phone);
+        $('#view-status').text(statusNumberToText(data.status));
+        $('#view-priority').text(priorityNumberToText(data.priority));
+        $('#view-description').text(data.description_text.trim());
+      },
+      error: function(jqXHR, tranStatus) {
+        x_request_id = jqXHR.getResponseHeader('X-Request-Id');
+        response_text = jqXHR.responseText;
+      }
+    }
+  );
+}
+function changeEdit(){
+  let id = $('#edit-id').text();
+  let subject = $('#edit-subject').val();
+  let email = $('#edit-email').val();
+  let phone = $('#edit-phone').val();
+  let status = $('#edit-status option:selected').text();
+  let priority = $('#edit-priority option:selected').text();
+  let description = $('#edit-description').val();
+  ticket_data = '{ "description": "'+description+'", "subject": "'+subject+'", "email": "'+email+'", "priority": '+priorityTextToMark(priority)+', "status": '+statusTextToMark(status)+' }';
+
+  contact_phone = '{ "phone": "'+phone+'" }';
+  var update_id;
+  // console.log(typeof subject, typeof email, typeof phone, typeof statusTextToMark(status), typeof priorityTextToMark(priority), typeof description);
+
+  $('#loading').text('Loading...');
+
+  $.ajax(
+    {
+      url: "https://"+yourdomain+".freshdesk.com/api/v2/tickets/"+id,
+      type: 'PUT',
+      contentType: "application/json; charset=utf-8",
+      dataType: "json",
+      headers: {
+        "Authorization": "Basic " + btoa(api_key + ":X")
+      },
+      data: ticket_data,
+      success: function(data, textStatus, jqXHR) {
+        update_id = data.requester_id;
+        alert('Saved!');
+      },
+      error: function(jqXHR, tranStatus) {
+        console.log('save error');
+      }
+    }
+  );
+
+  setTimeout(() => {
+    $.ajax(
+      {
+        url: "https://"+yourdomain+".freshdesk.com/api/v2/contacts/"+update_id,
+        type: 'PUT',
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        headers: {
+          "Authorization": "Basic " + btoa(api_key + ":X")
+        },
+        data: contact_phone,
+        success: function(data, textStatus, jqXHR) {
+
+        },
+        error: function(jqXHR, tranStatus) {
+          console.log('save error');
+        }
+      }
+    );
+  }, 1000)
+
+  setTimeout(() => {
+    location.reload();
+    $('#loading').empty();
+  }, 1000)
+
+}
+// Modal Actions Ends
+
+// Sorting Starts
 //=========[SORT OPEN]=========
 function sortOpenTable(n) {
   var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0
@@ -268,3 +562,4 @@ function sortCloseTable(n) {
     }
   }
 }
+// Sorting Ends

@@ -101,6 +101,15 @@ div.tab button.active {
   border: solid 1px black;
 }
 
+.error {
+  color: red;
+  font-size: 20px;
+}
+.loading {
+  font-weight: 500px;
+  font-size: 20px;
+}
+
 @media (max-width: 1135px){
   #ticket-wrap {
     position: relative;

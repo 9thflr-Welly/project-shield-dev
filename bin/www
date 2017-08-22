@@ -72,83 +72,6 @@ server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
-// freshdesk
-var unirest = require('unirest');
-
-var API_KEY = "4qydTzwnD7xRGaTt7Hqw";
-var FD_ENDPOINT = "fongyu";
-var URL_ticket =  "https://" + FD_ENDPOINT + ".freshdesk.com/api/v2/tickets";
-var URL_contact =  "https://" + FD_ENDPOINT + ".freshdesk.com/api/v2/contacts";
-var URL_agent =  "https://" + FD_ENDPOINT + ".freshdesk.com/api/v2/agents";
-var URL_solutions = "https://" + FD_ENDPOINT + ".freshdesk.com/api/v2/solutions/categories";
-
-var Request_ticket = unirest.get(URL_ticket);
-var Request_contact = unirest.get(URL_contact);
-var Request_agent = unirest.get(URL_agent);
-var Request_solutions = unirest.get(URL_solutions);
-
-var viewTicket;
-var viewContact;
-var viewAgent;
-var viewSolutions;
-
-Request_ticket.auth({
-  user: API_KEY,
-  pass: "X",
-  sendImmediately: true
-})
-.end(function(response){
-  // console.log(response.body)
-  viewTicket = response.body
-  console.log("Ticket Response Status : " + response.status)
-  if(response.status != 200){
-    console.log("X-Request-Id :" + response.headers['x-request-id']);
-  }
-});
-
-Request_contact.auth({
-  user: API_KEY,
-  pass: "X",
-  sendImmediately: true
-})
-.end(function(response){
-  // console.log(response.body)
-  viewContact = response.body
-  console.log("Contact Response Status : " + response.status)
-  if(response.status != 200){
-    console.log("X-Request-Id :" + response.headers['x-request-id']);
-  }
-});
-
-Request_agent.auth({
-  user: API_KEY,
-  pass: "X",
-  sendImmediately: true
-})
-.end(function(response){
-  // console.log(response.body)
-  viewAgent = response.body
-  console.log("Agent Response Status : " + response.status)
-  if(response.status != 200){
-    console.log("X-Request-Id :" + response.headers['x-request-id']);
-  }
-});
-
-Request_solutions.auth({
-  user: API_KEY,
-  pass: "X",
-  sendImmediately: true
-})
-.end(function(response){
-  // console.log(response.body)
-  viewSolutions = response.body
-  console.log("Agent Response Status : " + response.status)
-  if(response.status != 200){
-    console.log("X-Request-Id :" + response.headers['x-request-id']);
-  }
-});
-// end of freshdesk
-
 // 接收訊息
 // LINE bot implement
 bot.on('message', event => {
@@ -691,11 +614,6 @@ io.sockets.on('connection', (socket) => {
             users[socket.nickname] = socket;
         }
     });
-
-    io.sockets.emit('all tickets info', viewTicket);
-    io.sockets.emit('all agents info', viewAgent);
-    io.sockets.emit('all contacts info', viewContact);
-    io.sockets.emit('all solutions info', viewSolutions);
 
 
     socket.on('get tags from chat', data => {
