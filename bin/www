@@ -10,6 +10,9 @@ var firebase = require('firebase');
 var linebot = require('linebot');
 var apiai = require('apiai');
 var fs = require('fs');
+var Wufoo = require("wufoo");
+var wufoo = new Wufoo("hwanghsin", "F508-QAHZ-BYDY-50I3");
+var jotform = require("jotform")
 
 var config = {
     apiKey: "AIzaSyAqzIra9YkeE0HZZBSwXrjh4GemO7yVdmI",
@@ -55,6 +58,7 @@ const io = require('socket.io').listen(server);
 var users = {};
 var type_sticker = 0;
 var agent_nickname = 'agent'
+
 //webhook event
 var receiverId = '';
 var agent_sendTo_receiver;
@@ -71,6 +75,26 @@ const linebotParser = bot.parser();
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
+// wufoo.getFormEntries('meat', function(err, form) {
+//   // do something with your forms here.
+//   console.log(form);
+// });
+
+jotform.options({
+    debug: true,
+    apiKey: "c780b057c05239f39f973c57d2b873e1"
+});
+
+jotform.getSubmissions()
+.then(function(r){
+    /* successful response after request */
+    console.log(r);
+})
+.fail(function(e){
+    /* handle error */
+    console.log(e);
+})
 
 // 接收訊息
 // LINE bot implement
