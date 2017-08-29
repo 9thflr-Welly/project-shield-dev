@@ -17,31 +17,23 @@ $(document).ready(function() {
 
 function loadProf() {
   let userId = auth.currentUser.uid;
-//  alert(userId) ;
+  // console.log(userId);
   database.ref('users/' + userId).on('value', snap => {
-  let profInfo = snap.val();
+    let profInfo = snap.val();
+    // console.log(profInfo);
 
-
-  //  alert(snap.A);
     if(profInfo === null) {
       $('#error-message').show();
     } else {
-      let profInfo = []
-      let profData = snap.val();
-      let profId = Object.keys(profData);
-      profInfo.push(snap.child(profId[0]).val());
-      // console.log(profInfo);
-      $('#prof-id').text(profId);
-      $('#prof-name').text(profInfo[0].name);
-      $('#prof-dob').text(profInfo[0].dob);
-      $('#prof-email').text(profInfo[0].email);
-      $('#prof-gender').text(profInfo[0].gender);
-      $('#prof-phone').text(profInfo[0].phone);
-      $('#prof-nick').text(profInfo[0].nickname);
+      $('#prof-id').text(userId);
+      $('#prof-name').text(profInfo.name);
+      $('#prof-dob').text(profInfo.dob);
+      $('#prof-email').text(profInfo.email);
+      $('#prof-gender').text(profInfo.gender);
+      $('#prof-phone').text(profInfo.phone);
+      $('#prof-nick').text(profInfo.nickname);
     }
   });
-
-  // $('#prof-email').append(email);
 }
 
 function profEdit() {
@@ -52,8 +44,6 @@ function profEdit() {
   let email = $('#prof-email').text();
   let gender = $('#prof-gender').text();
   let phone = $('#prof-phone').text();
-
-  // console.log(id, name, dob, email, gender,phone);
 
   $('#prof-edit-id').val(id);
   $('#prof-edit-name').val(name);
@@ -76,11 +66,8 @@ function profSubmit() {
   let gender = $('#prof-edit-gender').val();
   let phone = $('#prof-edit-phone').val();
 
-  // console.log(id, name, dob, email, gender,phone);
-
-  // console.log(id);
   database.ref('users/' + userId).remove();
-  database.ref('users/' + userId).push({
+  database.ref('users/' + userId).update({
     name: name,
     dob: dob,
     email: email,
@@ -88,28 +75,12 @@ function profSubmit() {
     phone: phone,
     nickname: nick
   });
-  // if(id === ''){
-  //   database.ref('users/' + userId).push({
-  //     name: name,
-  //     dob: dob,
-  //     email: email,
-  //     gender: gender,
-  //     phone: phone
-  //   });
-  // } else {
-  //   database.ref('users/' + userId + '/' + id).set({
-  //     name: name,
-  //     dob: dob,
-  //     email: email,
-  //     gender: gender,
-  //     phone: phone
-  //   });
-  // }
 
   $('#error-message').hide();
   profClear();
   loadProf();
   $('#profModal').modal('hide');
+  location.reload();
 }
 
 function profClear() {

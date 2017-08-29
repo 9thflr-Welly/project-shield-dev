@@ -152,7 +152,7 @@ function submitAdd(){
         },
         data: ticket_data,
         success: function(data, textStatus, jqXHR) {
-          console.log('works');
+          // console.log('works');
         },
         error: function(jqXHR, tranStatus) {
           x_request_id = jqXHR.getResponseHeader('X-Request-Id');
@@ -167,7 +167,7 @@ function submitAdd(){
     $('#form-description').val('');
 
     setTimeout(() => {
-      location.href = '/';
+      location.href = '/ticket';
     }, 1000)
   }
 
@@ -284,7 +284,7 @@ function deleteTicket(){
           "Authorization": "Basic " + btoa(api_key + ":x")
         },
         success: function(data, textStatus, jqXHR) {
-          console.log('deleted');
+          // console.log('deleted');
         },
         error: function(jqXHR, tranStatus) {
           console.log('error');

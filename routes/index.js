@@ -15,19 +15,12 @@ router.get('/chat', function(req, res, next) {
   res.render('chat', { title: 'SHIELD chat' });
 });
 
-router.get('/tag', function(req, res, next) {
-  res.render('tag', { title: 'SHIELD tag' });
-});
-router.get('/history', function(req, res, next) {
-  res.render('history', { title: 'SHIELD history' });
+router.get('/agentChat', function(req, res, next) {
+  res.render('agentChat', { title: 'SHEILD agent chat'});
 });
 
-//authentication
-router.get('/login', function(req, res, next) {
-  res.render('login', { title: 'Login' });
-});
-router.get('/signup', function(req, res, next) {
-  res.render('signup', { title: 'Register' });
+router.get('/tag', function(req, res, next) {
+  res.render('tag', { title: 'SHIELD tag' });
 });
 
 router.get('/ticket', function(req, res, next) {
@@ -42,5 +35,12 @@ router.get('/profile', function(req, res, next) {
   res.render('profile', { title: 'Profile' });
 });
 
+//authentication
+router.get('/login', function(req, res, next) {
+  res.render('login', { title: 'Login' });
+});
+router.get('/signup', function(req, res, next) {
+  res.render('signup', { title: 'Register' });
+});
 
 module.exports = router;
