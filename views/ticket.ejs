@@ -1,280 +1,96 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><%= title %></title>
-
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" />
-    <link rel="stylesheet" href="stylesheets/sb-admin-2.css">
-    <link rel="stylesheet" href="stylesheets/main.css">
-    <link rel="stylesheet" href="stylesheets/ticket.css">
+    <link rel='stylesheet' href='/stylesheets/ticket.css' />
   </head>
   <body>
+    <h1><%= title %></h1>
+    <h2>Welcome to <%= title %></h2>
+    <!-- <button type="button" class="btn btn-success" id="btn_test">Button</button> -->
+    <div class="add-btn">
+      <a href="/tform" class="btn btn-default inner-add-complete">
+        <span class="fa fa-plus fa-fw"></span> Add a Ticket
+      </a>
+    </div>
+    <input type="text" class="ticket_search_bar" id="exampleInputAmount" value="" placeholder="Search">
 
-
-    <div id="wrapper">
-      <!-- Navigation -->
-      <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
-          <div class="navbar-header">
-              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                  <span class="sr-only">Toggle navigation</span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-              </button>
-              <a class="navbar-brand" href="/">SHIELD</a>
-          </div>
-          <!-- /.navbar-header -->
-
-          <ul class="nav navbar-top-links navbar-right">
-              <!-- /.dropdown -->
-              <li class="dropdown">
-                  <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                      <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
-                  </a>
-                  <ul class="dropdown-menu dropdown-user">
-                      <li><a href="/profile"><i class="fa fa-user fa-fw"></i> User Profile</a></li>
-                      <li class="divider"></li>
-                      <li><a href="/login" id="signout-btn"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
-                  </ul>
-                  <!-- /.dropdown-user -->
+    <div class="main">
+      <div class="navbar-default sidebar" role="navigation">
+        <div class="sidebar-nav navbar-collapse">
+           <ul class="nav" id="side-menu">
+              <li>
+                 <a href="/"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
               </li>
-              <!-- /.dropdown -->
-          </ul>
-          <!-- /.navbar-top-links -->
-
-          <div class="navbar-default sidebar" role="navigation">
-              <div class="sidebar-nav navbar-collapse">
-                <ul class="nav" id="side-menu">
-                  <li>
-                    <a href="/"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
-                  </li>
-                  <li>
-                    <a href="/chat"><i class="fa fa-commenting fa-fw"></i> Chat</a>
-                  </li>
-                  <li>
-                    <a href="/tag"><i class="fa fa-server fa-fw"></i> Tag</a>
-                  </li>
-                  <li>
-                    <a href="/calendar"><i class="fa fa-table fa-fw"></i> Calendar</a>
-                  </li>
-                  <li>
-                    <a href="/ticket" class="active"><i class="fa fa-ticket fa-fw"></i> Support</a>
-                  </li>
-                </ul>
-              </div>
-              <!-- /.sidebar-collapse -->
-          </div>
-          <!-- /.navbar-static-side -->
-      </nav>
-    </div>
-
-    <div id="ticket-wrap">
-      <div id="ticket-header">
-        <div id="header-left">
-          <span class="bigFont">Ticket List</span>
-        </div>
-        <div id="header-right">
-          <div class="add-btn">
-            <a href="/tform" class="btn btn-default inner-add-complete">
-              <span class="fa fa-plus fa-fw"></span> Add a Ticket
-            </a>
-          </div>
+              <li>
+                 <a href="/chat"><i class="fa fa-commenting fa-fw"></i> Chat</a>
+              </li>
+              <li>
+                <a href="/tag"><i class="fa fa-server fa-fw"></i> Tag</a>
+              </li>
+              <li>
+                 <a href="/calendar"><i class="fa fa-table fa-fw"></i> Calendar</a>
+              </li>
+              <li>
+                 <a href="/ticket"><i class="fa fa-ticket fa-fw"></i> Support</a>
+              </li>
+           </ul>
         </div>
       </div>
-      <br />
-      <div id="ticket-search">
-        <form class="form-inline">
-          <div class="input-group">
-            <input type="text" class="form-control" id="exampleInputAmount" placeholder="">
-            <div class="input-group-addon"><span class="fa fa-search fa-fw" id="ticket-search"></span></div>
-          </div>
-        </form>
-      </div>
-      <br />
-      <div id="ticket-tab">
-        <div class="tab">
-          <button class="tablinks" onclick="openCity(event, 'Open')" id="defaultOpen">Open</button>
-          <button class="tablinks" onclick="openCity(event, 'Closed')">Closed</button>
-        </div>
-
-        <div id="Open" class="tabcontent">
-          <table class="table table-striped" id="open-Table">
-            <thead>
-              <tr>
-                <th id="id" onclick="sortOpenTable(0)"> ID </th>
-                <th id="co" onclick="sortOpenTable(1)"> Content </th>
-                <th id="st" onclick="sortOpenTable(2)"> Status </th>
-                <th id="pr" onclick="sortOpenTable(3)"> Priority </th>
-                <th>  </th>
-              </tr>
-            </thead>
-            <tbody id="open-ticket-list"></tbody>
-
-          </table>
-        </div>
-
-        <div id="Closed" class="tabcontent">
-          <table class="table table-striped" id="close-Table">
-            <thead>
-              <tr>
-                <th id="id" onclick="sortCloseTable(0)"> ID </th>
-                <th id="co" onclick="sortCloseTable(1)"> Content </th>
-                <th id="st" onclick="sortCloseTable(2)"> Status </th>
-                <th id="pr" onclick="sortCloseTable(3)"> Priority </th>
-                <th>  </th>
-              </tr>
-            </thead>
-            <tbody id="closed-ticket-list">
-            </tbody>
-
-          </table>
-        </div>
+      <div class="ticket">
+        <table>
+          <thead>
+            <tr>
+              <th> ID </th>
+              <th> Content </th>
+              <th> Status </th>
+              <th> Priority </th>
+              <th> Due </th>
+            </tr>
+          </thead>
+          <tbody id="ticket-content">
+          </tbody>
+        </table>
       </div>
     </div>
+    <div >
+      <p id="console">
 
-    <!-- View Modal -->
-    <div class="modal fade" id="viewModal" tabindex="-1" role="dialog" aria-labelledby="viewModalTitle" aria-hidden="true">
-      <div class="modal-dialog" role="document">
+      </p>
+    </div>
+    <div class="modal fade" id="ticketInfoModal" role="dialog">
+      <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="viewModalTitle"></h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <div style="display:flex">
+              <span id="ID_num"></span>
+              <table>
+                <th style="display:none">subject</th>
+                <td class="modal-title edit">User NickName</td>
+              </table>
+
+            </div>
           </div>
           <div class="modal-body">
+            <table class="info_input_table">
 
-            <form>
-              <!-- 編號 -->
-              <div class="form-group">
-                <label>ID:  </label>
-                <span id="view-id"></span>
-              </div>
-              <!-- 主題 -->
-              <div class="form-group">
-                <label>Subject:  </label>
-                <span id="view-subject"></span>
-              </div>
-              <!-- email -->
-              <div class="form-group">
-                <label>Email:  </label>
-                <span id="view-email"></span>
-              </div>
-              <!-- phone -->
-              <div class="form-group">
-                <label>Phone:  </label>
-                <span id="view-phone"></span>
-              </div>
-              <!-- status -->
-              <div class="form-group">
-                <label>Status:  </label>
-                <span id="view-status"></span>
-              </div>
-              <!-- priority -->
-              <div class="form-group">
-                <label>Priority:  </label>
-                <span id="view-priority"></span>
-              </div>
-              <!-- 說明 -->
-              <div class="form-group">
-                <label>Description:  </label>
-                <span id="view-description"></span>
-              </div>
-            </form>
-
+            </table>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" id="ticketInfo-submit" class="btn btn-default" data-dismiss="modal" style="background-color: greenyellow;">Confirm</button>
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Edit Modal -->
-    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalTitle" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="editModalTitle"></h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div id="loading" class="loading"></div>
-            <form>
-              <!-- 編號 -->
-              <div class="form-group">
-                <label>ID:  </label>
-                <span id="edit-id"></span>
-              </div>
-              <!-- 主題 -->
-              <div class="form-group">
-                <label class="col-2 col-form-label">Subject</label>
-                <div class="col-4">
-                  <input class="form-control" type="text" value="" id="edit-subject">
-                </div>
-              </div>
-              <!-- email -->
-              <div class="form-group">
-                <label class="col-2 col-form-label">Email</label>
-                <div class="col-4">
-                  <input class="form-control" type="text" value="" id="edit-email">
-                </div>
-              </div>
-              <!-- phone -->
-              <div class="form-group">
-                <label class="col-2 col-form-label">Phone</label>
-                <div class="col-4">
-                  <input class="form-control" type="text" value="" id="edit-phone">
-                </div>
-              </div>
-              <!-- 狀態 -->
-              <div class="form-group">
-                <label>Status</label>
-                <select class="form-control" id="edit-status">
-                  <option>Open</option>
-                  <option>Pending</option>
-                  <option>Resolved</option>
-                  <option>Closed</option>
-                </select>
-              </div>
-              <!-- 緊急 -->
-              <div class="form-group">
-                <label>Priority</label>
-                <select class="form-control" id="edit-priority">
-                  <option>Low</option>
-                  <option>Medium</option>
-                  <option>High</option>
-                  <option>Urgent</option>
-                </select>
-              </div>
 
-              <!-- 說明 -->
-              <div class="form-group">
-                <label>Description</label>
-                <textarea class="form-control" id="edit-description" rows="3"></textarea>
-              </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" id="edit-submit">Submit</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js'></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/3.9.0/firebase.js"></script>
-    <script src="javascripts/firebaseConfig.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+    <script src="javascripts/socket.io.js"></script>
     <script src="javascripts/ticket.js"></script>
-    <script src="javascripts/sb-admin-2.js"></script>
   </body>
 </html>
