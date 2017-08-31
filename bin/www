@@ -17,12 +17,12 @@ var bufferAPI = require('buffer-node'),
   buffer_api = bufferAPI('1/7693333cc6b9610bfc49022ca8c3baaf')
 
 var config = {
-    apiKey: "AIzaSyAr1ic8lr_asYZTwwIjBNp3uiqFdu1QJKI",
-    authDomain: "shield-dev-91210.firebaseapp.com",
-    databaseURL: "https://shield-dev-91210.firebaseio.com",
-    projectId: "shield-dev-91210",
-    storageBucket: "",
-    messagingSenderId: "514816655617"
+  apiKey: "AIzaSyAr1ic8lr_asYZTwwIjBNp3uiqFdu1QJKI",
+  authDomain: "shield-dev-91210.firebaseapp.com",
+  databaseURL: "https://shield-dev-91210.firebaseio.com",
+  projectId: "shield-dev-91210",
+  storageBucket: "shield-dev-91210.appspot.com",
+  messagingSenderId: "514816655617"
 };
 firebase.initializeApp(config);
 
@@ -44,6 +44,9 @@ tagsRef.on('value', snapshot => {
     console.log("tags data loading complete!");
     // ...
 });
+
+var chatObj;
+
 /**
  * Get port from environment and store in Express.
  */
@@ -64,11 +67,7 @@ var agent_nickname = 'agent';
 var receiverId = '';
 var agent_sendTo_receiver;
 // LINE bot設定
-var bot = linebot({
-    channelId: '1522555697',
-    channelSecret: 'bf698f41fcc086655174327b8ad752d5',
-    channelAccessToken: '+hGZzOkZqSikClHB5FYvYQqSoLGa4I+RVDyc3II8V92kGUxuzEvSLQpX8drq2AmLcbmc3RoZLcL0OnYJJGut9X12SB/MlL/2l58mPwXKSAEw2EtFl7pwAQx2nuB8d66Juu5YaqCKaB6E/+14vd6SHQdB04t89/1O/w1cDnyilFU='
-});
+var bot = linebot(getChatObj());
 const linebotParser = bot.parser();
 /**
  * Listen on provided port, on all network interfaces.
@@ -77,7 +76,7 @@ server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
-//buffer
+// buffer
 // buffer_api.user.get().then(
 buffer_api.profiles.get().then(
   function(response) {
@@ -1598,6 +1597,11 @@ io.sockets.on('connection', (socket) => {
         updateTicket(data);
     });
 
+    socket.on('channel', (data) => {
+      console.log(data);
+      setChatObj(data.channelId, data.channelSecret, data.channelAccessToken)
+    });
+
 });
 
 function updateTicket(data) {
@@ -1631,6 +1635,24 @@ function updateTicket(data) {
                 console.log("X-Request-Id :" + response.headers['x-request-id']);
             }
         });
+}
+
+function setChatObj(id, secret, token){
+  chatObj = {
+    channelId: id,
+    channelSecret: secret,
+    channelAccessToken: token
+  };
+}
+
+function getChatObj(){
+  if(chatObj !== undefined){
+    console.log('new data');
+    return chatObj;
+  } else {
+    console.log('no data');
+    return chatObj = { channelId: '1516667468', channelSecret: 'd89c9a5ef9ae83fbdfd2fc59ab451f98', channelAccessToken: 'yeeDeC5dExJDeVEPPf2dMTlAoZE4izrqX6bBaldhddpG7esOFEpxm5m5dMIIB7pz0zIS49QZxJBFgAkxQZWmfy9toaiTR+B/q1pz7F5xkf+dljkSJV1krOOtrT93BSSYydIZLnt0zxX8JCqWF4uE4wdB04t89/1O/w1cDnyilFU=' }
+  }
 }
 
 // catch 404 and forward to error handler

@@ -1,11 +1,9 @@
 var google_provider = new firebase.auth.GoogleAuthProvider();
 var facebook_provider = new firebase.auth.FacebookAuthProvider();
-// var line_code;
 
 $(document).ready(function() {
   $(document).on('click', '#login-btn', login); //登入
   $(document).on('click', '#google-log', googleLog); //Google登入
-  $(document).on('click', '#facebook-log', facebookLog); //Facebook登入
 });
 
 function login(){
@@ -13,10 +11,9 @@ function login(){
   var password = document.getElementById('login-password').value;
   auth.signInWithEmailAndPassword(email, password)
   .then(response => {
-    window.location.assign("/");
+    
   })
   .catch(error => {
-    // console.log(error.message);
     showError(error.message);
   });
 };
@@ -27,13 +24,6 @@ function googleLog() {
     var token = result.credential.accessToken;
     // The signed-in user info.
     var user = result.user;
-
-    database.ref('users/' + user.uid).update({
-      name: user.displayName,
-      email: user.email
-    });
-
-    // window.location.assign("/");
   }).catch(function(error) {
     // Handle Errors here.
     var errorCode = error.code;
@@ -45,29 +35,9 @@ function googleLog() {
   });
 }
 
-function facebookLog() {
-  auth.signInWithPopup(facebook_provider).then(function(result) {
-    // This gives you a Facebook Access Token. You can use it to access the Facebook API.
-    var token = result.credential.accessToken;
-    // The signed-in user info.
-    var user = result.user;
-    // console.log(user);
-
-    database.ref('users/' + user.uid).update({
-      name: user.displayName,
-      email: user.email
-    });
-
-    window.location.assign("/");
-
-  }).catch(function(error) {
-    // Handle Errors here.
-    var errorCode = error.code;
-    var errorMessage = error.message;
-    // The email of the user's account used.
-    var email = error.email;
-    // The firebase.auth.AuthCredential type that was used.
-    var credential = error.credential;
-    // ...
-  });
+function showError(msg) {
+  $('#reg-error').hide();
+  $('#reg-error').text('');
+  $('#reg-error').append(msg);
+  $('#reg-error').show();
 }
