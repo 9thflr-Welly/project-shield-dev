@@ -2,25 +2,25 @@ $(document).ready(function() {
   var socket = io.connect();    //socket
   // var unreadCount = 0;
 
-  var users = $('#users');              //what's this
-  var printAgent = $('#printAgent');    //agent welcome text
+  var users = $('#users');      //what's this
+  var printAgent = $('#printAgent');  //agent welcome text
   var messageForm = $('#send-message'); //button for agent to send message
   var messageInput = $('#message');     //input for agent to send message
   var messageContent = $('#chat');      //what's this
 
-  var clients = $('#clients');          //online rooms of tablinks
-  var idles = $('#idle-roomes');        //idle rooms of tablinks
-  var name_list = [];                   //list of all users
-  var user_list = [];                   // user list for checking on idle chat rooms
+  var clients = $('#clients');        //online rooms of tablinks
+  var idles = $('#idle-roomes');      //idle rooms of tablinks
+  var name_list = [];                 //list of all users
+  var user_list = []; // user list for checking on idle chat rooms
 
-  var canvas = $("#canvas");            //panel of message canvas
-  var person;                           //agent name
+  var canvas = $("#canvas");          //panel of message canvas
+  var person = "agentColman";         //agent name
 
   const LOADING_MSG_AND_ICON = "<p class='message-day' style='text-align: center'><strong><i>"
     + "Loading History Messages..."
     + "</i></strong><span class='loadingIcon'></span></p>";
   const NO_HISTORY_MSG = "<p class='message-day' style='text-align: center'><strong><i>"
-    + "-------------------------------------------------------No More History Message-------------------------------------------------------"
+    + "-沒有更舊的歷史訊息-"
     + "</i></strong></p>";
 
   var searchBox = $('.searchBox');    //input of search box
@@ -52,16 +52,56 @@ $(document).ready(function() {
   $(document).on('click', '.edit-button', changeProfile);
   $(document).on('click','#userInfo-submit',submitProfile);
   $(document).on('change', '.multiselect-container', multiselect_change);
+  $(document).on('click', '#upImg', upImg);
+  $(document).on('click', '#upVid', upVid);
+  $(document).on('click', '#upAud', upAud);
+
   $(document).on('click','.dropdown-menu', function(event){
     event.stopPropagation();
   });
 
+    // $('#nav_subMenu').on('click', function(){
+    //   console.log('nav_subMenu clicked on line 64');
+    //     var target = $(this).attr('rel');
+    //     console.log('target on line 371.ejs')
+    //     console.log(target);
+    //     if ($("#"+target).is(":visible")){
+    //         $('#check_mark').hide();
+    //     }else{
+    //         $('#check_mark').show()
+    //       }
+    //   });
+
+
+    $('.onclick_show').on('click', function(){
+      console.log('onclick_show exe');
+        var target = $(this).attr('rel');
+
+        if ($("#"+target).is(":visible")){
+            $("#"+target).hide();
+        }else{
+            $("#"+target).show();
+      }
+      });//onclick_show
+
+  function upImg(){
+    var imgAtt = $('#attImgFill').val();
+    $('#message').val('<img src="'+imgAtt+'"/>');
+  }
+  function upVid(){
+    var vidAtt = $('#attVidFill').val();
+    $('#message').val('<video controls><source src="'+vidAtt+'" type="video/mp4"></video>');
+  }
+  function upAud(){
+    var audAtt = $('#attAudFill').val();
+    $('#message').val('<video controls><source src="'+audAtt+'" type="video/mp4"></video>');
+  }
   setInterval(() => {
     closeIdleRoomTry();
   }, 20000);
 
-  if (window.location.pathname === '/chat') {
-    // console.log("Start loading history message...");
+  if (window.location.pathname === '/agentChat') {
+    console.log("Start loading history message...");
     setTimeout(function() {
       socket.emit('get json from back');
     }, 10);  //load history msg
@@ -106,13 +146,13 @@ $(document).ready(function() {
       canvas_last_child_time_list.push(convert_list.slice(-1)[0].getAttribute('rel'))
       if(over_fifteen_min - canvas_last_child_time_list[i] >= 60000) {
         // 更改display client的東西
-        // console.log('id = '+user_list[i]+' passed idle time');
+        console.log('id = '+user_list[i]+' passed idle time');
         // item_move_down = $('[rel="'+user_list[i]+'"]').parent();
         $('#idle-roomes').append($('[rel="'+user_list[i]+'"]').parent());
         $('#clients').find('[rel="'+user_list[i]+'"]').remove();
       }
       else {
-        // console.log('id = '+user_list[i]+' passed chat time');
+        console.log('id = '+user_list[i]+' passed chat time');
         // item_move_up = $('[rel="'+user_list[i]+'"]').parent();
         $('#clients').append($('[rel="'+user_list[i]+'"]').parent());
         $('#idle-roomes').find('[rel="'+user_list[i]+'"]').remove();
@@ -125,7 +165,7 @@ $(document).ready(function() {
 
   socket.on('push json to front', (data) => {
     //www emit data of history msg
-    // console.log("push json to front");
+    console.log("push json to front");
     for( i in data ) pushMsg(data[i]);    //one user do function one time
     sortUsers("recentTime", sortRecentBool, function(a,b){ return a<b; } );   //sort users by recent time
     closeIdleRoomTry();
@@ -146,7 +186,7 @@ $(document).ready(function() {
 
     historyMsgStr += historyMsg_to_Str(historyMsg);
     historyMsgStr += "<p class='message-day' style='text-align: center'><strong><italic>"
-      + "-------------------------------------------------------Present Message-------------------------------------------------------"
+      + "-即時訊息-"
       +" </italic></strong></p>";   //history message string tail
 
     canvas.append(    //push string into canvas
@@ -163,17 +203,18 @@ $(document).ready(function() {
 
     let lastMsg = historyMsg[historyMsg.length-1];
     let font_weight = profile.unRead ? "bold" : "normal";  //if last msg is by user, then assume the msg is unread by agent
-    let lastMsgStr = '<br><span id="msg" style="font-weight: '+ font_weight + '">' + toTimeStr(lastMsg.time) + lastMsg.message + "</span>";
-    //display last message at tablinks
+    let lastMsgStr = '<br><span id="msg" style="font-weight: '+ font_weight + '; font-size:12px">' + toTimeStr(lastMsg.time) + lastMsg.message + "</span>";
+    // display last message at tablinks
 
-    clients.append("<b><button rel=\""+profile.userId+"\" class=\"tablinks\""
+    clients.append("<b><button style='text-align:left' rel=\""+profile.userId+"\" class=\"tablinks\""
       + "data-avgTime=\""+ profile.avgChat +"\" "
       + "data-totalTime=\"" + profile.totalChat +"\" "
       + "data-chatTimeCount=\"" + profile.chatTimeCount +"\" "
       + "data-firstTime=\"" + profile.firstChat +"\" "
-      + "data-recentTime=\"" + lastMsg.time +"\"> "
-      + '<span id="nick">' + profile.nickname + '</span>'
-      + lastMsgStr
+      + "data-recentTime=\"" + lastMsg.time +"\" id=\"userInfoBtn\"> "
+      // + "<img src=\"\" alt=\"無法顯示相片\" class=\"userPhoto\" style=\"width:128px;height:128px;\"/>"
+      + '<span style="text-align:left; float:left; margin-left:12px" id="nick">' + profile.nickname + '</span>'
+      + lastMsgStr+'<div class="unread_msg">1</div>'
       + "</button></b>"
     );    //new a tablinks
 
@@ -194,11 +235,11 @@ $(document).ready(function() {
       if( head==0 ) ele.off('scroll');
       ele.attr('data-position', head);
       socket.emit('upload history msg from front', request);
-      // console.log('upload! head = '+head+', tail = '+tail);
+      console.log('upload! head = '+head+', tail = '+tail);
     }
   }
   socket.on('upload history msg from back', data=>{
-    // console.log('get uploaded history msg');
+    console.log('get uploaded history msg');
     let msgContent = $('#'+data.userId+'-content');
 
     let origin_height = msgContent[0].scrollHeight;
@@ -218,7 +259,7 @@ $(document).ready(function() {
     var userId = auth.currentUser.uid;
     database.ref('users/' + userId).on('value', snap => {
       let profInfo = snap.val();
-      person = profInfo.nickname;  //從DB獲取agent的nickname
+      let person = profInfo.nickname;  //從DB獲取agent的nickname
 
       if (person != '' && person != null) {
         socket.emit('new user', person, (data) => {
@@ -226,19 +267,21 @@ $(document).ready(function() {
           else {
             alert('username is already taken');
             person = prompt("Please enter your name");  //update new username
-            database.ref('users/' + userId).update({nickname : person});
+            database.ref('users/' + userId + '/' + profId).update({nickname : person});
           }
         });
       }
       else{
         person = prompt("Please enter your name");  //if username not exist,update username
-        database.ref('users/' + userId).update({nickname : person});
+        database.ref('users/' + userId + '/' + profId).update({nickname : person});
       }
       printAgent.html("Welcome <b>" + person + "</b>! You're now on board.");
     });
+    socket.emit('get json from agentChat', { id: userId } );
   }
 
   function clickUserTablink(){
+    setTimeout(showProfile,100);
     $("#selected").removeAttr('id').css("background-color", "");   //selected tablinks change, clean prev's color
     $(this).attr('id','selected').css("background-color",COLOR.CLICKED);    //clicked tablinks color
 
@@ -252,7 +295,7 @@ $(document).ready(function() {
     $('#user-rooms').val(target);             //change value in select bar
     $('#'+target+'-content').scrollTop($('#'+target+'-content')[0].scrollHeight);   //scroll to down
 
-    // console.log('click tablink executed');
+    console.log('click tablink executed');
   }
 
   function clickSpan() {
@@ -263,7 +306,7 @@ $(document).ready(function() {
 
   socket.on('new message2', (data) => {
      //if www push "new message2"
-    // console.log("Message get! identity=" + data.owner + ", name=" + data.name);
+    console.log("Message get! identity=" + data.owner + ", name=" + data.name);
     //owner = "user", "agent" ; name = "Colman", "Ted", others...
     displayMessage( data ); //update canvas
     displayClient( data );  //update tablinks
@@ -271,7 +314,20 @@ $(document).ready(function() {
     if( data.owner=="user" ) change_document_title(data.name);    //not done yet
     if( name_list.indexOf(data.id) == -1 ) {  //if its never chated user, push his name into name list
       name_list.push(data.id);
-      // console.log("new user!!! push into name_list!");
+      console.log("new user!!! push into name_list!");
+    }
+  });
+  socket.on('new message3', (data) => {
+     //if www push "new message2"
+    console.log("Message get! identity=" + data.owner + ", name=" + data.name);
+    //owner = "user", "agent" ; name = "Colman", "Ted", others...
+    displayMessage( data ); //update canvas
+    displayClient( data );  //update tablinks
+
+    if( data.owner=="user" ) change_document_title(data.name);    //not done yet
+    if( name_list.indexOf(data.id) == -1 ) {  //if its never chated user, push his name into name list
+      name_list.push(data.id);
+      console.log("new user!!! push into name_list!");
     }
   });
 
@@ -282,7 +338,7 @@ $(document).ready(function() {
 
       let designated_chat_room_msg_time = $("#" + data.id + "-content").find(".message:last").attr('rel');
       if(data.time - designated_chat_room_msg_time >= 900000){    // 如果現在時間多上一筆聊天記錄15分鐘
-        $("#" + data.id + "-content").append('<p class="message-day" style="text-align: center"><strong>-------------------New Session starts-------------------</strong></p>');
+        $("#" + data.id + "-content").append('<p class="message-day" style="text-align: center"><strong>-新訊息-</strong></p>');
       }
       if( data.owner == "agent" ) str = toAgentStr(data.message, data.name, data.time);
       else str = toUserStr(data.message, data.name, data.time);
@@ -323,15 +379,16 @@ $(document).ready(function() {
       clients.prepend(ele);
     }
     else{     //new user, make a tablinks
-      clients.prepend('<b><button rel="' + data.id + '" class="tablinks"><span id="nick">' + data.name
+      clients.prepend('<b><button id="userInfoBtn" data-toggle="modal" data-target="#userInfoModal"  rel="' + data.id + '" class="tablinks"><span id="nick">'+
+        + data.name
         + "</span><br><span id='msg' style='font-weight: " + font_weight + "'>" + toTimeStr(data.time)
         + data.message +  "</span></button></b>"
       );
     }
   } //close client function
   socket.on('new user profile', function(data){
-    // console.log('new user come in from www!');
-    // console.log(data);
+    console.log('new user come in from www!');
+    console.log(data);
     userProfiles[data.userId] = data;
   });
 
@@ -390,13 +447,14 @@ $(document).ready(function() {
       }
     });
 
-    // console.log("filterDataCustomer: ");
-    // console.log(filterDataCustomer);
+    console.log("filterDataCustomer: ");
+    console.log(filterDataCustomer);
     for( let way in filterDataCustomer ) {
+      if (way != 'VIP等級'){
       $('#selectBy').append('<li><input type="checkbox" value="filter_'+way+'">'+way+'</li>');
       $('.filterPanel').append(
         '<div class="filterUnit filterBar btn-group" id="filter_'+way+'" style="display:none;">'
-        + '<button data-toggle="dropdown" aria-expanded="false">'
+        + '<button class="filter_btn" data-toggle="dropdown" aria-expanded="false">'
         + way + ':<span class="multiselect-selected-text">全選</span>'
         + '<b class="caret"></b></button>'
         + '<ul class="multiselect-container dropdown-menu">'
@@ -408,6 +466,7 @@ $(document).ready(function() {
         $('.filterSelect#'+way).append('<li><input type="checkbox" value="'+option+'" checked>'+option+'</li>');
       });
     }
+  }
   }
 
   function initialFilterSilder() {
@@ -512,8 +571,8 @@ $(document).ready(function() {
       $(this).show();
       let userId = $(this).attr('rel');
       let profile = userProfiles[userId];
-      // console.log("now filter user "+userId+", profile:");
-      // console.log(profile);
+      console.log("now filter user "+userId+", profile:");
+      console.log(profile);
 
       if( $('#filter_age').is(':visible') ) {
         let user_option = profile['年齡'];
@@ -521,7 +580,7 @@ $(document).ready(function() {
           let user_age = parseInt(user_option);
           let min = $('#filter_age .multiselect-selected-text').attr('min');
           let max = $('#filter_age .multiselect-selected-text').attr('max');
-          // console.log("user_age = "+user_age + ", min="+min+",max="+max);
+          console.log("user_age = "+user_age + ", min="+min+",max="+max);
           if( user_age < min || user_age > max ) {
             $(this).hide();
             return;
@@ -532,7 +591,7 @@ $(document).ready(function() {
         user_option = profile['地區'];
         select_option = $('#filter_place .multiselect-selected-text').text();
         if( user_option && select_option!="全選") {
-          // console.log(userId+" place = "+user_option + "select_option = "+select_option);
+          console.log(userId+" place = "+user_option + "select_option = "+select_option);
           if( select_option.indexOf(user_option)==-1 ) {
             $(this).hide();
             return;
@@ -546,7 +605,7 @@ $(document).ready(function() {
           let min = $('#filter_recent .multiselect-selected-text').attr('min');
           let max = $('#filter_recent .multiselect-selected-text').attr('max');
           let user_time_gap = Date.now()-user_option;
-          // console.log("user_option = "+user_option + " user_time_gap = "+user_time_gap+" min="+min+",max="+max);
+          console.log("user_option = "+user_option + " user_time_gap = "+user_time_gap+" min="+min+",max="+max);
           if( user_time_gap < min || user_time_gap > max ) {
             $(this).hide();
             return;
@@ -559,37 +618,52 @@ $(document).ready(function() {
           let min = $('#filter_first .multiselect-selected-text').attr('min');
           let max = $('#filter_first .multiselect-selected-text').attr('max');
           let user_time_gap = Date.now() - user_option;
-          // console.log(" user_option = "+user_option + " user_time_gap = "+user_time_gap+" min="+min+",max="+max);
+          console.log(" user_option = "+user_option + " user_time_gap = "+user_time_gap+" min="+min+",max="+max);
           if( user_time_gap < min || user_time_gap > max ) {
             $(this).hide();
             return;
           }
         }
-      }
+      }//end if
+      if ($('#filter_VIP等級').is(':visible')){
+        user_option = profile['VIP等級'];
+        select_option = $('#filter_VIP等級 .multiselect-selected-text').text();
+        console.log('this is select_option on line 627');
+        console.log(select_option);
+        if( select_option!="全選" ){
+          if( !user_option){
+            $(this).hide();
+            return;
+          }
 
+        }
+      }
       for( let way in filterDataCustomer ) {
         if( $('#filter_'+way).is(':visible') ) {
           user_option = profile[way];
           select_option = $('#filter_'+way+' .multiselect-selected-text').text();
+
           if( select_option!="全選") {
+
+
             if( !user_option ) {
               $(this).hide();
               return;
             }
-            // console.log(userId+", "+way+"="+user_option + ", select_option="+select_option);
+            console.log(userId+", "+way+"="+user_option + ", select_option="+select_option);
             user_option = user_option.split(',');
-            // console.log(user_option);
+            console.log(user_option);
             let i;
             for( i=0; i<user_option.length; i++ ) {
               if( select_option.indexOf(user_option[i])!=-1 ) break;
-            }
+            }//for
             if( i==user_option.length ) {
               $(this).hide();
               return;
-            }
-          }
+            }//if
+          }//if全選
         }
-      }
+      }//end for
 
     });
   });
@@ -660,7 +734,7 @@ $(document).ready(function() {
             $(this).attr("id", "ref");    //msg immediately add link
             searchBox.val("");    //then cancel searching mode,
             displayAll();         //display all msg
-            window.location.replace("/chat#ref"); //then jump to the #link added
+            window.location.replace("/chatAll#ref"); //then jump to the #link added
             $(this).removeAttr("id");   //last remove link
           };
         });
@@ -740,7 +814,7 @@ $(document).ready(function() {
       infoTable.html("please choose an user");
       return;
     }
-    // console.log("show profile of userId " + target);
+    console.log("show profile of userId " + target);
     reload_tags();
     showTargetProfile(userProfiles[target]);
   }
@@ -884,7 +958,7 @@ $(document).ready(function() {
         content = new Date(inner.val()).getTime();
       }
       buffer[id] = content;
-      // console.log("content = "+content);
+      console.log("content = "+content);
     }
     else{  //deny edit, restore data before editing
       let origin = buffer[id];
@@ -906,7 +980,7 @@ $(document).ready(function() {
       }
       else if( type=="time" ) {
         let d = new Date(origin);
-        // console.log("date = "+d.toString());
+        console.log("date = "+d.toString());
         inner.val(d.getFullYear()+'-'+addZero(d.getMonth()+1)+'-'+addZero(d.getDate())+'T'+addZero(d.getHours())+':'+addZero(d.getMinutes()));
       }
     }
@@ -917,7 +991,7 @@ $(document).ready(function() {
       alert('please check all tags change');
     }
     else if( confirm("Are you sure to change profile?") ){
-      // console.log(buffer);
+      console.log(buffer);
       socket.emit('update profile',buffer);
       $('.modal').modal('hide');
       userProfiles[buffer.userId] = JSON.parse(JSON.stringify(buffer));   //clone object
@@ -953,10 +1027,18 @@ $(document).ready(function() {
   }
 
   function toAgentStr(msg, name, time) {
-    return '<p class="message" rel="' + time + '" style="text-align: right;" title="' + toDateStr(time) + '"><span class="content">' + msg + '</span><strong> : <span class="sender">' + name + '</span><span class="sendTime">' + toTimeStr(time) + '</span></strong><br/></p>';
+    if (msg.startsWith("<img")){
+      return '<p class="message" rel="' + time + '" style="text-align: right;line-height:250%" title="' + toDateStr(time) + '"><span class="content">  ' + msg + '</span><strong> : <span class="sender">' + name + '</span><span  class="sendTime">' + toTimeStr(time) + '</span></strong><br/></p>';
+    }else{
+      return '<p class="message" rel="' + time + '" style="text-align: right;line-height:250%" title="' + toDateStr(time) + '"><span class="content" style="border:1px solid #b5e7a0; padding:8px; border-radius:10px; background-color:#b5e7a0">  ' + msg + '</span><strong> : <span class="sender">' + name + '</span><span  class="sendTime">' + toTimeStr(time) + '</span></strong><br/></p>';
+    }
   }
   function toUserStr(msg, name, time) {
-    return '<p class="message" rel="' + time + '" title="' + toDateStr(time) + '"><strong><span class="sender">' + name + '</span><span class="sendTime">' + toTimeStr(time) + '</span>: </strong><span class="content">' + msg + '</span><br/></p>';
+    if (msg.startsWith("<img")){
+      return '<p style="line-height:250%" class="message" rel="' + time + ' title="' + toDateStr(time) + '"><strong><span class="sender">' + name + '</span><span class="sendTime">' + toTimeStr(time) + '</span>: </strong><span class="content">  ' + msg + '</span><br/></p>';
+    }else{
+      return '<p style="line-height:250%" class="message" rel="' + time + ' title="' + toDateStr(time) + '"><strong><span class="sender">' + name + '</span><span class="sendTime">' + toTimeStr(time) + '</span>: </strong><span style="border:1px solid lightgrey;background-color:lightgrey; padding:8px; border-radius:10px" class="content">  ' + msg + '</span><br/></p>';
+    }
   }
 
   function toDateStr( input ) {
