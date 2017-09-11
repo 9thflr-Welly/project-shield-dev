@@ -1,25 +1,22 @@
 // Initialize Firebase
 var config = {
-  apiKey: "AIzaSyAr1ic8lr_asYZTwwIjBNp3uiqFdu1QJKI",
-  authDomain: "shield-dev-91210.firebaseapp.com",
-  databaseURL: "https://shield-dev-91210.firebaseio.com",
-  projectId: "shield-dev-91210",
-  storageBucket: "shield-dev-91210.appspot.com",
-  messagingSenderId: "514816655617"
+  apiKey: "AIzaSyCKIPCKJpN1PCqK1EUygD6erNpo2lGmrpA",
+  authDomain: "shield-production.firebaseapp.com",
+  databaseURL: "https://shield-production.firebaseio.com",
+  projectId: "shield-production",
+  storageBucket: "shield-production.appspot.com",
+  messagingSenderId: "524065152880"
 };
 firebase.initializeApp(config);
 
 const auth = firebase.auth();
 const database = firebase.database();
-var authId;
 
 // log in status
 if(window.location.pathname === '/login' || window.location.pathname === '/signup'){
   auth.onAuthStateChanged(user => {
     if(user){
-      setTimeout(() => {
-        window.location = '/';
-      }, 2000)
+      window.location = '/';
     } else {
       console.log('need to sign in');
     }
@@ -27,9 +24,11 @@ if(window.location.pathname === '/login' || window.location.pathname === '/signu
 } else {
   auth.onAuthStateChanged(user => {
     if(user){
-      authId = user.uid
+      // console.log(user.email);
+      console.log('firebase signed in');
     } else {
-      window.location = '/login';
+      // console.log('need to sign in');
+      window.location.assign("/login");
     }
   });
 }
@@ -38,10 +37,6 @@ if(window.location.pathname === '/login' || window.location.pathname === '/signu
 function logout(){
   auth.signOut()
   .then(response => {
-    window.location = '/login';
+    window.location.assign("/login");
   })
-}
-
-function getAuthId(){
-  return authId;
 }

@@ -12,13 +12,17 @@ var firebase = require('firebase');
 var linebot = require('linebot');
 var apiai = require('apiai');
 var fs = require('fs');
+var ticket = {} ;
+var unirest = require('unirest');
+var API_KEY = "VAxM08x35ThAOEqIgvOF";
+var FD_ENDPOINT = "fongyu";
 var MessengerPlatform = require('facebook-bot-messenger');
 
 // custom global var
 var chatData; // firebase chat data
 var agentChatData; // firebase agent data
 var tagsData; // firebase tag data
-var users = {}; // agent list to prevent duplicates
+var users = {};
 var agent_nickname = 'agent';
 //webhook event
 var receiverId = '';
@@ -44,12 +48,12 @@ var fb_bot = MessengerPlatform.create({
 });
 
 var config = {
-  apiKey: "AIzaSyAr1ic8lr_asYZTwwIjBNp3uiqFdu1QJKI",
-  authDomain: "shield-dev-91210.firebaseapp.com",
-  databaseURL: "https://shield-dev-91210.firebaseio.com",
-  projectId: "shield-dev-91210",
-  storageBucket: "",
-  messagingSenderId: "514816655617"
+  apiKey: "AIzaSyCKIPCKJpN1PCqK1EUygD6erNpo2lGmrpA",
+  authDomain: "shield-production.firebaseapp.com",
+  databaseURL: "https://shield-production.firebaseio.com",
+  projectId: "shield-production",
+  storageBucket: "shield-production.appspot.com",
+  messagingSenderId: "524065152880"
 };
 firebase.initializeApp(config);
 const newDBRef = firebase.database().ref().child('chats/Data');
@@ -93,88 +97,26 @@ server.on('listening', onListening);
 // 接收訊息
 // LINE bot implement
 function bot_on_message(event) {
+    console.log(event);
     let message_type = event.message.type;
     let message_lineTochat = event.message.text;
     let receiverId = event.source.userId;
     let receiver_name;
     let nowTime = Date.now();
 
+    console.log('current ID is: '+receiverId);
+
     event.source.profile().then(function(profile) {
+      // console.log(profile.pictureUrl);
         receiver_name = profile.displayName;
         if( receiver_name==undefined ) receiver_name = "userName_undefined";
 
         var msgObj = {
           owner: "user",
           name: receiver_name,
-          time: nowTime
+          time: nowTime,
+          receiverId: receiverId
         };
-        function emitIO_and_pushDB(obj) {
-          console.log("sending object user: ");
-          console.log(obj);
-          console.log("sending to new firebase database");
-          sendToNewFb(obj);
-          console.log("sending to new io sockets...");
-          sendToFrontSocket(obj);
-          console.log("All sent!");
-        }
-        function sendToFrontSocket(obj) {
-          for( let prop in chatData ) {
-            if(chatData[prop].Profile.userId == obj.receiverId) {
-              var count_unread_toFront = chatData[prop].Profile.unRead;
-              count_unread_toFront++;
-            }
-          }//for let prop in chatData
-          obj.id = receiverId;
-          obj.unRead = count_unread_toFront;
-          io.sockets.emit('new message2', obj);
-        }
-
-        function sendToNewFb(obj){
-          let flag = true;
-          for( let prop in chatData ) {
-            if(chatData[prop].Profile.userId == receiverId) {
-              console.log("find user " + receiverId + " in database");
-              var count_unread = chatData[prop].Profile.unRead;
-              count_unread++;
-              let length = chatData[prop].Messages.length;
-              let updateObj = {};
-              updateObj['/'+prop+'/Messages/'+length] = obj;
-              newDBRef.update(updateObj);
-              newDBRef.child(prop).child("Profile").update({
-                unRead: count_unread,
-                photo: profile.pictureUrl? profile.pictureUrl :""
-              });
-              flag = false;
-              break;
-            }
-          }
-          if( flag ) {
-            console.log("new user come in");
-            let newData = {
-              Profile: {
-                nickname: receiver_name,
-                userId: receiverId,
-                age: -1,
-                telephone: "",
-                address: "",
-                firstChat: nowTime,
-                首次聊天時間: nowTime,
-                recentChat: nowTime,
-                上次聊天時間: nowTime,
-                totalChat: 1,
-                總共聊天時間: 1,
-                avgChat: 1,
-                平均每次聊天時間: 1,
-                聊天次數: 1,
-                unRead: 1,
-                photo: profile.pictureUrl? profile.pictureUrl :""
-              },
-              Messages: [obj]
-            };
-            newDBRef.push(newData);
-            io.sockets.emit('new user profile', newData.Profile);
-          }
-        }
 
         // from wenyen
         //  ===================  KINDS ====================
@@ -274,10 +216,88 @@ function bot_on_message(event) {
           }
         }
 
+        // function
+        function emitIO_and_pushDB(obj) {
+          console.log("sending object user: ");
+          console.log(obj);
+          console.log("sending to new firebase database");
+          sendToNewFb(obj);
+          console.log("sending to new io sockets...");
+          sendToFrontSocket(obj);
+          console.log("All sent!");
+        }
+        function sendToNewFb(obj){
+          let flag = true;
+          for( let prop in chatData ) {
+            if(chatData[prop].Profile.userId == receiverId) {
+              console.log("find user " + receiverId + " in database1");
+              var count_unread = chatData[prop].Profile.unRead;
+              count_unread++;
+              // console.log(count_unread);
+              let length = chatData[prop].Messages.length;
+              let updateObj = {};
+              updateObj['/'+prop+'/Messages/'+length] = obj;
+              console.log(updateObj);
+              newDBRef.update(updateObj);
+              // console.log('update obj');
+              // console.log(count_unread);
+              newDBRef.child(prop).child("Profile").update({
+                unRead: count_unread,
+                photo: profile.pictureUrl? profile.pictureUrl :""
+              });
+              flag = false;
+              console.log('finish update db');
+              break;
+            }
+          }
+          if( flag ) {
+            console.log("new user come in");
+            let newData = {
+              Profile: {
+                nickname: receiver_name,
+                userId: receiverId,
+                age: -1,
+                telephone: "",
+                address: "",
+                firstChat: nowTime,
+                首次聊天時間: nowTime,
+                recentChat: nowTime,
+                上次聊天時間: nowTime,
+                totalChat: 1,
+                總共聊天時間: 1,
+                avgChat: 1,
+                平均每次聊天時間: 1,
+                聊天次數: 1,
+                unRead: 1,
+                photo: profile.pictureUrl? profile.pictureUrl :""
+              },
+              Messages: [obj]
+            };
+            newDBRef.push(newData);
+            io.sockets.emit('new user profile', newData.Profile);
+          }
+        }
+        function sendToFrontSocket(obj) {
+          for( let prop in chatData ) {
+            if(chatData[prop].Profile.userId == obj.receiverId) {
+              var count_unread_toFront = chatData[prop].Profile.unRead;
+            }
+          }//for let prop in chatData
+          obj.id = receiverId;
+          obj.unRead = count_unread_toFront;
+          obj.pictureUrl = profile.pictureUrl;
+          console.log('insert unRead: ');
+          console.log(obj);
+          io.sockets.emit('new message2', obj);
+          count_unread_toFront++;
+        }
+
         function apiai(obj) {
           var apiai = require('apiai');
           var app = apiai('a84ed63ae3914a1fb4601f2824d4cabd');
-          var request = app.textRequest(obj.message, { sessionId: '0896c04e-218b-4951-b75d-2d09e1ce7d4b' });
+          var request = app.textRequest(obj.message, {
+              sessionId: '0896c04e-218b-4951-b75d-2d09e1ce7d4b'
+              });
           request.on('response', function(response) {
             let action = response.result.action ;
             let speech = response.result.fulfillment.messages[0].speech ;
@@ -289,6 +309,9 @@ function bot_on_message(event) {
               console.log(response.result) ;
               msgObj.owner = 'agent';
               msgObj.name = 'api.ai';
+              msgObj.unRead = 1;
+              response.result.unRead = 1;
+              console.log(response.result) ;
               if(action == 'input.welcome'||action == 'timeGreeting'){
                 obj.message = '已接收選項'+"購買方案, "+"服務時段, "+'問卷調查';
                 emitIO_and_pushDB(msgObj);
@@ -326,8 +349,8 @@ function bot_on_message(event) {
                   event.reply({ type: 'text', text: speech });
                 }
                 else if(type == 'principal'){
-                  msgObj.message = "關於負責人";
-                  emitIO_and_pushDB(msgObj);
+                  // msgObj.message = "關於負責人";
+                  // emitIO_and_pushDB(msgObj);
                   event.reply({
                     "type": "template",
                     "altText": "關於負責人",
@@ -344,8 +367,8 @@ function bot_on_message(event) {
 
                 }
                 else if(type == 'money'){
-                  msgObj.message = '關於資本額';
-                  emitIO_and_pushDB(msgObj);
+                  // msgObj.message = '關於資本額';
+                  // emitIO_and_pushDB(msgObj);
                   event.reply({
                     "type": "template",
                     "altText": "關於資本額",
@@ -374,8 +397,8 @@ function bot_on_message(event) {
                   });
                 }
                 else if(type == 'servies'){
-                  msgObj.message = '關於附加服務';
-                  emitIO_and_pushDB(msgObj);
+                  // msgObj.message = '關於附加服務';
+                  // emitIO_and_pushDB(msgObj);
                   event.reply({
                     "type": "template",
                     "altText": "關於附加服務",
@@ -404,8 +427,8 @@ function bot_on_message(event) {
                   });
                 }
                 else if(type == 'bank'){
-                  msgObj.message = '關於銀行帳戶';
-                  emitIO_and_pushDB(msgObj);
+                  // msgObj.message = '關於銀行帳戶';
+                  // emitIO_and_pushDB(msgObj);
                   event.reply({
                     "type": "template",
                     "altText": "關於銀行帳戶",
@@ -430,7 +453,7 @@ function bot_on_message(event) {
                   });
                 }
                 else if(type == 'starting'){
-                  msgObj.message = '關於公司設立';
+                  // msgObj.message = '關於公司設立';
                   event.reply({
                     "type": "template",
                     "altText": "關於公司設立",
@@ -520,8 +543,8 @@ function bot_on_message(event) {
                   emitIO_and_pushDB(msgObj);
                 }
                 else if(type == 'business'){
-                  msgObj.message = '關於營業項目';
-                  emitIO_and_pushDB(msgObj);
+                  // msgObj.message = '關於營業項目';
+                  // emitIO_and_pushDB(msgObj);
                   event.reply({
                     "type": "template",
                     "altText": "關於營業項目",
@@ -542,8 +565,8 @@ function bot_on_message(event) {
                   });
                 }
                 else if(type == 'price'){
-                  msgObj.message = '關於價格方案';
-                  emitIO_and_pushDB(msgObj);
+                  // msgObj.message = '關於價格方案';
+                  // emitIO_and_pushDB(msgObj);
                   event.reply({
                     "type": "template",
                     "altText": "關於價格方案",
@@ -564,8 +587,8 @@ function bot_on_message(event) {
                   });
                 }
                 else if(type == 'insurance'){
-                  msgObj.message = '關於勞健保';
-                  emitIO_and_pushDB(msgObj);
+                  // msgObj.message = '關於勞健保';
+                  // emitIO_and_pushDB(msgObj);
                   event.reply({
                     "type": "template",
                     "altText": "關於勞健保",
@@ -594,8 +617,8 @@ function bot_on_message(event) {
                   });
                 }
                 else if(type == 'other'){
-                  msgObj.message = '常見問題';
-                  emitIO_and_pushDB(msgObj);
+                  // msgObj.message = '常見問題';
+                  // emitIO_and_pushDB(msgObj);
                   event.reply({
                     "type": "template",
                     "altText": "常見問題",
@@ -659,7 +682,7 @@ function bot_on_message(event) {
                 ticket.priority = parameter.priority ;
                 if(complete) createTicket(ticket);
               }
-              obj.message = speech ;
+              obj.message = speech;
               emitIO_and_pushDB(obj) ;
               event.reply({ type: 'text', text: msgObj.message });
             }
@@ -735,8 +758,377 @@ function bot_on_message(event) {
             else{
               	console.log("X-Request-Id :" + response.headers['x-request-id']);
             }
+            });
+        }
+
+
+
+  });
+}
+
+function bot_on_postback(event){
+  let data = event.postback.data ;
+  let receiverId = event.source.userId;
+  let receiver_name;
+  let nowTime = Date.now();
+  console.log(event);
+
+  event.source.profile().then(function(profile){
+    receiver_name = profile.displayName;
+    if( receiver_name==undefined ) receiver_name = "userName_undefined";
+
+    var msgObj = {
+      owner: "agent",
+      name: 'api.ai',
+      time: nowTime
+    };
+
+    function emitIO_and_pushDB(obj) {
+      console.log("sending object user: ");
+      console.log(obj);
+      console.log("sending to new firebase database");
+      sendToNewFb(obj);
+      console.log("sending to new io sockets...");
+      sendToFrontSocket(obj);
+      console.log("All sent!");
+    }
+    function sendToFrontSocket(obj) {
+      obj.id = receiverId;
+      io.sockets.emit('new message2', obj);
+    }
+    function sendToNewFb(obj){
+      let flag = true;
+      for( let prop in chatData ) {
+        if(chatData[prop].Profile.userId == receiverId) {
+          console.log("find user " + receiverId + " in database");
+          let length = chatData[prop].Messages.length;
+          let updateObj = {};
+          updateObj['/'+prop+'/Messages/'+length] = obj;
+          newDBRef.update(updateObj);
+          newDBRef.child(prop).child("Profile").update({
+            unRead: true,
+            photo: profile.pictureUrl
           });
+          flag = false;
+          break;
+        }
       }
+      if( flag ) {
+        console.log("new user come in");
+        let newData = {
+          Profile: {
+            nickname: receiver_name,
+            userId: receiverId,
+            age: -1,
+            telephone: "",
+            address: "",
+            firstChat: nowTime,
+            首次聊天時間: nowTime,
+            recentChat: nowTime,
+            上次聊天時間: nowTime,
+            totalChat: 1,
+            總共聊天時間: 1,
+            avgChat: 1,
+            平均每次聊天時間: 1,
+            聊天次數: 1,
+            unRead: true,
+            photo: profile.pictureUrl
+          },
+          Messages: [obj]
+        };
+        newDBRef.push(newData);
+      }
+    }
+    function sendToLocalDB(obj) {
+      let DATA = JSON.parse(fs.readFileSync('chatMsg.json'));
+      let i=0;
+      for( i=0; i<DATA.length; i++ ) {
+        if( DATA[i].Profile.userId == receiverId ) {
+          DATA[i].Messages.push(obj);
+          break;
+        }
+      }
+      if( i==DATA.length ) {
+        console.log("new user come in");
+        let newData = {
+          Profile: {
+            nickname: receiver_name,
+            userId: receiverId,
+            age: -1,
+            telephone: "",
+            address: "",
+            firstChat: nowTime,
+            recentChat: nowTime,
+            totalChat: 1,
+            avgChat: 1
+          },
+          Messages: [obj]
+        };
+        DATA.push(newData);
+      }
+      fs.writeFileSync('chatMsg.json', JSON.stringify(DATA, null, 2));
+      console.log("send to local DB success");
+    }
+
+    if(data.indexOf('purchasePlan') != -1){
+      let hr = data.substring(13);
+      console.log("hour:"+hr) ;
+      switch (hr) {
+        case '4':
+          msgObj.message = "4小時方案   15,888 元  \n 4小時方案/每天   $15,888每月" ;
+          break;
+        case '8':
+          msgObj.message = "8小時方案   21,888 元  \n 8小時方案/每天   $21,888每月" ;
+          break;
+        case '16':
+          msgObj.message = "16小時方案   39,888 元  \n 16小時方案/每天   $39,888每月" ;
+          break;
+        default:
+          msgObj.message = '已發送購買方案'+"4小時方案  "+"8小時方案  "+"16小時方案  ";
+          event.reply({
+            "type": "template",
+            "altText": "購買方案說明",    //text that customer see at chat list
+            "template": {
+              "type": "buttons",
+              "title": "購買方案說明",
+              "text": "請選擇一個方案",
+              "actions": [{
+                "type": "postback",
+                "label": "4小時方案",
+                "data": "purchasePlan-4"
+              },{
+                "type": "postback",
+                "label": "8小時方案",
+                "data": "purchasePlan-8"
+              },{
+                "type": "postback",
+                "label": "16小時方案",
+                "data": "purchasePlan-16"
+              }]
+            }
+          });
+          break;
+
+      }
+      emitIO_and_pushDB(msgObj);
+      event.reply({"type":"text","text":msgObj.message}) ;
+    }
+    else if(data == 'serviesHour'){
+      msgObj.message =
+      "我們的服務時如下:\n"+
+      "「0700~1100」\n "+
+      "「1100~1500」\n "+
+      "「1500~1900」\n "+
+      "「1900~2300」\n "+
+      " 兩個時段必須是「連續的」\n"+
+      "「0700~1100」及「1100~1500」\n"+
+      "「1100~1500」及「1500~1900」\n"+
+      "「1500~1900」及「1900~2300」。" ;
+
+      console.log(msgObj.message) ;
+      emitIO_and_pushDB(msgObj);
+      event.reply({"type":"text","text":msgObj.message}) ;
+    }
+    else if(data.indexOf('Questionnaire') != -1){
+      let pos = data.indexOf(':');
+      let para = data.substring(14,pos);
+      let value = data.substring(pos+1);
+      let id = event.source.userId ;
+      //console.log(pos+" "+id+":"+para+":"+value) ;
+      //console.log(event.message) ;
+      if(pos != -1){
+        let obj = {} ;
+        obj.id = id ;
+        obj.para = para ;
+        obj.value = value ;
+        updateProfile(obj) ;
+      }
+
+      if(para == '性別'){
+        msgObj.message = '詢問客戶資料(居住地)';
+        emitIO_and_pushDB(msgObj);
+        event.reply({
+          "type": "template",
+          "altText": "問券調查",
+          "template": {
+            "type": "buttons",
+            "title": "問券調查:地區",
+            "text": "請選擇您的性別",
+            "actions": [{
+              "type": "postback",
+              "label": "地區:北部",
+              "text": "地區:北部",
+              "data": "Questionnaire_地區:北部"
+            },{
+              "type": "postback",
+              "label": "地區:中部",
+              "text": "地區:中部",
+              "data": "Questionnaire_地區:中部"
+            },{
+              "type": "postback",
+              "label": "地區:南部",
+              "text": "地區:南部",
+              "data": "Questionnaire_地區:南部"
+            },{
+              "type": "postback",
+              "label": "地區:東部",
+              "text": "地區:東部",
+              "data": "Questionnaire_地區:東部"
+            }]
+          }
+        });
+
+      }
+      else if(para == '地區'){
+        msgObj.message = '詢問客戶資料(年齡層)';
+        emitIO_and_pushDB(msgObj);
+        event.reply({
+          "type": "template",
+          "altText": "問券調查part2",
+          "template": {
+            "type": "carousel",
+            "columns": [
+                {
+                  "text": "您的年齡層。請左右滑動並選擇您的年齡層",
+                  "actions": [
+                      {
+                          "type": "postback",
+                          "label": "年齡:20以下",
+                          "text": "年齡:20以下",
+                          "data": "Questionnaire_年齡:20以下"
+                      },
+                      {
+                          "type": "postback",
+                          "label": "年齡:21-30",
+                          "text": "年齡:21-30",
+                          "data": "Questionnaire_年齡:21-30"
+                      },
+                      {
+                          "type": "postback",
+                          "label": "年齡:31-40",
+                          "text": "年齡:31-40",
+                          "data": "Questionnaire_年齡:31-40"
+                      }
+                  ]
+                },
+                {
+                  "text": "您的年齡層。請左右滑動並選擇您的年齡層",
+                  "actions": [
+                      {
+                        "type": "postback",
+                        "label": "年齡:41-50",
+                        "text": "年齡:41-50",
+                        "data": "Questionnaire_年齡:41-50"
+                      },
+                      {
+                        "type": "postback",
+                        "label": "年齡:51-64",
+                        "text": "年齡:51-64",
+                        "data": "Questionnaire_年齡:51-64"
+                      },
+                      {
+                        "type": "postback",
+                        "label": "年齡:65以上",
+                        "text": "年齡:65以上",
+                        "data": "Questionnaire_年齡:65以上"
+                      }
+                  ]
+                }
+            ]
+          }
+        });
+      }
+      else if(para == '年齡'){
+        msgObj.message = '感謝您填寫問卷!' ;
+        emitIO_and_pushDB(msgObj);
+        //bot.push(obj.id,msgObj.message);
+        event.reply({ type: 'text', text: msgObj.message });
+      }
+      else{
+        event.reply({
+          "type": "template",
+          "altText": "問券調查part1",
+          "template": {
+            "type": "buttons",
+            "title": "問券調查:性別",
+            "text": "請選擇您的性別",
+            "actions": [{
+              "type": "postback",
+              "label": "性別:男",
+              "text": "性別:男",
+              "data": "Questionnaire_性別:男"
+            },{
+              "type": "postback",
+              "label": "性別:女",
+              "text": "性別:女",
+              "data": "Questionnaire_性別:女"
+            }]
+          }
+        });
+        msgObj.message = '詢問客戶資料(性別)';
+        emitIO_and_pushDB(msgObj);
+      }
+
+
+    }
+    else{
+      tinistartAns(event);
+    }
+
+    function tinistartAns(event) {
+      var gsjson = require('google-spreadsheet-to-json');
+
+      gsjson({
+          spreadsheetId: '1ZhR-f6BVHp4kIzBQL_VK9BDP4AS0KDTESYqq22RrtOA',
+          hash : 'id'
+          // other options...
+      })
+      .then(function(result) {
+        let ansId = event.postback.data;
+        console.log(ansId);
+        //console.log(result.length);
+        //console.log(result);
+        let ans = result[ansId].ans ;
+        let que = result[ansId].question ;
+        var msg = 'Q :\n'+que+'\n'+'A :\n'+ans ;
+        msgObj.owner = "agent";
+        msgObj.name ='apiai';
+        msgObj.time = nowTime;
+        msgObj.id = receiverId;
+        msgObj.message = msg ;
+        emitIO_and_pushDB(msgObj) ;
+        event.reply({ type: 'text', text: msg });
+      })
+      .catch(function(err) {
+          console.log(err.message);
+          console.log(err.stack);
+      });
+
+    }
+    function updateProfile(survey) {
+      /*
+      survey:{id ,para ,value }
+      //*//*
+      let survey = {id:'',para:'',value:''};
+      let pos = event.message.text.indexOf(':');
+      let para = event.message.text.substring(0,pos);
+      let value = event.message.text.substring(pos+1);
+      survey.id = event.source.userId;
+      survey.para = para;
+      survey.value = value ;
+      //*/
+      console.log(survey);
+      for( let i in chatData ) {
+        if( chatData[i].Profile.userId == survey.id ) {
+          console.log('match!updating profile...')
+          let obj = {};
+          obj['/'+survey.para] = survey.value;
+          newDBRef.child(i).child("Profile").update(obj);
+          break;
+        }
+      }
+    }
+
   });
 }
 
@@ -746,185 +1138,46 @@ app.post('/webhook1/', function() {
   linebotParser[0](arguments[0], arguments[1], arguments[2]);
 });
 app.post('/webhook2/', function() {
-  console.log(linebotParser[1].toString());
   console.log("webhook arguments length = "+arguments.length);
   linebotParser[1](arguments[0], arguments[1], arguments[2]);
 });
-
-
-// Facebook excute code
-function loadFbProfile(obj, psid) {
-    fb_bot.webhook('/webhook');
-    fb_bot.getProfile(psid).then(function(data) {
-        var fb_user_name = data.first_name + ' ' + data.last_name;
-        var fb_user_profilePic = data.profile_pic;
-        var fb_user_locale = data.locale;
-        var fb_user_gender = data.gender;
-
-        if (obj.message.attachments) {
-            //Checking if there are any image attachments
-            if (obj.message.attachments[0].type === "image") {
-                var imageURL = obj.message.attachments[0].payload.url;
-                obj.message = '<img src="' + imageURL + '"/>';
-            } //if image
-            else if (obj.message.attachments[0].type === "video") {
-                var videoURL = obj.message.attachments[0].payload.url;
-                obj.message = '<video controls><source src="' + videoURL + '" type="video/mp4"></video>';
-
-            } //if video
-            else if (obj.message.attachments[0].type === "audio") {
-                var audioURL = obj.message.attachments[0].payload.url;
-                obj.message = '<audio controls><source src="' + audioURL + '" type="audio/mpeg"/></audio>';
-
-            } //if audio
-            else if (obj.message.attachments[0].type === "file") {
-                var fileURL = obj.message.attachments[0].payload.url;
-                obj.message = 'The user sent a file, click <a target="blank" href="' + fileURL + '">HERE</a> for download.';
-
-            } //if audio
-            else if (obj.message.attachments[0].type === "location") {
-                var locateURL = obj.message.attachments[0].url;
-                obj.message = 'The user sent a location, click <a target="blank" href="' + locateURL + '">HERE</a> for map link.';
-
-            } //if location
-        } else {
-            obj.message = obj.message.text;
-
-        }
-
-        for (let prop in chatData) {
-            if (chatData[prop].Profile.userId == obj.sender.id) {
-                var count_unread_toFront = chatData[prop].Profile.unRead;
-                count_unread_toFront++;
-
-            }
-        } //for let prop in chatData
-
-        obj.id = obj.sender.id;
-        obj.owner = obj.recipient.id;
-        obj.name = fb_user_name;
-        obj.time = obj.timestamp;
-        obj.unRead = count_unread_toFront;
-        io.sockets.emit('new message2', obj);
-
-
-        //======receive message==========
-
-        var senderID = obj.sender.id;
-        var recipientID = obj.recipient.id;
-        var timeOfMessage = obj.timestamp;
-        var message_text = obj.message;
-
-
-
-        console.log("Received message for user %d and page %d at %d with message:",
-            senderID, recipientID, timeOfMessage);
-        console.log(JSON.stringify(obj.message));
-
-        //===========================================
-
-        //=============saving to database============
-        let message_lineTochat = message_text;
-        let receiverId = senderID;
-        let receiver_name = fb_user_name;
-        let nowTime = Date.now();
-
-
-        var msgObj = {
-            owner: "user",
-            name: receiver_name,
-            time: nowTime,
-            message: message_lineTochat,
-            id: receiverId,
-            prof_pic: fb_user_profilePic,
-            locale: fb_user_locale,
-            gend: fb_user_gender
-        };
-
-
-        function emitIO_and_pushDB(obj) {
-            console.log("sending object user: ");
-            console.log(obj);
-            console.log("sending to new firebase database");
-            sendToNewFb(obj);
-            console.log("sending to new io sockets...");
-            console.log("All sent!");
-        }
-
-        function sendToNewFb(obj) {
-            let flag = true;
-            for (let prop in chatData) {
-                if (chatData[prop].Profile.userId == receiverId) {
-                    console.log("find user " + receiverId + " in database");
-                    var count_unread = chatData[prop].Profile.unRead;
-                    count_unread++;
-                    let length = chatData[prop].Messages.length;
-                    let updateObj = {};
-                    updateObj['/' + prop + '/Messages/' + length] = obj;
-                    newDBRef.update(updateObj);
-                    newDBRef.child(prop).child("Profile").update({
-                        unRead: count_unread,
-                        photo: obj.prof_pic
-                    });
-
-                    flag = false;
-                    break;
-                }
-            }
-            if (flag) {
-                console.log("new user come in");
-
-                let newData = {
-                    Profile: {
-                        nickname: obj.name,
-                        userId: obj.id,
-                        age: -1,
-                        地區: obj.locale,
-                        性別: obj.gend,
-                        telephone: "",
-                        address: "",
-                        firstChat: nowTime,
-                        首次聊天時間: nowTime,
-                        recentChat: nowTime,
-                        上次聊天時間: nowTime,
-                        totalChat: 1,
-                        總共聊天時間: 1,
-                        avgChat: 1,
-                        平均每次聊天時間: 1,
-                        聊天次數: 1,
-                        unRead: 1,
-                        photo: obj.prof_pic
-                    },
-                    Messages: [obj]
-                };
-                newDBRef.push(newData);
-                io.sockets.emit('new user profile', newData.Profile);
-            }
-        } //sendTONewFb
-
-        emitIO_and_pushDB(msgObj);
-
-    }).catch(function(error) {
-        console.log('on line 295 error');
-    }); //fb_bot
-
-} //loadFbProfile
 
 /**
  * Socket.io 傳訊息
  */
 
 io.sockets.on('connection', (socket) => {
-    // 建立群組
+
+    // 更新群組
     socket.on('update bot', (data) => {
       if( bot[0] ) bot[0]._events = {};
       if( bot[1] ) bot[1]._events = {};
       for( let i=0; i<data.length; i++ ) {
         console.log("update Line channel_"+i+" information.");
+        // console.log(data[i]);
+        bot[i] = linebot(data[i]);
+        console.log(bot[i]);
+        linebotParser[i] = bot[i].parser();
+        console.log(linebotParser[i]);
+        bot[i].on('message', bot_on_message);
+        bot[i].on('postback', bot_on_postback);
+        console.log('update done');
+      }
+    });
+
+    // 打開群組
+    socket.on('chat to server', data => {
+      console.log(data[0]);
+      console.log(data[1]);
+      for( let i=0; i<data.length; i++ ) {
+        console.log("update Line channel_"+i+" information.");
         console.log(data[i]);
         bot[i] = linebot(data[i]);
+        console.log(bot[i]);
         linebotParser[i] = bot[i].parser();
+        console.log(linebotParser[i]);
         bot[i].on('message', bot_on_message);
+        bot[i].on('postback', bot_on_postback);
         console.log('update done');
       }
     });
@@ -1118,7 +1371,7 @@ io.sockets.on('connection', (socket) => {
         }
 
         // 訊息傳到LINE
-        if (agent_sendTo_receiver !== undefined) {
+        if (agent_sendTo_receiver !== undefined ) { // 需要新增一個判斷式來分別出要傳訊息給哪一間聊天室
           bot[0].push(agent_sendTo_receiver, message);
           bot[1].push(agent_sendTo_receiver, message);
         }
@@ -1126,10 +1379,18 @@ io.sockets.on('connection', (socket) => {
           console.log("agent_sendTo_receiver undefined!");
         }
 
+        for( let i in chatData ) {
+          if( chatData[i].Profile.userId == data.id ) {
+            var unRead_fromProfile = chatData[i].Profile.unRead;
+            break;
+          }
+        }
+
         var msgObj = {
           owner: "agent",
           name: agent_nickname,
           time: nowTime,
+          unRead: unRead_fromProfile
         };
 
         function emitIO_and_pushDB(obj) {
@@ -1148,7 +1409,7 @@ io.sockets.on('connection', (socket) => {
             console.log("find next user data");
             if(chatData[prop].Profile.userId == agent_sendTo_receiver) {
               console.log("find the same user");
-              let length = chatData[prop].Messages.length;
+              let length = chatData[prop].Messages.length - 1;
               let updateObj = {};
               updateObj['/'+prop+'/Messages/'+length] = obj;
               newDBRef.update(updateObj);
@@ -1179,38 +1440,6 @@ io.sockets.on('connection', (socket) => {
         function sendToFrontSocket(obj) {
           obj.id = agent_sendTo_receiver;
           io.sockets.emit('new message2', obj);
-        }
-
-        function sendToLocalDB(obj) {
-          let DATA = JSON.parse(fs.readFileSync('chatMsg.json'));
-          let i=0;
-          for( i=0; i<DATA.length; i++ ) {
-            if( DATA[i].Profile.userId == agent_sendTo_receiver ) {
-              DATA[i].Messages.push(obj);
-              break;
-            }
-          }
-          if( i==DATA.length ) {
-            console.log("new user come in");
-            let newData = {
-              Profile: {
-                nickname: "unknown nickname",
-                userId: agent_sendTo_receiver,
-                age: -1,
-                telephone: "",
-                address: "",
-                firstChat: nowTime,
-                首次聊天時間: nowTime,
-                recentChat: nowTime,
-                totalChat: 1,
-                avgChat: 1
-              },
-              Messages:[obj]
-            };
-            DATA.push(newData);
-          }
-          fs.writeFileSync('chatMsg.json', JSON.stringify(DATA, null, 2));
-          console.log("send to local DB success");
         }
 
         if (msg.includes('/image')) {
@@ -1365,7 +1594,7 @@ io.sockets.on('connection', (socket) => {
             console.log("find next room data");
             if(agentChatData[prop].Profile.roomId == receive_room) {
               console.log("find the same room");
-              let length = agentChatData[prop].Messages.length;
+              let length = agentChatData[prop].Messages.length - 1;
               let updateObj = {};
               updateObj['/'+prop+'/Messages/'+length] = obj;
 

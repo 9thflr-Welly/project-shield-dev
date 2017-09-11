@@ -18,9 +18,14 @@ $(document).ready(function() {
 
     })
   }, 1000);
+
+
   $("#a").hide();//隱藏選單
+
   $(document).on('click', '#signout-btn', logout); //登出
+
   // $(document).on('click', '#search-btn', filterChart);
+
   $("#search-input").click(function(){$("#a").show()});//選單
   $(document).on('click', '#search-input', getH);//總覽
   $(document).on('click', '#get_h', getH);//總覽

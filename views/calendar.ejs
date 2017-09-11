@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -15,6 +13,8 @@
   <link rel="stylesheet" href="stylesheets/main.css" >
 </head>
 <body>
+
+
   <div id="wrapper">
     <!-- Navigation -->
     <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
@@ -57,7 +57,7 @@
                     <a href="/chat"><i class="fa fa-commenting fa-fw"></i> Chat</a>
                  </li>
                  <li>
-                    <a href="/tag"><i class="fa fa-server fa-fw"></i> Tag</a>
+                    <a href="/tag"><i class="fa fa-commenting fa-fw"></i> Tag</a>
                  </li>
                  <li>
                     <a href="/calendar" class="active"><i class="fa fa-table fa-fw"></i> Calendar</a>
@@ -87,17 +87,18 @@
           <!-- 內容 -->
           <form>
             <span id="keyId" hidden></span><br />
-            <input type="text" placeholder="Event" id="title" required="true" /><br /><br />
+            <input type="text" placeholder="Event" id="title" required="true" />
+            <br /><br />
             <input type="datetime-local" id="startDate" required="true" />
-            <!-- <input type="time" id="startTime" /> -->
             -
             <input type="datetime-local" id="endDate" />
-            <!-- <input type="time" id="endTime" /> -->
+            <br /><br />
+            <textarea type="text" placeholder="Description" id="description" required="false" rows="6" style="width:90%; resize:vertical; "></textarea>
+            <br /><br />
+            <input type="checkbox" id="allday" value="false"/> <span class="alldaylabel">All Day</span>
             <br /><br />
 
-            <input type="checkbox" id="allday" value="false"/> <span class="alldaylabel">All Day</span><br /><br />
-
-            <div id="cal-error-msg" hidden>Please fill in the event name or start date</div>
+            <div id="cal-error-msg" hidden>Please fill in the event name or start date or end date</div>
             <div id="tim-error-msg" hidden>Start date cannot be greater than end date</div>
             <!-- <textarea id="details" placeholder="Details">
             </textarea> -->
