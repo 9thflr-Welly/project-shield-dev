@@ -31,4 +31,16 @@ app.use(express.static(path.join(__dirname, 'public')));// to import css and jav
 app.use('/', index);
 app.use('/users', users);
 
+//facebook connection
+app.get('/webhook', function(req, res) {
+  if (req.query['hub.mode'] === 'subscribe' &&
+      req.query['hub.verify_token'] === 'verify_token') {
+    console.log("Validating webhook");
+    res.status(200).send(req.query['hub.challenge']);
+  } else {
+    console.error("Failed validation. Make sure the validation tokens match.");
+    res.sendStatus(403);
+  }
+});//app.get-->facebook webhook
+
 module.exports = app;

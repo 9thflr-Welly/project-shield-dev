@@ -3,18 +3,27 @@
 /**
  * Module dependencies.
  */
-var app = require('../app');
-var debug = require('debug')('project-shield:server');
-var http = require('http');
-var firebase = require('firebase');
-var linebot = require('linebot');
-var fs = require('fs');
+const app = require('../app');
+const debug = require('debug')('project-shield:server');
+const http = require('http');
+const firebase = require('firebase');
+const linebot = require('linebot');
+const fs = require('fs');
+const unirest = require('unirest');
+const MessengerPlatform = require('facebook-bot-messenger');
 // for tickets
 var ticket = {} ;
-var unirest = require('unirest');
 var API_KEY = "VAxM08x35ThAOEqIgvOF";
 var FD_ENDPOINT = "fongyu";
-
+// facebook bot
+var fb_bot = MessengerPlatform.create({
+  pageID: '1505268191222395',
+  appID: '472206313149798',
+  appSecret: '64f066580f1118cce5277483865680f9',
+  validationToken: '8d651e7bf52b3f923d099302268b8893',
+  pageToken: 'EAAGteBmOVWYBAJShzsZADFojyn9RzSkZC085RXHG4XZCe1ZAYXQ89HcHgUQR7z2ZAfvJ2MJT0nXqGOmeQDooK0FMNk7K1BLJHJ8KUlyI33dcUg221mLr5Ft6GYDQBQ6d5C8pvqy27flm7VNYShR8PAW4mF4bo09Vn90zdNY53tYLT9LeiesXG'
+});
+// firebase
 var config = {
   apiKey: "AIzaSyAr1ic8lr_asYZTwwIjBNp3uiqFdu1QJKI",
   authDomain: "shield-dev-91210.firebaseapp.com",
@@ -106,6 +115,207 @@ var count = 0;
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
+// facebook implementation
+//==============FACEBOOK MESSAGE==============
+app.post('/webhook', function(req, res) {
+    var data = req.body;
+    console.log('webhook entry: ');
+    console.log(data);
+
+    // Make sure this is a page subscription
+    if (data.object === 'page') {
+
+        // Iterate over each entry - there may be multiple if batched
+        data.entry.forEach(function(entry) {
+            var pageID = entry.id;
+            var timeOfEvent = entry.time;
+
+            // Iterate over each messaging event
+            entry.messaging.forEach(function(event) {
+                console.log('this is event');
+                console.log(event);
+                if (event.message) {
+                    loadFbProfile(event, event.sender.id);
+                } else {
+                    console.log("Webhook received unknown event: ", event);
+                }
+            });
+        });
+
+        // Assume all went well.
+        //
+        // You must send back a 200, within 20 seconds, to let us know
+        // you've successfully received the callback. Otherwise, the request
+        // will time out and we will keep trying to resend.
+        res.sendStatus(200);
+    } else {
+        console.log('not on a page');
+    }
+}); //app.post
+
+function loadFbProfile(obj, psid) {
+    fb_bot.webhook('/webhook');
+    fb_bot.getProfile(psid).then(function(data) {
+    var fb_user_name = data.first_name + ' ' + data.last_name;
+    var fb_user_profilePic = data.profile_pic;
+    var fb_user_locale = data.locale;
+    var fb_user_gender = data.gender;
+
+        if (obj.message.attachments) {
+            //Checking if there are any image attachments
+            if (obj.message.attachments[0].type === "image") {
+                var imageURL = obj.message.attachments[0].payload.url;
+                obj.message = '<img src="' + imageURL + '"/>';
+            } //if image
+            else if (obj.message.attachments[0].type === "video") {
+                var videoURL = obj.message.attachments[0].payload.url;
+                obj.message = '<video controls><source src="' + videoURL + '" type="video/mp4"></video>';
+
+            } //if video
+            else if (obj.message.attachments[0].type === "audio") {
+                var audioURL = obj.message.attachments[0].payload.url;
+                obj.message = '<audio controls><source src="' + audioURL + '" type="audio/mpeg"/></audio>';
+
+            } //if audio
+            else if (obj.message.attachments[0].type === "file") {
+                var fileURL = obj.message.attachments[0].payload.url;
+                obj.message = 'The user sent a file, click <a target="blank" href="' + fileURL + '">HERE</a> for download.';
+
+            } //if audio
+            else if (obj.message.attachments[0].type === "location") {
+                var locateURL = obj.message.attachments[0].url;
+                obj.message = 'The user sent a location, click <a target="blank" href="' + locateURL + '">HERE</a> for map link.';
+
+            } //if location
+        } else {
+            obj.message = obj.message.text;
+
+        }
+
+        for (let prop in chatData) {
+            if (chatData[prop].Profile.userId == obj.sender.id) {
+                var count_unread_toFront = chatData[prop].Profile.unRead;
+                count_unread_toFront++;
+            }
+        } //for let prop in chatData
+
+        obj.id = obj.sender.id;
+        obj.owner = obj.recipient.id;
+        obj.name = fb_user_name;
+        obj.time = obj.timestamp;
+        obj.unRead = count_unread_toFront;
+
+        let fbObj = {
+          data: obj,
+          channelId: 'FB'
+        }
+
+        io.sockets.emit('new message2', fbObj);
+
+        //======receive message==========
+
+        var senderID = obj.sender.id;
+        var recipientID = obj.recipient.id;
+        var timeOfMessage = obj.timestamp;
+        var message_text = obj.message;
+
+
+
+        console.log("Received message for user %d and page %d at %d with message:",
+            senderID, recipientID, timeOfMessage);
+        console.log(JSON.stringify(obj.message));
+
+        //===========================================
+
+        //=============saving to database============
+        let message_lineTochat = message_text;
+        let receiverId = senderID;
+        let receiver_name = fb_user_name;
+        let nowTime = Date.now();
+
+
+        var msgObj = {
+            owner: "user",
+            name: receiver_name,
+            time: nowTime,
+            message: message_lineTochat,
+            id: receiverId,
+            prof_pic: fb_user_profilePic,
+            locale: fb_user_locale,
+            gend: fb_user_gender
+        };
+
+
+        function emitIO_and_pushDB(obj) {
+            console.log("sending object user: ");
+            console.log(obj);
+            console.log("sending to new firebase database");
+            sendToNewFb(obj);
+            console.log("sending to new io sockets...");
+            console.log("All sent!");
+        }
+
+        function sendToNewFb(obj) {
+            let flag = true;
+            for (let prop in chatData) {
+                if (chatData[prop].Profile.userId == receiverId) {
+                    console.log("find user " + receiverId + " in database");
+                    var count_unread = chatData[prop].Profile.unRead;
+                    count_unread++;
+                    let length = chatData[prop].Messages.length;
+                    let updateObj = {};
+                    updateObj['/' + prop + '/Messages/' + length] = obj;
+                    newDBRef.update(updateObj);
+                    newDBRef.child(prop).child("Profile").update({
+                        unRead: count_unread,
+                        photo: obj.prof_pic
+                    });
+
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                console.log("new user come in");
+
+                let newData = {
+                    Profile: {
+                        nickname: obj.name,
+                        userId: obj.id,
+                        age: -1,
+                        地區: obj.locale,
+                        性別: obj.gend,
+                        telephone: "",
+                        address: "",
+                        firstChat: nowTime,
+                        首次聊天時間: nowTime,
+                        recentChat: nowTime,
+                        上次聊天時間: nowTime,
+                        totalChat: 1,
+                        總共聊天時間: 1,
+                        avgChat: 1,
+                        平均每次聊天時間: 1,
+                        聊天次數: 1,
+                        unRead: 1,
+                        photo: obj.prof_pic
+                    },
+                    Messages: [obj]
+                };
+                newDBRef.push(newData);
+                io.sockets.emit('new user profile', newData.Profile);
+            }
+        } //sendTONewFb
+
+        emitIO_and_pushDB(msgObj);
+
+    }).catch(function(error) {
+        console.log('on line 295 error');
+    }); //fb_bot
+
+} //loadFbProfile
+//============================================
+
 // 接收訊息
 // LINE bot implement
 bot.on('message', event => {
@@ -120,6 +330,8 @@ bot.on('message', event => {
     let nowTime = Date.now();
     let postion;
     var RQuestion;
+
+    console.log('data entered');
 
     event.source.profile().then(function(profile) {
         receiver_name = profile.displayName; // 客戶在line的名稱
@@ -142,7 +354,13 @@ bot.on('message', event => {
         }
         function sendToFrontSocket(obj) {
           obj.id = receiverId;
-          io.sockets.emit('new message2', obj);
+
+          let lineObj = {
+            data: obj,
+            channelId: chanId
+          }
+
+          io.sockets.emit('new message2', lineObj);
         }
         function sendToNewFb(obj){
           let flag = true;
@@ -6358,7 +6576,13 @@ bot.on('postback', event =>{
     }
     function sendToFrontSocket(obj) {
       obj.id = receiverId;
-      io.sockets.emit('new message2', obj);
+
+      let apiaiObj = {
+        data: obj,
+        channelId: '1534733290'
+      }
+
+      io.sockets.emit('new message2', apiaiObj);
     }
     function sendToNewFb(obj){
       let flag = true;
@@ -6396,7 +6620,6 @@ bot.on('postback', event =>{
             聊天次數: 1,
             unRead: true,
             photo: profile.pictureUrl,
-            channelId: chanId,
             userId: receiverId
           },
           Messages: [obj]
@@ -6655,7 +6878,7 @@ bot.on('postback', event =>{
 
 });
 
-app.post('/webhook', linebotParser);
+app.post('/linehook', linebotParser);
 
 //==================ticket=======================
 var viewContact;
@@ -6902,7 +7125,13 @@ io.sockets.on('connection', (socket) => {
 
         function sendToFrontSocket(obj) {
           obj.id = agent_sendTo_receiver;
-          io.sockets.emit('new message2', obj);
+
+          let agentObj = {
+            data: obj,
+            channelId: '1534733290'
+          }
+
+          io.sockets.emit('new message2', agentObj);
         }
         function sendToLocalDB(obj) {
           let DATA = JSON.parse(fs.readFileSync('chatMsg.json'));

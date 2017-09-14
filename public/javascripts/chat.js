@@ -100,12 +100,14 @@ $(document).ready(function() {
     function () {
       $(this).css('width','70px') ;
   });
-  $('.chatApp_item').click(function () {
+  $('.chatApp_item[open="true"]').click(function() {
+    $(this).addClass('select').siblings().removeClass('select');
+
     let id = $(this).attr('id');
-    $(this).addClass('select')
-           .siblings().removeClass('select');
-    $("#user").children('#'+id).toggle('fast').siblings('.tablinks_area').hide();
-    $(".filter_head").children("#title").html($(this).children('h4').text());
+    $("#user").children('#' + id).show('fast').siblings('.tablinks_area').hide();
+
+    let title = $(this).children('h4').text();
+    $(".filter_head #title").html(title);
   });
   $(".filter_head #search").click(function () {
     if(!$(".tablinks_head").children('.search').is(':visible')){
@@ -485,6 +487,7 @@ $(document).ready(function() {
     let historyMsg = data.Messages;
     let profile = data.Profile;
 
+    if (profile.channelId === undefined) profile.channelId = 'FB';
 
     let historyMsgStr = "";
     if( data.position!=0 ) {    //if there's still history messages unloaded
@@ -618,7 +621,15 @@ $(document).ready(function() {
     $('#user-rooms').val(target);             //change value in select bar
     $('#'+target+'-content').scrollTop($('#'+target+'-content')[0].scrollHeight);   //scroll to down
     $("#"+target+"-info").show().siblings().hide();
-    toggleInfoPanel() ;
+    let profile = userProfiles[target];
+    // console.log(profile);
+    $('.userPhoto').attr('src', profile.photo ? profile.photo : "");
+    $('#prof_nick').text(profile.nickname);
+    // toggleInfoPanel() ;
+    $(this).attr("active",'true').parent().siblings().children().attr("active",'false') ;
+    let panel = $('.nav-link[active=true]').text().trim().toLowerCase() ;
+    $('.card-group:visible').children('#'+panel).fadeIn('fast').siblings().fadeOut('fast');
+
     console.log('click tablink executed');
   }
 
@@ -639,8 +650,8 @@ $(document).ready(function() {
      //if www push "new message2"
     console.log("Message get! identity=" + data.owner + ", name=" + data.name);
     //owner = "user", "agent" ; name = "Colman", "Ted", others...
-    displayClient( data );  //update tablinks
-    displayMessage( data ); //update canvas
+    displayClient( data.data, data.channelId );  //update tablinks
+    displayMessage( data.data, data.channelId ); //update canvas
     if( data.owner === "user" ) change_document_title(data.name);    //not done yet
     if( name_list.indexOf(data.id) == -1 ) {  //if its never chated user, push his name into name list
       name_list.push(data.id);
@@ -1302,7 +1313,7 @@ $(document).ready(function() {
     if (msg.startsWith("<img")){
       return '<p style="line-height:250%" class="message" rel="' + time + ' title="' + toDateStr(time) + '"><strong><span class="sender">' + name + '</span></strong><span class="content">  ' + msg + '</span><span class="sendTime">' + toTimeStr(time) + '</span><br/></p>';
     }else{
-      return '<div style="line-height:250%" class="message" rel="' + time + ' title="' + toDateStr(time) + '"><strong><span class="sender">' + name + '</span></strong><span style="background-color:lightgrey" class="content"><p>' + msg + '</p></span><span class="sendTime">' + toTimeStr(time) + '</span><br/></div>';
+      return '<div style="line-height:250%" class="message" rel="' + time + ' title="' + toDateStr(time) + '"><strong><span class="sender">' + name + '</span></strong><span style="background-color:lightgrey;" class="content"><p>' + msg + '</p></span><span class="sendTime">' + toTimeStr(time) + '</span><br/></div>';
     }
   }
 
