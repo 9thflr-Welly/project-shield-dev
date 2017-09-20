@@ -16,7 +16,7 @@ const database = firebase.database();
 if(window.location.pathname === '/login' || window.location.pathname === '/signup'){
   auth.onAuthStateChanged(user => {
     if(user){
-      window.location = '/';
+      window.location = '/chat';
     } else {
       console.log('need to sign in');
     }

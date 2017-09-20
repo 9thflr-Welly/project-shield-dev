@@ -14,6 +14,10 @@ router.get('/chat', function(req, res, next) {
   res.render('chat', { title: 'SHIELD chat' });
 });
 
+router.get('/dashboard', function(req, res, next) {
+  res.render('dashboard', { title: 'SHIELD Dashboard' });
+});
+
 router.get('/tag', function(req, res, next) {
   res.render('tag', { title: 'SHIELD tag' });
 });
