@@ -2,4 +2,5 @@
 
 Issues <br />
 
-ready to insert facebook messenger bot
+9/25 facebook messenger串接
+9/26 董事長demo整理
