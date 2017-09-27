@@ -257,32 +257,41 @@ function profEdit() {
   $('#prof-edit-channelSecret_1').val(chanSecret_1);
   $('#prof-edit-channelAccessToken_1').val(chanAT_1);
   $('#prof-edit-channelId_2').val(chanId_2);
-  $('#prof-edit-channelSecret_2').val(chanSecret_2);
+  $('#prof-input-channelSecret_2').val(chanSecret_2);
   $('#prof-edit-channelAccessToken_2').val(chanAT_2);
 
   $('#prof-edit-company').val(company);
   $('#prof-edit-logo').val(logo);
 }
 
+function checkInputUndefined(input){
+	if(typeof(input) === "undefined"){    	
+    	return 0
+    }
+    else{
+    	return input;
+    }
+}
+  
 function profSubmit() {
   let userId = auth.currentUser.uid;
-  let id = $('#prof-edit-id').val();
-  let name = $('#prof-edit-name').val();
-  let nick = $('#prof-edit-nick').val();
-  let dob = $('#prof-edit-dob').val();
-  let email = $('#prof-edit-email').val();
-  let gender = $('#prof-edit-gender').val();
-  let phone = $('#prof-edit-phone').val();
+  let id = checkInputUndefined($('#prof-edit-id').val());
+  let name = checkInputUndefined($('#prof-edit-name').val());
+  let nick = checkInputUndefined($('#prof-edit-nick').val());
+  let dob = checkInputUndefined($('#prof-edit-dob').val());
+  let email = checkInputUndefined($('#prof-edit-email').val());
+  let gender = checkInputUndefined($('#prof-edit-gender').val());
+  let phone = checkInputUndefined($('#prof-edit-phone').val());
 
-  let chanId_1 = $('#prof-edit-channelId_1').val();
-  let chanSecret_1 = $('#prof-edit-channelSecret_1').val();
-  let chanAT_1 = $('#prof-edit-channelAccessToken_1').val();
-  let chanId_2 = $('#prof-edit-channelId_2').val();
-  let chanSecret_2 = $('#prof-edit-channelSecret_2').val();
-  let chanAT_2 = $('#prof-edit-channelAccessToken_2').val();
+  let chanId_1 = checkInputUndefined($('#prof-edit-channelId_1').val());
+  let chanSecret_1 = checkInputUndefined($('#prof-edit-channelSecret_1').val());
+  let chanAT_1 = checkInputUndefined($('#prof-edit-channelAccessToken_1').val());
+  let chanId_2 = checkInputUndefined($('#prof-edit-channelId_2').val());
+  let chanSecret_2 = checkInputUndefined($('#prof-edit-channelSecret_2').val());
+  let chanAT_2 = checkInputUndefined($('#prof-edit-channelAccessToken_2').val());
   // console.log(id, name, dob, email, gender,phone);
-  let company = $('#prof-edit-company').val();
-  let logo = $('#prof-edit-logo').val();
+  let company = checkInputUndefined($('#prof-edit-company').val());
+  let logo = checkInputUndefined($('#prof-edit-logo').val());
   // console.log(id);
   // database.ref('users/' + userId).remove();
   database.ref('users/' + userId).set({
