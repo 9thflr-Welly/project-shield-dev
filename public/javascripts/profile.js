@@ -258,7 +258,7 @@ function profEdit() {
   $('#prof-edit-channelAccessToken_1').val(chanAT_1);
   $('#prof-edit-channelId_2').val(chanId_2);
   $('#prof-input-channelSecret_2').val(chanSecret_2);
-  $('#prof-edit-channelAccessToken_2').val(chanAT_2);
+  $('#prof-input-channelAccessToken_2').val(chanAT_2);
 
   $('#prof-edit-company').val(company);
   $('#prof-edit-logo').val(logo);
