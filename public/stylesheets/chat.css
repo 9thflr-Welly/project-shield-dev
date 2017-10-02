@@ -30,6 +30,22 @@
   float:right;
   margin-top:20px;
 }
+
+.unread_msg_count_all{
+  position: absolute;
+  top: 15px;
+  left: 40px;
+  border:1px solid limegreen;
+  border-radius:50px;
+  width:20px;
+  height:20px;
+  background-color:limegreen;
+  color:black;
+  text-align:center;
+  float:right;
+  margin-top:20px;
+}
+
 .tablinks_head{
   font-size:14px;
   font-weight:bold;
@@ -76,7 +92,9 @@
   font-size: 10px
 }
 #prof_nick{
-  color:lightgrey;
+  position: absolute;
+  top: 10%;
+  color:white;
   font-size: 100%;
   float:bottom;
   margin:0;
@@ -94,7 +112,9 @@
   float:top;
   padding-bottom: 1%;
   background-color: grey;
+  position: relative;
 }
+
 html,body{
   height: 100%;
   font-family: Microsoft JhengHei;
@@ -141,14 +161,44 @@ html,body{
   height: 60px;
   padding: 10px;
   cursor: pointer;
+  position: relative;
 }
-.chatApp_item h4{
+/*.chatApp_item h4{
   margin-left: 20px;
-}
+}*/
 .chatApp_item:hover,.select{
   background-color: rgb(133, 134, 180);
 }
+.unread_msg_count{
+  position: absolute;
+  top: 15px;
+  left: 40px;
+  border:1px solid limegreen;
+  border-radius:50px;
+  width:20px;
+  height:20px;
+  background-color:limegreen;
+  color:black;
+  text-align:center;
+  float:right;
+  margin-top:20px;
+}
+.unread_msg_count_backup{
+  position: relative;
+  top: 40px;
+  left: 40px;
+  height: 20px;
+  width: 20px;
+  background-color: red;
+  border-radius: 50%;
+  z-index: 999;
+  display: none;
+  text-align: center;
+}
+
+
 .software_icon{
+  position: absolute;
   width: 40px;
   height: 40px
 }
@@ -186,7 +236,7 @@ html,body{
   margin: 3px;
   float: left;
   border: 1px solid #ccc;
-  width: 80%;
+  width: 95%;
   height: 25px;
 }
 #filterClean{
@@ -250,10 +300,6 @@ html,body{
 .filter_btn:hover{
   background-color: #ccc
 }
-.dropdown-menu{
-  position: fixed;
-  top: 0;
-}
 .tablinks_head{
   overflow: hidden;
   height: 80px;
@@ -263,7 +309,7 @@ html,body{
 }
 .tablinks_area{
   flex:1;
-  display: none;
+  display: block;
   position: relative;
   background-color: inherit;
   height: 88% ;
@@ -463,11 +509,6 @@ button{
   margin: auto 2em;
   float: right;
   height: 200px;
-}
-.dropdown-menu {
-  padding-left: 20px;
-  padding-top: 20px;
-  padding-bottom: 20px;
 }
 #showChatApp{
   display:none;

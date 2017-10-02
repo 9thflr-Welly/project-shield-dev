@@ -1,5 +1,11 @@
 var name_list = []; //list of all users
+var room_list = [];
 var user_list = []; // user list for checking on idle chat rooms
+
+var fbCount = 0;
+var line1Count = 0;
+var line2Count = 0;
+var totalCount = 0;
 
 const LOADING_MSG_AND_ICON = "<p class='message-day' style='text-align: center'><strong><i>" +
 "Loading History Messages..." +
@@ -14,6 +20,7 @@ $(document).ready(function() {
   // var messageForm = $('#send-message'); //button for agent to send message
   var messageInput = $('#message'); //input for agent to send message
   var canvas = $("#canvas"); //panel of message canvas
+  var searchBox = $('#searchBox'); // search box
   var userId = "";
   var person = "agentColman"; //agent name
   var infoCanvas = $("#infoCanvas");
@@ -35,8 +42,9 @@ $(document).ready(function() {
   var filterDataCustomer = {}; //option of filter customized tags
 
   const COLOR = {
-    FIND: "#A52A2A",
+    FIND: "#ff0000",
     CLICKED: "#ccc",
+    FINDBACK: "#ffff00"
   }
   let n = 0;
 
@@ -55,11 +63,12 @@ $(document).ready(function() {
   // 群組名稱
   $(document).on('dblclick', '.myText', openTitle); // 點開編輯群組名稱
   $(document).on('click', '#save-group-btn', groupSubmit); // 完成編輯群組名稱
-  $('#message').on('keydown', function(event){
+  $(document).on('click', '#cls-cal-btn', cancelSubmit); // 取消編輯群組名稱
+  $('#message').on('keydown', function(event){ // 按enter可以發送訊息
     if(event.keyCode == 13){
       document.getElementById('submitMsg').click();
     }
-  })
+  });
   $(document).on('click', '.dropdown-menu', function(event) {
     event.stopPropagation();
   });
@@ -111,35 +120,78 @@ $(document).ready(function() {
   });//onclick_show
 
   // mouse hover the chatApp
-  $("#chatApp").hover(
-    function() {
-      $(this).css('width', '250px').find('h4').delay(50).fadeIn();
-    },
-    function() {
-      $(this).css('width', '70px').find('h4').hide();
-    }
-  );
+  // $("#chatApp").hover(
+  //   function() {
+  //     $(this).css('width', '250px').find('h4').delay(50).fadeIn();
+  //   },
+  //   function() {
+  //     $(this).css('width', '70px').find('h4').hide();
+  //   }
+  // );
   // select a group
+  // $('.chatApp_item[open="true"]').click(function() {
+  //   $('.choose').hide();
+  //   $('.error').hide();
+  //   $(this).addClass('select').siblings().removeClass('select'); // 對點選以外的選項都隱藏
+  //
+  //   let id = $(this).attr('id');
+  //   $("#user").children('#' + id + '_room').show('fast').siblings('.tablinks_area').hide(); // 對應的id以外的選項都隱藏
+  //
+  //   let title = $(this).children('h4').text();
+  //   $(".filter_head #title").html(title);
+  // });
+
   $('.chatApp_item[open="true"]').click(function() {
-    $('.choose').hide();
-    $('.error').hide();
-    $(this).addClass('select').siblings().removeClass('select'); // 對點選以外的選項都隱藏
-
-    let id = $(this).attr('id');
-    $("#user").children('#' + id + '_room').show('fast').siblings('.tablinks_area').hide(); // 對應的id以外的選項都隱藏
-
-    let title = $(this).children('h4').text();
-    $(".filter_head #title").html(title);
+    let thisRel = $(this).attr('rel');
+    if(thisRel === 'All'){
+      $('.tablinks_area').find('b').show();
+    } else {
+      $('.tablinks_area').find('b').hide();
+      $('.tablinks_area').find('[rel="'+thisRel+'"]').parent().show();
+    }
   });
 
   $(document).on("mouseenter", ".message", function() {
-    // console.log("HAA");
     $(this).find('.sender').show();
   });
   $(document).on("mouseleave", ".message", function() {
-    // console.log("888");
     $(this).find('.sender').hide();
   });
+
+  searchBox.on('keypress', function (e) {
+    let code = (e.keyCode ? e.keyCode : e.which);
+    if (code != 13) return;
+
+    let searchStr = $(this).val().toLowerCase();
+    if( searchStr === "" ) {
+      displayAll();
+    } else {
+      // 搜尋displayClient所有的名字
+      // 搜尋所有canvas下的訊息 如果有match就在displayClient的message上顯示 "找到訊息"
+      // 把在離天是裡面的關鍵字標黃
+
+      $('.tablinks').each( function() {
+        //find his content parent
+        let id = $(this).attr('name');
+        let room = $(this).attr('rel');
+        let panel = $("div #"+id+"-content[rel='"+room+"']");
+
+        //display searched msg & push #link when onclick
+        let color = "";
+        panel.find(".message").each(function() {
+          let text = $(this).find('.content').text();
+          if( text.toLowerCase().indexOf(searchStr)!=-1 ) {
+            // displayMessage match的字標黃
+            $(this).find('.content').css({'color': COLOR.FIND, 'background-color': COLOR.FINDBACK});
+            // displayClient顯示"找到訊息"並標紅
+            $('[name="'+id+'"][rel="'+room+'"]').find('#msg').css('color', COLOR.FIND).text("找到訊息");
+          }
+        });
+        $(this).css("color", color);
+
+      });
+    }
+  }); //end searchBox change func
 
   setInterval(() => {
     closeIdleRoomTry();
@@ -223,15 +275,19 @@ $(document).ready(function() {
 
     setTimeout(() => { // 載入群組名稱
       loadChatGroupName();
-    }, 1000)
+    }, 1000);
   }
 
   socket.on('response line channel', (data) => {
-    $('.tablinks_area#Line_1_room').attr('rel', data.chanId_1);
-    $('.tablinks_area#Line_2_room').attr('rel', data.chanId_2);
-    // console.log("Line channel loading complete!");
+    if(data.chanId_1 === '' && data.chanId_2 === ''){
+      $('.error').text('群組名稱沒有設定，請於設定頁面更改。');
+    } else {
+      $('#Line_1').attr('rel', data.chanId_1);
+      $('#Line_2').attr('rel', data.chanId_2);
+      room_list.push(data.chanId_1);
+      room_list.push(data.chanId_2);
+    }
 
-    // console.log("Start loading history message...");
     socket.emit('get json from back');
   })
 
@@ -294,7 +350,6 @@ $(document).ready(function() {
 
   socket.on('new message', (data) => {
     // console.log("receive socket! data = ");
-    // console.log(data);
     // console.log(data);
     // if www push "new message"
     // console.log("Message get! identity=" + data.owner + ", name=" + data.name);
@@ -544,11 +599,10 @@ $(document).ready(function() {
 
   // inner functions
   function pushMsg(data) {
-    // console.log(data);
+
     // one user do function one time; data structure see file's end
     let historyMsg = data.Messages;
     let profile = data.Profile;
-    // console.log(profile);
 
     let historyMsgStr = "";
     if (data.position != 0) {
@@ -560,9 +614,6 @@ $(document).ready(function() {
     }
 
     historyMsgStr += historyMsg_to_Str(historyMsg);
-    historyMsgStr += "<p class='message-day' style='text-align: center'><strong><italic>" +
-    "-即時訊息-" +
-    " </italic></strong></p>"; //history message string tail
     // end of history message
 
     $('#user-rooms').append('<option value="' + profile.userId + '">' + profile.nickname + '</option>'); //new a option in select bar
@@ -577,86 +628,239 @@ $(document).ready(function() {
     }
 
     let msgTime = '<div style="float:right;font-size:8px; font-weight:normal">' + toTimeStr_minusQuo(lastMsg.time) + '</div>';
-    // display last message at tablinks
 
-    if(profile.channelId === undefined || profile.channelId === "FB"){
-      // console.log('to fb');
-      if( profile.channelId === undefined ) profile.channelId = "FB";
-      // name_list.push(profile.channelId+profile.userId); //make a name list of all chated user
-      $('#fb-clients').append(
-        "<b><button style='text-align:left' class='tablinks'" +
-        "name='" + profile.userId + "' rel='" + profile.channelId + "'" +
-        "data-avgTime='" + profile.avgChat + "' " +
-        "data-totalTime='" + profile.totalChat + "' " +
-        "data-chatTimeCount='" + profile.chatTimeCount + "' " +
-        "data-firstTime='" + profile.firstChat + "' " +
-        "data-recentTime='" + lastMsg.time + "' >"+
-        "<div class='img_holder'>" +
-        "<img src='" + profile.photo + "' alt='無法顯示相片'>" +
-        "</div>" +
-        "<div class='msg_holder'>" +
-        profile.nickname +
-        lastMsgStr +
-        "</div>" +
-        "<div class='agentImg_holder'>" +
-        "<img src='http://www.boothcon.com.au/wp-content/uploads/2016/05/travel-agent-icon.png' alt='無法顯示相片'>" +
-        "</div>" +
-        "<div class='unread_msg' style='display:none;'>" + profile.unRead + "</div>" +
-        "</button></b>"
-      ); //new a tablinks
-    } else if(profile.channelId === $('#Line_1_room').attr('rel')){
-      // console.log('to room 1');
-      $('#line1-clients').append(
-        "<b><button style='text-align:left' class='tablinks'" +
-        "name='" + profile.userId + "' rel='" + profile.channelId + "'" +
-        "data-avgTime='" + profile.avgChat + "' " +
-        "data-totalTime='" + profile.totalChat + "' " +
-        "data-chatTimeCount='" + profile.chatTimeCount + "' " +
-        "data-firstTime='" + profile.firstChat + "' " +
-        "data-recentTime='" + lastMsg.time + "' >"+
-        "<div class='img_holder'>" +
-        "<img src='" + profile.photo + "' alt='無法顯示相片'>" +
-        "</div>" +
-        "<div class='msg_holder'>" +
-        profile.nickname +
-        lastMsgStr +
-        "</div>" +
-        "<div class='agentImg_holder'>" +
-        "<img src='http://www.boothcon.com.au/wp-content/uploads/2016/05/travel-agent-icon.png' alt='無法顯示相片'>" +
-        "</div>" +
-        "<div class='unread_msg' style='display:none;'>" + profile.unRead + "</div>" +
-        "</button></b>"
-      ); //new a tablinks
-    } else if(profile.channelId === $('#Line_2_room').attr('rel')){
+    if(profile.VIP等級 !== undefined){
+      if( profile.channelId === undefined ){
+        profile.channelId = "FB";
+        // fbCount += profile.unRead;
+      }
+      if(profile.unRead > 0){
+        $('#vip_list').prepend(
+          "<b><button style='text-align:left' class='tablinks'" +
+          "name='" + profile.userId + "' rel='" + profile.channelId + "'" +
+          "data-avgTime='" + profile.avgChat + "' " +
+          "data-totalTime='" + profile.totalChat + "' " +
+          "data-chatTimeCount='" + profile.chatTimeCount + "' " +
+          "data-firstTime='" + profile.firstChat + "' " +
+          "data-recentTime='" + lastMsg.time + "' >"+
+          "<div class='img_holder'>" +
+          "<img src='" + profile.photo + "' alt='無法顯示相片'>" +
+          "</div>" +
+          "<div class='msg_holder'>" +
+          profile.nickname +
+          lastMsgStr +
+          "</div>" +
+          // "<div class='agentImg_holder'>" +
+          // "<img src='http://www.boothcon.com.au/wp-content/uploads/2016/05/travel-agent-icon.png' alt='無法顯示相片'>" +
+          // "</div>" +
+          "<div class='unread_msg' style='display:block;'>" + profile.unRead + "</div>" +
+          "</button></b>"
+        ); //new a tablinks
+        
+        //20170929 - Welly
+        console.log(profile.channelId);
+        updateTotalUnread(profile.channelId,profile.unRead);
+          
+      } else {
+        $('#vip_list').prepend(
+          "<b><button style='text-align:left' class='tablinks'" +
+          "name='" + profile.userId + "' rel='" + profile.channelId + "'" +
+          "data-avgTime='" + profile.avgChat + "' " +
+          "data-totalTime='" + profile.totalChat + "' " +
+          "data-chatTimeCount='" + profile.chatTimeCount + "' " +
+          "data-firstTime='" + profile.firstChat + "' " +
+          "data-recentTime='" + lastMsg.time + "' >"+
+          "<div class='img_holder'>" +
+          "<img src='" + profile.photo + "' alt='無法顯示相片'>" +
+          "</div>" +
+          "<div class='msg_holder'>" +
+          profile.nickname +
+          lastMsgStr +
+          "</div>" +
+          // "<div class='agentImg_holder'>" +
+          // "<img src='http://www.boothcon.com.au/wp-content/uploads/2016/05/travel-agent-icon.png' alt='無法顯示相片'>" +
+          // "</div>" +
+          "<div class='unread_msg' style='display:none;'>" + profile.unRead + "</div>" +
+          "</button></b>"
+        ); //new a tablinks
 
-      // console.log('to room 2');
-      $('#line2-clients').append(
-        "<b><button style='text-align:left' class='tablinks'" +
-        "name='" + profile.userId + "' rel='" + profile.channelId + "'" +
-        "data-avgTime='" + profile.avgChat + "' " +
-        "data-totalTime='" + profile.totalChat + "' " +
-        "data-chatTimeCount='" + profile.chatTimeCount + "' " +
-        "data-firstTime='" + profile.firstChat + "' " +
-        "data-recentTime='" + lastMsg.time + "' >"+
-        "<div class='img_holder'>" +
-        "<img src='" + profile.photo + "' alt='無法顯示相片'>" +
-        "</div>" +
-        "<div class='msg_holder'>" +
-        profile.nickname +
-        lastMsgStr +
-        "</div>" +
-        "<div class='agentImg_holder'>" +
-        "<img src='http://www.boothcon.com.au/wp-content/uploads/2016/05/travel-agent-icon.png' alt='無法顯示相片'>" +
-        "</div>" +
-        "<div class='unread_msg' style='display:none;'>" + profile.unRead + "</div>" +
-        "</button></b>"
-      ); //new a tablinks
-    } else {
-      // console.log('not found');
-      // console.log("profile.channelId: " + profile.channelId);
+        //20170929 - Welly
+        console.log(profile.channelId);
+        
+      }
+
+    } else if(profile.channelId === undefined || profile.channelId === "FB"){
+      if( profile.channelId === undefined ){
+        profile.channelId = "FB";
+        // fbCount += profile.unRead;
+      }
+      if(profile.unRead > 0){
+        $('#clients').append(
+          "<b><button style='text-align:left' class='tablinks'" +
+          "name='" + profile.userId + "' rel='" + profile.channelId + "'" +
+          "data-avgTime='" + profile.avgChat + "' " +
+          "data-totalTime='" + profile.totalChat + "' " +
+          "data-chatTimeCount='" + profile.chatTimeCount + "' " +
+          "data-firstTime='" + profile.firstChat + "' " +
+          "data-recentTime='" + lastMsg.time + "' >"+
+          "<div class='img_holder'>" +
+          "<img src='" + profile.photo + "' alt='無法顯示相片'>" +
+          "</div>" +
+          "<div class='msg_holder'>" +
+          profile.nickname +
+          lastMsgStr +
+          "</div>" +
+          // "<div class='agentImg_holder'>" +
+          // "<img src='http://www.boothcon.com.au/wp-content/uploads/2016/05/travel-agent-icon.png' alt='無法顯示相片'>" +
+          // "</div>" +
+          "<div class='unread_msg' style='display:block;'>" + profile.unRead + "</div>" +
+          "</button></b>"
+        ); //new a tablinks
+        
+        //20170929 - Welly
+        console.log(profile.channelId);
+        updateTotalUnread(profile.channelId,profile.unRead);
+  
+      } else {
+        $('#clients').append(
+          "<b><button style='text-align:left' class='tablinks'" +
+          "name='" + profile.userId + "' rel='" + profile.channelId + "'" +
+          "data-avgTime='" + profile.avgChat + "' " +
+          "data-totalTime='" + profile.totalChat + "' " +
+          "data-chatTimeCount='" + profile.chatTimeCount + "' " +
+          "data-firstTime='" + profile.firstChat + "' " +
+          "data-recentTime='" + lastMsg.time + "' >"+
+          "<div class='img_holder'>" +
+          "<img src='" + profile.photo + "' alt='無法顯示相片'>" +
+          "</div>" +
+          "<div class='msg_holder'>" +
+          profile.nickname +
+          lastMsgStr +
+          "</div>" +
+          // "<div class='agentImg_holder'>" +
+          // "<img src='http://www.boothcon.com.au/wp-content/uploads/2016/05/travel-agent-icon.png' alt='無法顯示相片'>" +
+          // "</div>" +
+          "<div class='unread_msg' style='display:none;'>" + profile.unRead + "</div>" +
+          "</button></b>"
+        ); //new a tablinks
+
+        //20170929 - Welly
+        console.log(profile.channelId);
+        
+      }
+    } else if(profile.channelId === room_list[0]){
+      if(profile.unRead > 0){
+        $('#clients').append(
+          "<b><button style='text-align:left' class='tablinks'" +
+          "name='" + profile.userId + "' rel='" + profile.channelId + "'" +
+          "data-avgTime='" + profile.avgChat + "' " +
+          "data-totalTime='" + profile.totalChat + "' " +
+          "data-chatTimeCount='" + profile.chatTimeCount + "' " +
+          "data-firstTime='" + profile.firstChat + "' " +
+          "data-recentTime='" + lastMsg.time + "' >"+
+          "<div class='img_holder'>" +
+          "<img src='" + profile.photo + "' alt='無法顯示相片'>" +
+          "</div>" +
+          "<div class='msg_holder'>" +
+          profile.nickname +
+          lastMsgStr +
+          "</div>" +
+          // "<div class='agentImg_holder'>" +
+          // "<img src='http://www.boothcon.com.au/wp-content/uploads/2016/05/travel-agent-icon.png' alt='無法顯示相片'>" +
+          // "</div>" +
+          "<div class='unread_msg' style='display:block;'>" + profile.unRead + "</div>" +
+          "</button></b>"
+        ); //new a tablinks
+        
+        //20170929 - Welly
+        console.log(profile.channelId);
+        updateTotalUnread(profile.channelId,profile.unRead);
+
+      } else {
+        $('#clients').append(
+          "<b><button style='text-align:left' class='tablinks'" +
+          "name='" + profile.userId + "' rel='" + profile.channelId + "'" +
+          "data-avgTime='" + profile.avgChat + "' " +
+          "data-totalTime='" + profile.totalChat + "' " +
+          "data-chatTimeCount='" + profile.chatTimeCount + "' " +
+          "data-firstTime='" + profile.firstChat + "' " +
+          "data-recentTime='" + lastMsg.time + "' >"+
+          "<div class='img_holder'>" +
+          "<img src='" + profile.photo + "' alt='無法顯示相片'>" +
+          "</div>" +
+          "<div class='msg_holder'>" +
+          profile.nickname +
+          lastMsgStr +
+          "</div>" +
+          // "<div class='agentImg_holder'>" +
+          // "<img src='http://www.boothcon.com.au/wp-content/uploads/2016/05/travel-agent-icon.png' alt='無法顯示相片'>" +
+          // "</div>" +
+          "<div class='unread_msg' style='display:none;'>" + profile.unRead + "</div>" +
+          "</button></b>"
+        ); //new a tablinks
+
+        //20170929 - Welly
+        console.log(profile.channelId);
+        
+      }
+    } else if(profile.channelId === room_list[1]){
+      if(profile.unRead > 0){
+        $('#clients').append(
+          "<b><button style='text-align:left' class='tablinks'" +
+          "name='" + profile.userId + "' rel='" + profile.channelId + "'" +
+          "data-avgTime='" + profile.avgChat + "' " +
+          "data-totalTime='" + profile.totalChat + "' " +
+          "data-chatTimeCount='" + profile.chatTimeCount + "' " +
+          "data-firstTime='" + profile.firstChat + "' " +
+          "data-recentTime='" + lastMsg.time + "' >"+
+          "<div class='img_holder'>" +
+          "<img src='" + profile.photo + "' alt='無法顯示相片'>" +
+          "</div>" +
+          "<div class='msg_holder'>" +
+          profile.nickname +
+          lastMsgStr +
+          "</div>" +
+          // "<div class='agentImg_holder'>" +
+          // "<img src='http://www.boothcon.com.au/wp-content/uploads/2016/05/travel-agent-icon.png' alt='無法顯示相片'>" +
+          // "</div>" +
+          "<div class='unread_msg' style='display:block;'>" + profile.unRead + "</div>" +
+          "</button></b>"
+        ); //new a tablinks
+        
+        //20170929 - Welly
+        console.log(profile.channelId);
+        updateTotalUnread(profile.channelId,profile.unRead);
+
+      } else {
+        $('#clients').append(
+          "<b><button style='text-align:left' class='tablinks'" +
+          "name='" + profile.userId + "' rel='" + profile.channelId + "'" +
+          "data-avgTime='" + profile.avgChat + "' " +
+          "data-totalTime='" + profile.totalChat + "' " +
+          "data-chatTimeCount='" + profile.chatTimeCount + "' " +
+          "data-firstTime='" + profile.firstChat + "' " +
+          "data-recentTime='" + lastMsg.time + "' >"+
+          "<div class='img_holder'>" +
+          "<img src='" + profile.photo + "' alt='無法顯示相片'>" +
+          "</div>" +
+          "<div class='msg_holder'>" +
+          profile.nickname +
+          lastMsgStr +
+          "</div>" +
+          // "<div class='agentImg_holder'>" +
+          // "<img src='http://www.boothcon.com.au/wp-content/uploads/2016/05/travel-agent-icon.png' alt='無法顯示相片'>" +
+          // "</div>" +
+          "<div class='unread_msg' style='display:none;'>" + profile.unRead + "</div>" +
+          "</button></b>"
+        ); //new a tablinks
+
+        //20170929 - Welly
+        console.log(profile.channelId);
+        
+      }
     }
 
-    if(profile.channelId === undefined || profile.channelId == "FB"){
+    if(profile.channelId === undefined || profile.channelId === "FB"){
       canvas.append( //push string into canvas
         '<div id="' + profile.userId + '" rel="FB" class="tabcontent"style="display: none;">' +
         '<span class="topright">x&nbsp;&nbsp;&nbsp</span>' +
@@ -664,7 +868,15 @@ $(document).ready(function() {
         historyMsgStr + "</div>" +
         "</div>"
       ); // close append
-    } else {
+    } else if(profile.channelId === room_list[0]){
+      canvas.append( //push string into canvas
+        '<div id="' + profile.userId + '" rel="'+profile.channelId+'" class="tabcontent"style="display: none;">' +
+        '<span class="topright">x&nbsp;&nbsp;&nbsp</span>' +
+        "<div id='" + profile.userId + "-content' rel='"+profile.channelId+"' class='messagePanel' data-position='" + data.position + "'>" +
+        historyMsgStr + "</div>" +
+        "</div>"
+      ); // close append
+    } else if(profile.channelId === room_list[1]){
       canvas.append( //push string into canvas
         '<div id="' + profile.userId + '" rel="'+profile.channelId+'" class="tabcontent"style="display: none;">' +
         '<span class="topright">x&nbsp;&nbsp;&nbsp</span>' +
@@ -674,7 +886,6 @@ $(document).ready(function() {
       ); // close append
     }
 
-    // console.log(profile.userId, profile.channelId);
     if (data.position != 0) $('#' + profile.userId + '-content' + '[rel="'+profile.channelId+'"]').on('scroll', function() {
       detecetScrollTop($(this));
     });
@@ -689,7 +900,10 @@ $(document).ready(function() {
 
     name_list.push(profile.channelId+profile.userId); //make a name list of all chated user
     userProfiles[profile.userId] = profile;
-    // console.log(name_list);
+
+    console.log("fbCount = " + fbCount);
+    console.log("line1Count = " + line1Count);
+    console.log("line2Count = " + line2Count);
   } // end of pushMsg
 
   function agentName() {
@@ -727,6 +941,7 @@ $(document).ready(function() {
     // console.log(data);
     // console.log(channelId+data.id);
     if (name_list.indexOf(channelId+data.id) !== -1) { //if its chated user
+      // console.log('returned user');
       let str;
 
       let designated_chat_room_msg_time = $("#" + data.id + "-content" + "[rel='"+channelId+"']").find(".message:last").attr('rel');
@@ -758,7 +973,7 @@ $(document).ready(function() {
   } // end of displayMessage
 
   function displayClient(data, channelId) {
-    console.log(data);
+    // console.log(data);
     // console.log(channelId+data.id);
     // console.log(data.message);
     //update tablinks
@@ -767,8 +982,9 @@ $(document).ready(function() {
     // console.log(name_list);
     // console.log(name_list.indexOf(channelId+data.id) > -1);
     if (name_list.indexOf(data.channelId+data.id) > -1) {
-      let target = $('.tablinks_area[rel="'+channelId+'"]').find(".tablinks[name='" + data.id + "'][rel='"+channelId+"']");
-      console.log(data.message);
+      let target = $('.tablinks_area').find(".tablinks[name='" + data.id + "'][rel='"+channelId+"']");
+      // console.log(target);
+      // console.log(data.message);
       if(data.message.startsWith('<a')){ // 判斷客戶傳送的是檔案還是文字
         target.find("#msg").html(toTimeStr(data.time) + '客戶傳送檔案').css("font-weight", font_weight); // 未讀訊息字體變大
       } else {
@@ -780,14 +996,18 @@ $(document).ready(function() {
       // console.log('data.unRead on line 400');
       // console.log(data.unRead);
       if (data.unRead == 0 || data.unRead == false || data.unRead == 'undefined') {
-        console.log('im here');
+        // console.log('im here');
         target.find('.unread_msg').html(data.unRead).css("display", "none");
       }
       n++;
 
+      //20170929 - Welly
+      console.log(channelId);
+      updateTotalUnread(channelId,data.unRead);
+
       let ele = target.parents('b'); //buttons to b
       ele.remove();
-       $('.tablinks_area[rel="'+channelId+'"]>.list-group:first').prepend(ele);
+       $('.tablinks_area>#clients').prepend(ele);
     }
     else { //new user, make a tablinks
       // pictureUrl
@@ -804,9 +1024,9 @@ $(document).ready(function() {
         data.message +
         "</div>" +
         "<div class='unread_msg'>" + data.unRead + "</div>" +
-        "<div class='agentImg_holder'>" +
-        "<img src='http://www.boothcon.com.au/wp-content/uploads/2016/05/travel-agent-icon.png' alt='無法顯示相片'>" +
-        "</div>" +
+        // "<div class='agentImg_holder'>" +
+        // "<img src='http://www.boothcon.com.au/wp-content/uploads/2016/05/travel-agent-icon.png' alt='無法顯示相片'>" +
+        // "</div>" +
         "</button></b>"
       );
 
@@ -935,14 +1155,38 @@ $(document).ready(function() {
   } // end of displayClient
 
   function clickUserTablink() {
-    // console.log('click tablink executed');
-
-    // 把未讀訊息數歸零
     let userId = $(this).attr('name');
-    let roomId = $(this).attr('rel');
+    let roomId = $(this).attr('rel'); // channelId
     let selectedId = [];
     let outerInfo, outerId, innerInfo;
-    // console.log(userId, roomId);
+    
+    // 先取得未讀訊息數量
+    //20170929 - Welly
+    let unreadCount = $(this).find('.unread_msg').text();
+    if(unreadCount > 0)
+      unreadCount = (-unreadCount);
+    console.log("press tablink unreadcount = " + unreadCount);
+    updateTotalUnread(roomId,unreadCount);  
+    console.log("room ID = " + roomId);
+    console.log("fbCount = " + fbCount);
+    console.log("line1Count = " + line1Count);
+    console.log("line2Count = " + line2Count); 
+    console.log("unread_count = " +unreadCount);
+    console.log("totalCount = " + totalCount);
+    if(line1Count <= 0)
+    {
+      $('#Line_1>.unread_msg_count').hide();
+    };
+    
+    //20170929 - welly : not sure whether unread_msg value been written back to FireBase 
+    $(this).find('.unread_msg').text(0);
+    // let new_count = fbCount - unread_count;
+    // if(new_count > 0){
+    //   $('#FB>.unread_msg_count').text(new_count);
+    // } else {
+    //   $('#FB>.unread_msg_count').hide();
+    // }
+    // 把未讀訊息數歸零
     database.ref('chats/Data').once('value', outersnap => {
       outerInfo = outersnap.val();
       outerId = Object.keys(outerInfo);
@@ -982,8 +1226,8 @@ $(document).ready(function() {
     $("#" + targetId + "[rel='"+targetRel+"']"+'>#' + targetId + '-content' + '[rel="'+targetRel+'"]').scrollTop($('#' + targetId + '-content' + '[rel="'+targetRel+'"]')[0].scrollHeight); //scroll to down
 
     let profile = userProfiles[targetId];
-    // console.log(profile);
     $('#prof_nick').text(profile.nickname);
+
   } // end of clickUserTablink
 
   function toggleInfoPanel() {
@@ -1008,7 +1252,8 @@ $(document).ready(function() {
 
   function clickSpan() {
     let userId = $(this).parent().hide().attr("id");
-    $(".tablinks[rel='" + userId + "'] ").removeAttr('id').css("background-color", ""); //clean tablinks color
+    let room = $(this).parent().hide().attr("rel");
+    $(".tablinks[name='" + userId + "'][rel='"+room+"']").removeAttr('id').css("background-color", ""); //clean tablinks color
   } // end of clickSpan
 
   function loadPanelProfile(profile) {
@@ -1113,19 +1358,49 @@ $(document).ready(function() {
 
   function submitMsg(e){
     e.preventDefault();
-    // console.log($(this).parent().parent().siblings('#canvas').find('[style="display: block;"]').attr('rel'));
-    // console.log($(this).parent().parent().parent().siblings('#user').find('.tablinks_area[style="display: block;"]').attr('id'));
-    let sendObj = {
-      id: "",
-      msg: messageInput.val(),
-      msgtime: Date.now(),
-      room: $(this).parent().parent().parent().siblings('#user').find('.tablinks_area[style="display: block;"]').attr('id'),
-      channelId: $(this).parent().parent().siblings('#canvas').find('[style="display: block;"]').attr('rel')
-    };
-    console.log(sendObj);
-    sendObj.id = $("#user-rooms option:selected").val();
-    socket.emit('send message', sendObj); //socket.emit
-    messageInput.val('');
+    let email = auth.currentUser.email;
+    // console.log($(this).parent().parent().siblings('#canvas').find('[style="display: block;"]').attr('rel')); // 測試
+    // console.log($(this).parent().parent().parent().siblings('#user').find('.tablinks_area[style="display: block;"]').attr('id')); // 測試
+    let room = $(this).parent().parent().parent().siblings('#user').find('.tablinks_area[style="display: block;"]').attr('id');
+    let channelId = $(this).parent().parent().siblings('#canvas').find('[style="display: block;"]').attr('rel');
+    let userId = $(this).parent().parent().siblings('#canvas').find('[style="display: block;"]').attr('id');
+    if(room !== undefined || channelId !== undefined){
+      let sendObj = {
+        id: "",
+        msg: messageInput.val(),
+        msgtime: Date.now(),
+        room: room,
+        channelId: channelId
+        // room: $(this).parent().parent().parent().siblings('#user').find('.tablinks_area[style="display: block;"]').attr('id'), // 聊天室
+        // channelId: $(this).parent().parent().siblings('#canvas').find('[style="display: block;"]').attr('rel')
+      };
+      // 新增功能：把最後送出訊息的客服人員的編號放在客戶的Profile裡面
+      database.ref('chats/Data').once('value', outsnap => {
+        let outInfo = outsnap.val();
+        let outId = Object.keys(outInfo);
+        // console.log(outId);
+        for(let i in outId){
+          database.ref('chats/Data/' + outId[i] + '/Profile').once('value', innsnap => {
+            let innInfo = innsnap.val();
+            // console.log(innInfo.channelId);
+            if(innInfo.channelId === undefined){
+            } else if(innInfo.channelId === channelId && innInfo.userId === userId){
+              database.ref('chats/Data/' + outId[i] + '/Profile').update({
+                "最後聊天的客服人員": email
+              });
+            }
+          });
+        }
+      });
+      sendObj.id = $("#user-rooms option:selected").val(); // select tag選到的值
+      socket.emit('send message', sendObj); //emit到server (www)
+      messageInput.val('');
+    } else {
+      console.log('either room id or channel id is undefined');
+      console.log('room: ' + room);
+      console.log('channel id: ' + channelId);
+    }
+
   } // end of submitMsg
 
   function submitProfile() {
@@ -1340,6 +1615,13 @@ function groupSubmit() {
   }
 }//end groupSubmit
 
+function cancelSubmit(){
+  $(this).hide();
+  $(this).siblings('#save-group-btn').hide();
+  $(this).siblings('[type="text"]').hide();
+  $(this).siblings('.myText').show();
+} // end of cancelSubmit
+
 function closeIdleRoomTry() {
   let early_time = Date.now() - 15 * 60 * 1000; //15min before now
   let lastForFb = $('#fb-clients').find('.tablinks:last'); //last user in online room
@@ -1404,10 +1686,10 @@ function closeIdleRoom() {
 
 function displayAll() {
   $('.tablinks').each(function() {
-    let id = $(this).attr('id');
+    let id = $(this).attr('name');
     let rel = $(this).attr('rel');
-    $("div #" + id + "-content" + "[rel='"+rel+"']" + " .message").show().off("click");
-    $(this).css("color", "");
+    $(this).find('#msg').text($("div #" + id + "-content" + "[rel='"+rel+"']" + " .message:last").find('.content').text().trim()).css('color', 'black');
+    $("div #" + id + "-content" + "[rel='"+rel+"']" + " .message").find('.content').css({"color": "black", "background-color": "lightgrey"});
   });
 } // end of displayAll
 
@@ -1784,3 +2066,50 @@ function openTitle() {
   $(this).hide();
   $(this).siblings().show();
 } // end of openTitle
+
+//20170930 - Welly
+function updateTotalUnread(chanid, unreadnum){
+  console.log("unreadnum = " + unreadnum);
+  switch(chanid){
+    case "FB":
+      fbCount += parseInt(unreadnum);
+      if(fbCount > 0){
+        $('#FB>.unread_msg_count').text(fbCount);
+      }
+      else{
+        $('#FB>.unread_msg_count').hide();
+      }
+      break;
+    case room_list[0]:
+      line1Count += parseInt(unreadnum);
+      if(line1Count > 0){
+        console.log("should display line1");
+        $('#Line_1>.unread_msg_count').text(line1Count);
+      }
+      else{
+        console.log("should not display line1");
+        $('#Line_1>.unread_msg_count').hide();
+      }
+      break;
+    case room_list[1]:
+      line2Count += parseInt(unreadnum);
+      if(line2Count > 0){
+        console.log("should display line2");
+        $('#Line_2>.unread_msg_count').text(line2Count);
+      }
+      else{
+        console.log("should not display line2");
+        $('#Line_2>.unread_msg_count').hide();
+      }
+      break;
+  }
+  totalCount += parseInt(unreadnum);
+  if(totalCount > 0){
+    console.log("should display total");
+   $('#All>.unread_msg_count').text(totalCount);
+  }
+  else{
+    console.log("should not display total");
+   $('#All>.unread_msg_count').hide();
+  }
+}
